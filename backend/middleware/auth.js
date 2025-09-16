@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const pool = require("../db");
+const { logger } = require("../utils/logger");
 
 const JWT_SECRET = process.env.JWT_SECRET || "development-secret";
 
@@ -39,7 +40,12 @@ module.exports = async function authenticate(req, res, next) {
     req.user = user;
     return next();
   } catch (error) {
-    console.error("Auth error:", error.message);
+    logger.warn(
+      "Authentication error on %s: %s (%s)",
+      req.originalUrl,
+      error.message,
+      error.name
+    );
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 };

@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const pool = require("../db");
+const { logger } = require("./logger");
 const { MOOD_OPTIONS } = require("./mood");
 
 const DEFAULT_NOTIFICATION_PREFS = {
@@ -264,7 +265,7 @@ async function ensureAdminAccount() {
      VALUES ($1, $2, $3, 'admin')`,
     [email.toLowerCase(), passwordHash, name]
   );
-  console.log("Seeded default admin account", email);
+  logger.info("Seeded default admin account for %s", email);
 }
 
 async function initializePlatform() {

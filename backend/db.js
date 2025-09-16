@@ -1,5 +1,13 @@
 const { Pool } = require("pg");
 
+const { logger, serializeError } = require("./utils/logger");
+
+if (!process.env.DATABASE_URL) {
+  const error = new Error("DATABASE_URL environment variable is not defined");
+  logger.error(error.message);
+  throw error;
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl:
@@ -13,15 +21,15 @@ pool
   .then(async (client) => {
     try {
       const res = await client.query("SELECT NOW()");
-      console.log("DB connected! Server time:", res.rows[0].now);
+      logger.info("Connected to database. Server time: %s", res.rows[0].now);
     } catch (error) {
-      console.error("DB test query error:", error.stack);
+      logger.error("DB test query error", { error: serializeError(error) });
     } finally {
       client.release();
     }
   })
   .catch((error) => {
-    console.error("DB connection error:", error.stack);
+    logger.error("DB connection error", { error: serializeError(error) });
   });
 
 module.exports = pool;
