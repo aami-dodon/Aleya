@@ -101,7 +101,7 @@ Before running Aleya locally make sure you have:
 
 ## 1. Configure environment variables
 
-Create `backend/.env` with the following variables:
+Update `backend/.env` (a sample file is checked into the repo) with the following variables:
 
 ```
 DATABASE_URL=postgres://<user>:<password>@<host>:<port>/<database>
@@ -109,6 +109,12 @@ DATABASE_SSL=false        # set to true only when your database requires SSL
 PORT=5000
 CORS_ORIGIN=http://localhost:3000
 JWT_SECRET=super-secret-value
+
+# Logging configuration
+LOG_FILE=logs/aleya.log
+LOG_LEVEL=info
+LOG_MAX_SIZE=5242880
+LOG_MAX_FILES=5
 
 # Optional: seed a default administrator account on startup
 SEED_ADMIN_EMAIL=admin@example.com
@@ -126,6 +132,7 @@ SMTP_SECURE=false
 
 - `DATABASE_URL` is required so the API can connect to PostgreSQL. The backend tests the connection on boot and will fail if it cannot reach the database.
 - `initializePlatform` automatically applies the SQL schema, ensures the default journaling form exists, and (optionally) seeds the admin user when the server starts.
+- `LOG_FILE`, `LOG_LEVEL`, `LOG_MAX_SIZE`, and `LOG_MAX_FILES` configure structured logging. Paths supplied in `LOG_FILE` are resolved relative to `backend/` unless absolute; rotation kicks in once the file size limit is reached.
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_FROM` configure the SMTP server used for notification emails. The backend validates these settings during start-up and will exit with a descriptive error if any value is missing or malformed.
 - Set `SMTP_SECURE=true` when connecting to port 465 or any server that requires an implicit TLS connection. For ports that upgrade via STARTTLS (such as 587) leave it as `false`.
 
@@ -174,6 +181,16 @@ npm start
 ```
 
 By default the frontend runs on `http://localhost:3000` and proxies API calls to `REACT_APP_API_URL`.
+
+## Logging
+
+The backend emits structured JSON logs via [Winston](https://github.com/winstonjs/winston). Messages are written both to stdout and to the file configured by `LOG_FILE` (default `backend/logs/aleya.log`). To follow the log file during development:
+
+```bash
+tail -f backend/logs/aleya.log
+```
+
+If you customise `LOG_FILE` in `.env`, the logger will create the directory automatically. Log rotation is controlled by `LOG_MAX_SIZE` (bytes) and `LOG_MAX_FILES`.
 
 ## 5. Running with Docker (optional)
 

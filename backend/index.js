@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
+const { logger, resolvedLogFile, serializeError } = require("./utils/logger");
 const pool = require("./db");
 const authRoutes = require("./routes/auth");
 const formRoutes = require("./routes/forms");
@@ -16,11 +17,15 @@ let mailSettings;
 
 try {
   mailSettings = validateMailSettings();
-  console.log(
-    `Validated SMTP configuration for ${mailSettings.host}:${mailSettings.port}`
+  logger.info(
+    "Validated SMTP configuration for %s:%s",
+    mailSettings.host,
+    mailSettings.port
   );
 } catch (error) {
-  console.error("SMTP configuration error:", error.message);
+  logger.error("SMTP configuration error", {
+    error: serializeError(error),
+  });
   process.exit(1);
 }
 
@@ -43,7 +48,7 @@ app.get("/api/health", async (req, res) => {
     const result = await pool.query("SELECT NOW() AS time");
     res.json({ status: "ok", time: result.rows[0].time });
   } catch (error) {
-    console.error("Health check error:", error.message);
+    logger.error("Health check error", { error: serializeError(error) });
     res.status(500).json({ status: "error", message: "Database unreachable" });
   }
 });
@@ -60,7 +65,7 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error("Unexpected error:", err);
+  logger.error("Unexpected error", { error: serializeError(err) });
   if (res.headersSent) {
     return next(err);
   }
@@ -75,18 +80,26 @@ const PORT = process.env.PORT || 5000;
 initializePlatform()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Aleya API listening on port ${PORT}`);
+      logger.info(
+        "Aleya API listening on port %s (logs: %s)",
+        PORT,
+        resolvedLogFile
+      );
     });
   })
   .catch((error) => {
-    console.error("Failed to initialise platform", error);
+    logger.error("Failed to initialise platform", {
+      error: serializeError(error),
+    });
     process.exit(1);
   });
 
 process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled promise rejection:", reason);
+  logger.error("Unhandled promise rejection", {
+    reason: serializeError(reason),
+  });
 });
 
 process.on("uncaughtException", (error) => {
-  console.error("Uncaught exception:", error);
+  logger.error("Uncaught exception", { error: serializeError(error) });
 });
