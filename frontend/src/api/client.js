@@ -9,7 +9,7 @@ async function request(path, { method = "GET", data, token, headers = {} } = {})
     },
   };
 
-  if (data !== undefined) {
+  if (data !== undefined && data !== null) {
     config.body = JSON.stringify(data);
   }
 
