@@ -221,6 +221,19 @@ label {
   font-weight: 600;
 }
 
+.form-feedback {
+  margin: 0.75rem 0 0;
+  font-weight: 600;
+}
+
+.form-info {
+  color: var(--text-muted);
+}
+
+.form-success {
+  color: var(--accent-green);
+}
+
 .section-card {
   background: var(--surface);
   border-radius: 20px;

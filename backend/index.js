@@ -10,8 +10,22 @@ const journalRoutes = require("./routes/journal");
 const dashboardRoutes = require("./routes/dashboard");
 const adminRoutes = require("./routes/admin");
 const { initializePlatform } = require("./utils/bootstrap");
+const { validateMailSettings } = require("./utils/email");
+
+let mailSettings;
+
+try {
+  mailSettings = validateMailSettings();
+  console.log(
+    `Validated SMTP configuration for ${mailSettings.host}:${mailSettings.port}`
+  );
+} catch (error) {
+  console.error("SMTP configuration error:", error.message);
+  process.exit(1);
+}
 
 const app = express();
+app.locals.mailSettings = mailSettings;
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())

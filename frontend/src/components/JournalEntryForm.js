@@ -8,7 +8,14 @@ const SHARING_OPTIONS = [
   { value: "full", label: "Share full entry" },
 ];
 
-function JournalEntryForm({ form, onSubmit, submitting, defaultSharing }) {
+function JournalEntryForm({
+  form,
+  onSubmit,
+  submitting,
+  defaultSharing,
+  statusMessage,
+  statusVariant = "info",
+}) {
   const [sharing, setSharing] = useState(defaultSharing || DEFAULT_SHARING);
   const [values, setValues] = useState({});
   const [error, setError] = useState(null);
@@ -105,6 +112,15 @@ function JournalEntryForm({ form, onSubmit, submitting, defaultSharing }) {
         </small>
       </div>
       {error && <p className="form-error">{error}</p>}
+      {statusMessage && (
+        <p
+          className={`form-feedback ${
+            statusVariant === "success" ? "form-success" : "form-info"
+          }`}
+        >
+          {statusMessage}
+        </p>
+      )}
       <button type="submit" className="primary-button" disabled={!canSubmit || submitting}>
         {submitting ? "Saving..." : "Save entry"}
       </button>

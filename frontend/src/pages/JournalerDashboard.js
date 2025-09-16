@@ -17,6 +17,8 @@ function JournalerDashboard() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [statusMessage, setStatusMessage] = useState(null);
+  const [statusVariant, setStatusVariant] = useState("info");
 
   useEffect(() => {
     if (!token) return;
@@ -58,20 +60,36 @@ function JournalerDashboard() {
     };
   }, [token, selectedFormId]);
 
+  useEffect(() => {
+    if (statusVariant !== "success" || !statusMessage) {
+      return;
+    }
+
+    const timeout = setTimeout(() => setStatusMessage(null), 4000);
+    return () => clearTimeout(timeout);
+  }, [statusVariant, statusMessage]);
+
   const selectedForm = useMemo(
     () => forms.find((form) => form.id === Number(selectedFormId)),
     [forms, selectedFormId]
   );
 
   const handleSubmit = async (payload) => {
+    setSubmitting(true);
+    setStatusVariant("info");
+    setStatusMessage("Submitting your journal entry...");
+    setError(null);
+
     try {
-      setSubmitting(true);
       const { entry } = await apiClient.post("/journal-entries", payload, token);
       setEntries((prev) => [entry, ...prev]);
       const dash = await apiClient.get("/dashboard/journaler", token);
       setDashboard(dash);
-      setError(null);
+      setStatusVariant("success");
+      setStatusMessage("Journal entry saved.");
     } catch (err) {
+      setStatusVariant("info");
+      setStatusMessage(null);
       setError(err.message);
     } finally {
       setSubmitting(false);
@@ -135,6 +153,8 @@ function JournalerDashboard() {
             form={selectedForm}
             onSubmit={handleSubmit}
             submitting={submitting}
+            statusMessage={statusMessage}
+            statusVariant={statusVariant}
           />
         </SectionCard>
 
