@@ -114,10 +114,20 @@ JWT_SECRET=super-secret-value
 SEED_ADMIN_EMAIL=admin@example.com
 SEED_ADMIN_PASSWORD=ChangeMe123!
 SEED_ADMIN_NAME=Aleya Admin
+
+# SMTP configuration for email notifications
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your-smtp-username
+SMTP_PASSWORD=your-smtp-password
+SMTP_FROM="Aleya <no-reply@example.com>"
+SMTP_SECURE=false
 ```
 
-- `DATABASE_URL` is required so the API can connect to PostgreSQL. The backend tests the connection on boot and will fail if it cannot reach the database.  
+- `DATABASE_URL` is required so the API can connect to PostgreSQL. The backend tests the connection on boot and will fail if it cannot reach the database.
 - `initializePlatform` automatically applies the SQL schema, ensures the default journaling form exists, and (optionally) seeds the admin user when the server starts.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_FROM` configure the SMTP server used for notification emails. The backend validates these settings during start-up and will exit with a descriptive error if any value is missing or malformed.
+- Set `SMTP_SECURE=true` when connecting to port 465 or any server that requires an implicit TLS connection. For ports that upgrade via STARTTLS (such as 587) leave it as `false`.
 
 Create `frontend/.env` (the file must start with `REACT_APP_` variables for Create React App):
 
