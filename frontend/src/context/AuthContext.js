@@ -55,8 +55,7 @@ export function AuthProvider({ children }) {
     setState((prev) => ({ ...prev, error: null }));
     try {
       const data = await apiClient.post("/auth/register", payload);
-      persist(data.token, data.user);
-      return data.user;
+      return data;
     } catch (error) {
       setState((prev) => ({ ...prev, error: error.message }));
       throw error;

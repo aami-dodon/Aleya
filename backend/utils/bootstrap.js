@@ -22,6 +22,9 @@ const createTableStatements = [
       notification_preferences JSONB DEFAULT '${JSON.stringify(
         DEFAULT_NOTIFICATION_PREFS
       )}',
+      is_verified BOOLEAN DEFAULT FALSE,
+      verification_token_hash TEXT,
+      verification_token_expires_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )`,
@@ -105,7 +108,11 @@ const createTableStatements = [
   `CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date ON journal_entries (journaler_id, entry_date DESC)` ,
   `CREATE INDEX IF NOT EXISTS idx_mentor_notifications_mentor ON mentor_notifications (mentor_id, created_at DESC)` ,
   `CREATE INDEX IF NOT EXISTS idx_mentor_assignments_journaler ON mentor_form_assignments (journaler_id)` ,
-  `CREATE INDEX IF NOT EXISTS idx_mentor_links_journaler ON mentor_links (journaler_id)`
+  `CREATE INDEX IF NOT EXISTS idx_mentor_links_journaler ON mentor_links (journaler_id)` ,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE` ,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_hash TEXT` ,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires_at TIMESTAMPTZ` ,
+  `UPDATE users SET is_verified = TRUE WHERE is_verified IS NULL`
 ];
 
 const DEFAULT_FORM = {
@@ -285,8 +292,8 @@ async function ensureAdminAccount() {
   const passwordHash = await bcrypt.hash(password, 10);
 
   await pool.query(
-    `INSERT INTO users (email, password_hash, name, role)
-     VALUES ($1, $2, $3, 'admin')`,
+    `INSERT INTO users (email, password_hash, name, role, is_verified)
+     VALUES ($1, $2, $3, 'admin', TRUE)`,
     [email.toLowerCase(), passwordHash, name]
   );
   logger.info("Seeded default admin account for %s", email);

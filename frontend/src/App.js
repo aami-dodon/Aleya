@@ -11,6 +11,7 @@ import MentorConnectionsPage from "./pages/MentorConnectionsPage";
 import JournalHistoryPage from "./pages/JournalHistoryPage";
 import FormBuilderPage from "./pages/FormBuilderPage";
 import SettingsPage from "./pages/SettingsPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 import LoadingState from "./components/LoadingState";
 import "./App.css";
 
@@ -64,6 +65,7 @@ function AppRoutes() {
           path="/register"
           element={user ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
         />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route
           path="/dashboard"
           element={

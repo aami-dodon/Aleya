@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
   role TEXT NOT NULL CHECK (role IN ('journaler','mentor','admin')),
   timezone TEXT DEFAULT 'UTC',
   notification_preferences JSONB DEFAULT '{"reminders":{"daily":true,"weekly":true},"mentorNotifications":"summary"}',
+  is_verified BOOLEAN DEFAULT FALSE,
+  verification_token_hash TEXT,
+  verification_token_expires_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
