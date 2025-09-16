@@ -1,0 +1,31 @@
+:root {
+  --background: #f7f8f5;
+  --surface: #ffffff;
+  --border: #d9dfd7;
+  --text-primary: #1f2a2a;
+  --text-muted: #5f6f6c;
+  --accent-green: #2f855a;
+  --accent-gold: #b7791f;
+  --accent-rose: #c53030;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+}
+
+a {
+  color: var(--accent-green);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+* {
+  box-sizing: border-box;
+}

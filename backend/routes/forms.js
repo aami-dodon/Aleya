@@ -1,0 +1,259 @@
+const express = require("express");
+const { body, validationResult } = require("express-validator");
+const pool = require("../db");
+const authenticate = require("../middleware/auth");
+const requireRole = require("../middleware/requireRole");
+
+const router = express.Router();
+
+const fieldValidators = [
+  body("title").trim().notEmpty().withMessage("Title is required"),
+  body("fields")
+    .isArray({ min: 1 })
+    .withMessage("At least one field is required"),
+];
+
+function parseJsonColumn(value, fallback) {
+  if (Array.isArray(value) || (value && typeof value === "object")) {
+    return value;
+  }
+
+  if (!value) return fallback;
+
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    return fallback;
+  }
+}
+
+async function fetchForms(whereClause = "", params = []) {
+  const query = `
+    SELECT f.id,
+           f.title,
+           f.description,
+           f.visibility,
+           f.is_default,
+           f.created_by,
+           f.created_at,
+           COALESCE(
+             json_agg(
+               json_build_object(
+                 'id', fld.id,
+                 'label', fld.label,
+                 'fieldType', fld.field_type,
+                 'required', fld.required,
+                 'options', fld.options,
+                 'helperText', fld.helper_text
+               )
+               ORDER BY fld.id
+             ) FILTER (WHERE fld.id IS NOT NULL),
+             '[]'
+           ) AS fields
+    FROM journal_forms f
+    LEFT JOIN journal_form_fields fld ON fld.form_id = f.id
+    ${whereClause}
+    GROUP BY f.id
+    ORDER BY f.is_default DESC, f.created_at DESC
+  `;
+
+  const { rows } = await pool.query(query, params);
+
+  return rows.map((row) => ({
+    ...row,
+    fields: parseJsonColumn(row.fields, []),
+  }));
+}
+
+router.get("/default", async (req, res, next) => {
+  try {
+    const forms = await fetchForms("WHERE f.is_default = TRUE");
+    if (!forms.length) {
+      return res.status(404).json({ error: "Default form not found" });
+    }
+
+    return res.json({ form: forms[0] });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/", authenticate, async (req, res, next) => {
+  try {
+    const { role, id } = req.user;
+
+    if (role === "journaler") {
+      const forms = await fetchForms(
+        `WHERE f.is_default = TRUE
+           OR f.id IN (
+             SELECT form_id FROM mentor_form_assignments WHERE journaler_id = $1
+           )`,
+        [id]
+      );
+
+      return res.json({ forms });
+    }
+
+    if (role === "mentor") {
+      const forms = await fetchForms(
+        `WHERE f.visibility IN ('default','admin')
+           OR f.created_by = $1`,
+        [id]
+      );
+      return res.json({ forms });
+    }
+
+    if (role === "admin") {
+      const forms = await fetchForms();
+      return res.json({ forms });
+    }
+
+    return res.json({ forms: [] });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post(
+  "/",
+  authenticate,
+  requireRole("mentor", "admin"),
+  fieldValidators,
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { title, description, fields } = req.body;
+    const visibility = req.user.role === "admin" ? "admin" : "mentor";
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+      const inserted = await client.query(
+        `INSERT INTO journal_forms (title, description, created_by, visibility, is_default)
+         VALUES ($1, $2, $3, $4, FALSE)
+         RETURNING id`,
+        [title, description || null, req.user.id, visibility]
+      );
+
+      const formId = inserted.rows[0].id;
+
+      for (const field of fields) {
+        if (!field || !field.label || !field.fieldType) {
+          continue;
+        }
+
+        // eslint-disable-next-line no-await-in-loop
+        await client.query(
+          `INSERT INTO journal_form_fields (form_id, label, field_type, required, options, helper_text)
+           VALUES ($1, $2, $3, $4, $5, $6)` ,
+          [
+            formId,
+            field.label,
+            field.fieldType,
+            field.required || false,
+            JSON.stringify(field.options || []),
+            field.helperText || null,
+          ]
+        );
+      }
+
+      await client.query("COMMIT");
+
+      const [form] = await fetchForms("WHERE f.id = $1", [formId]);
+      return res.status(201).json({ form });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return next(error);
+    } finally {
+      client.release();
+    }
+  }
+);
+
+router.post(
+  "/:formId/assign",
+  authenticate,
+  requireRole("mentor", "admin"),
+  [body("journalerId").isInt().withMessage("journalerId is required")],
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { formId } = req.params;
+    const { journalerId } = req.body;
+
+    try {
+      const { rows } = await pool.query(
+        "SELECT id, created_by, visibility FROM journal_forms WHERE id = $1",
+        [formId]
+      );
+
+      if (!rows.length) {
+        return res.status(404).json({ error: "Form not found" });
+      }
+
+      const form = rows[0];
+
+      if (
+        req.user.role === "mentor" &&
+        form.visibility === "mentor" &&
+        form.created_by !== req.user.id
+      ) {
+        return res.status(403).json({ error: "You can only assign your own forms" });
+      }
+
+      if (req.user.role === "mentor") {
+        const link = await pool.query(
+          `SELECT id FROM mentor_links WHERE mentor_id = $1 AND journaler_id = $2`,
+          [req.user.id, journalerId]
+        );
+
+        if (!link.rows.length) {
+          return res.status(403).json({
+            error: "A mentorship link must be established before assigning forms",
+          });
+        }
+      }
+
+      await pool.query(
+        `INSERT INTO mentor_form_assignments (mentor_id, journaler_id, form_id)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (journaler_id, form_id)
+         DO UPDATE SET mentor_id = EXCLUDED.mentor_id, assigned_at = NOW()` ,
+        [req.user.id, journalerId, formId]
+      );
+
+      return res.json({ success: true });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+router.delete(
+  "/:formId/assign/:journalerId",
+  authenticate,
+  requireRole("mentor", "admin"),
+  async (req, res, next) => {
+    const { formId, journalerId } = req.params;
+
+    try {
+      await pool.query(
+        `DELETE FROM mentor_form_assignments
+         WHERE form_id = $1 AND journaler_id = $2`,
+        [formId, journalerId]
+      );
+
+      return res.json({ success: true });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+module.exports = router;

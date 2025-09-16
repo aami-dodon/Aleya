@@ -1,20 +1,122 @@
-import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
+import Layout from "./components/Layout";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import JournalerDashboard from "./pages/JournalerDashboard";
+import MentorDashboard from "./pages/MentorDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import MentorConnectionsPage from "./pages/MentorConnectionsPage";
+import JournalHistoryPage from "./pages/JournalHistoryPage";
+import FormBuilderPage from "./pages/FormBuilderPage";
+import SettingsPage from "./pages/SettingsPage";
+import LoadingState from "./components/LoadingState";
+import "./App.css";
 
-function App() {
-  const [time, setTime] = useState("");
+function DashboardRouter() {
+  const { user } = useAuth();
+  if (!user) return null;
 
-  useEffect(() => {
-    fetch("http://localhost:5000/api")
-      .then((res) => res.json())
-      .then((data) => setTime(data.time))
-      .catch((err) => console.error("Error fetching API:", err));
-  }, []);
+  switch (user.role) {
+    case "mentor":
+      return <MentorDashboard />;
+    case "admin":
+      return <AdminDashboard />;
+    default:
+      return <JournalerDashboard />;
+  }
+}
+
+function ProtectedRoute({ roles, children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingState label="Preparing Aleya" />;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (roles && !roles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
+
+function AppRoutes() {
+  const { user } = useAuth();
 
   return (
-    <div style={{ fontFamily: "sans-serif", padding: "2rem" }}>
-      <h1>PERN Minimal Frontend</h1>
-      <p>{time ? `Server time: ${time}` : "Loading..."}</p>
-    </div>
+    <Layout>
+      <Routes>
+        <Route
+          path="/"
+          element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />}
+        />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+        />
+        <Route
+          path="/register"
+          element={user ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardRouter />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/journal/history"
+          element={
+            <ProtectedRoute roles={["journaler", "mentor"]}>
+              <JournalHistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mentorship"
+          element={
+            <ProtectedRoute roles={["journaler", "mentor", "admin"]}>
+              <MentorConnectionsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forms"
+          element={
+            <ProtectedRoute roles={["mentor", "admin"]}>
+              <FormBuilderPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute roles={["journaler", "mentor", "admin"]}>
+              <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Layout>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
   );
 }
 
