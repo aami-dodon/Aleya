@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import apiClient from "../api/client";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
 
@@ -74,8 +73,57 @@ function SettingsPage() {
   };
 
   const requestExport = async () => {
-    await apiClient.get("/journal-entries?limit=200", token);
-    setMessage("Data export requested. (Simulated)");
+    const baseUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+    const headers = {};
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    try {
+      setMessage(null);
+      const response = await fetch(`${baseUrl}/journal-entries/export`, {
+        method: "GET",
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let reason = response.statusText || "Failed to export journal entries.";
+        try {
+          const data = errorText ? JSON.parse(errorText) : null;
+          reason = data?.error || data?.message || reason;
+        } catch (parseError) {
+          reason = errorText || reason;
+        }
+        throw new Error(reason);
+      }
+
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let filename = "journal-entries-export.json";
+
+      if (contentDisposition) {
+        const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+        if (match?.[1]) {
+          filename = match[1].replace(/['"]/g, "");
+        }
+      }
+
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+
+      setMessage("Your journal export is downloading.");
+    } catch (error) {
+      console.error("Failed to export journal entries", error);
+      setMessage(error?.message || "Failed to export journal entries.");
+    }
   };
 
   return (

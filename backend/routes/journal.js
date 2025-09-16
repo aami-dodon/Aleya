@@ -1,4 +1,5 @@
 const express = require("express");
+const { Readable } = require("stream");
 const { body, validationResult } = require("express-validator");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
@@ -280,6 +281,85 @@ router.get("/", authenticate, async (req, res, next) => {
     }
 
     return res.json({ entries: [] });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/export", authenticate, async (req, res, next) => {
+  try {
+    let entries = [];
+    let targetJournalerId;
+
+    if (req.user.role === "journaler") {
+      const { rows } = await pool.query(
+        `SELECT e.*, f.title AS form_title
+         FROM journal_entries e
+         JOIN journal_forms f ON f.id = e.form_id
+         WHERE e.journaler_id = $1
+         ORDER BY e.entry_date DESC, e.created_at DESC`,
+        [req.user.id]
+      );
+
+      entries = rows.map(formatEntry);
+      targetJournalerId = req.user.id;
+    } else if (req.user.role === "mentor") {
+      const journalerId = Number(req.query.journalerId);
+      if (!journalerId) {
+        return res
+          .status(400)
+          .json({ error: "journalerId query parameter is required" });
+      }
+
+      const link = await pool.query(
+        `SELECT id FROM mentor_links WHERE mentor_id = $1 AND journaler_id = $2`,
+        [req.user.id, journalerId]
+      );
+
+      if (!link.rows.length) {
+        return res.status(403).json({ error: "No mentorship link established" });
+      }
+
+      const { rows } = await pool.query(
+        `SELECT e.*, f.title AS form_title
+         FROM journal_entries e
+         JOIN journal_forms f ON f.id = e.form_id
+         WHERE e.journaler_id = $1 AND e.shared_level <> 'private'
+         ORDER BY e.entry_date DESC, e.created_at DESC`,
+        [journalerId]
+      );
+
+      entries = rows.map((row) => shapeForMentor(formatEntry(row)));
+      targetJournalerId = journalerId;
+    } else {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const payload = {
+      generatedAt: new Date().toISOString(),
+      requester: {
+        id: req.user.id,
+        role: req.user.role,
+      },
+      journalerId: targetJournalerId,
+      entryCount: entries.length,
+      entries,
+    };
+
+    const body = JSON.stringify(payload, null, 2);
+    const stream = Readable.from(body);
+    stream.on("error", next);
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const filename = `journal-entries-${targetJournalerId}-${timestamp}.json`;
+
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${filename}"`
+    );
+
+    return stream.pipe(res);
   } catch (error) {
     return next(error);
   }
