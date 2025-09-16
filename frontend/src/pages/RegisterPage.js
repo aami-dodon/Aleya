@@ -1,21 +1,24 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const ROLES = [
   { value: "journaler", label: "Journaler" },
   { value: "mentor", label: "Mentor" },
-  { value: "admin", label: "Administrator" },
 ];
 
 function RegisterPage() {
   const { register, error } = useAuth();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  const [verificationDetails, setVerificationDetails] = useState(null);
+  const [localError, setLocalError] = useState(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     role: "journaler",
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     mentorProfile: {
@@ -27,11 +30,13 @@ function RegisterPage() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    setLocalError(null);
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleMentorChange = (event) => {
     const { name, value } = event.target;
+    setLocalError(null);
     setForm((prev) => ({
       ...prev,
       mentorProfile: { ...prev.mentorProfile, [name]: value },
@@ -40,16 +45,74 @@ function RegisterPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (form.password !== form.confirmPassword) {
+      setLocalError("Passwords must match");
+      return;
+    }
+
     setLoading(true);
     try {
-      await register(form);
-      navigate("/dashboard");
+      const payload = {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        confirmPassword: form.confirmPassword,
+        role: form.role,
+        timezone: form.timezone,
+      };
+
+      if (form.role === "mentor") {
+        payload.mentorProfile = form.mentorProfile;
+      }
+
+      const response = await register(payload);
+      setVerificationDetails(response);
+      setSubmittedEmail((response?.email || form.email || "").trim());
+      setSubmitted(true);
     } catch (err) {
       console.error(err);
+      if (err?.details?.errors?.length) {
+        setLocalError(err.details.errors[0].msg || err.message);
+      } else if (err?.message) {
+        setLocalError(err.message);
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  if (submitted) {
+    const expiresHours = verificationDetails?.verificationExpiresInHours;
+    const expiresCopy =
+      typeof expiresHours === "number"
+        ? expiresHours === 1
+          ? "within 1 hour"
+          : `within ${expiresHours} hours`
+        : null;
+
+    return (
+      <div className="auth-page">
+        <h1>Check your inbox</h1>
+        <p className="page-subtitle">
+          We've sent a verification link to {submittedEmail || "your email"}.
+          Follow the link to activate your account.
+        </p>
+        {verificationDetails?.message && (
+          <p className="info-text">{verificationDetails.message}</p>
+        )}
+        {expiresCopy && (
+          <p className="info-text">
+            The link will expire {expiresCopy}. If it doesn't arrive within a few
+            minutes, check your spam or junk folder.
+          </p>
+        )}
+        <Link to="/login" className="primary-button">
+          Return to sign in
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-page">
@@ -85,6 +148,17 @@ function RegisterPage() {
             type="password"
             name="password"
             value={form.password}
+            onChange={handleChange}
+            required
+            minLength={8}
+          />
+        </label>
+        <label>
+          Retype password
+          <input
+            type="password"
+            name="confirmPassword"
+            value={form.confirmPassword}
             onChange={handleChange}
             required
             minLength={8}
@@ -143,7 +217,9 @@ function RegisterPage() {
           </div>
         )}
 
-        {error && <p className="form-error">{error}</p>}
+        {(localError || error) && (
+          <p className="form-error">{localError || error}</p>
+        )}
         <button type="submit" className="primary-button" disabled={loading}>
           {loading ? "Creating account..." : "Create account"}
         </button>

@@ -224,7 +224,8 @@ All endpoints are served from the `/api` prefix and return JSON. Supply an `Auth
 
 ### Authentication & profile
 
-- `POST /api/auth/register` – Create an account (defaults to the `journaler` role unless `role` is provided, mentors can include `mentorProfile`). *(Public)*
+- `POST /api/auth/register` – Create a journaler or mentor account and trigger a verification email. *(Public)*
+- `POST /api/auth/verify-email` – Confirm a pending account using the emailed token. *(Public)*
 - `POST /api/auth/login` – Exchange credentials for a JWT and hydrated profile. *(Public)*
 - `POST /api/auth/magic-link` – Stub endpoint that acknowledges a magic-link request. *(Public)*
 - `GET /api/auth/me` – Return the authenticated user profile, including mentor metadata when applicable. *(Authenticated)*
