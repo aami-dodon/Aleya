@@ -35,3 +35,4 @@ coverage/
 
 # Postgres data (if you ever mount locally)
 pgdata/
+backend/.env
