@@ -5,6 +5,8 @@ import MentorRequestList from "../components/MentorRequestList";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
 
+const ACTIVE_MENTOR_STATUSES = new Set(["pending", "mentor_accepted", "confirmed"]);
+
 function MentorConnectionsPage() {
   const { token, user } = useAuth();
   const [requests, setRequests] = useState([]);
@@ -19,14 +21,23 @@ function MentorConnectionsPage() {
     setLoading(true);
     try {
       const requestsRes = await apiClient.get("/mentors/requests", token);
-      setRequests(requestsRes.requests || []);
+      const pendingRequests = requestsRes.requests || [];
+      setRequests(pendingRequests);
 
       if (user.role === "mentor") {
         const menteesRes = await apiClient.get("/mentors/mentees", token);
         setMentees(menteesRes.mentees || []);
       } else {
-        const mentorsRes = await apiClient.get("/mentors", token);
-        setMentors(mentorsRes.mentors || []);
+        const hasActiveMentor = pendingRequests.some((request) =>
+          ACTIVE_MENTOR_STATUSES.has(request.status)
+        );
+
+        if (hasActiveMentor) {
+          setMentors([]);
+        } else {
+          const mentorsRes = await apiClient.get("/mentors", token);
+          setMentors(mentorsRes.mentors || []);
+        }
       }
 
       setMessage(null);
@@ -41,13 +52,26 @@ function MentorConnectionsPage() {
     load();
   }, [load]);
 
+  const activeMentorRequest =
+    user.role === "journaler"
+      ? requests.find((request) => ACTIVE_MENTOR_STATUSES.has(request.status))
+      : null;
+  const canRequestMentor = user.role !== "journaler" || !activeMentorRequest;
+
   const handleSearch = async (event) => {
     event.preventDefault();
+    if (!canRequestMentor) {
+      return;
+    }
     const res = await apiClient.get(`/mentors?q=${encodeURIComponent(search)}`, token);
     setMentors(res.mentors || []);
   };
 
   const sendRequest = async (mentor) => {
+    if (!canRequestMentor) {
+      setMessage("You already have an active mentor connection.");
+      return;
+    }
     await apiClient.post(
       "/mentors/requests",
       { mentorId: mentor.id },
@@ -81,45 +105,66 @@ function MentorConnectionsPage() {
       {message && <p className="info-text">{message}</p>}
 
       {user.role === "journaler" && (
-        <SectionCard
-          title="Find a mentor"
-          subtitle="Invite someone who can check in on your reflections"
-          action={
-            <form className="inline-form" onSubmit={handleSearch}>
-              <input
-                type="text"
-                placeholder="Search by name or expertise"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-              <button type="submit" className="ghost-button">
-                Search
-              </button>
-            </form>
-          }
-        >
-          {mentors.length ? (
-            <ul className="mentor-list">
-              {mentors.map((mentor) => (
-                <li key={mentor.id}>
-                  <div>
-                    <strong>{mentor.name}</strong>
-                    <p>{mentor.expertise || "Mentor"}</p>
-                  </div>
-                  <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => sendRequest(mentor)}
-                  >
-                    Request mentorship
+        <>
+          {canRequestMentor ? (
+            <SectionCard
+              title="Find a mentor"
+              subtitle="Invite someone who can check in on your reflections"
+              action={
+                <form className="inline-form" onSubmit={handleSearch}>
+                  <input
+                    type="text"
+                    placeholder="Search by name or expertise"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                  />
+                  <button type="submit" className="ghost-button">
+                    Search
                   </button>
-                </li>
-              ))}
-            </ul>
+                </form>
+              }
+            >
+              {mentors.length ? (
+                <ul className="mentor-list">
+                  {mentors.map((mentor) => (
+                    <li key={mentor.id}>
+                      <div>
+                        <strong>{mentor.name}</strong>
+                        <p>{mentor.expertise || "Mentor"}</p>
+                      </div>
+                      <button
+                        type="button"
+                        className="primary-button"
+                        onClick={() => sendRequest(mentor)}
+                      >
+                        Request mentorship
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="empty-state">No mentors match that search yet.</p>
+              )}
+            </SectionCard>
           ) : (
-            <p className="empty-state">No mentors match that search yet.</p>
+            <SectionCard
+              title="You're linked with a mentor"
+              subtitle="Your current mentorship needs to close before inviting someone new"
+            >
+              <p className="info-text">
+                {activeMentorRequest?.mentor?.name
+                  ? `You're connected with ${activeMentorRequest.mentor.name}.`
+                  : "You already have an active mentor request."}
+                {activeMentorRequest?.status === "pending" &&
+                  " They are still reviewing your invitation."}
+                {activeMentorRequest?.status === "mentor_accepted" &&
+                  " Confirm the link below or decline to choose someone else."}
+                {activeMentorRequest?.status === "confirmed" &&
+                  " You can manage the connection from the requests list below."}
+              </p>
+            </SectionCard>
           )}
-        </SectionCard>
+        </>
       )}
 
       <SectionCard
