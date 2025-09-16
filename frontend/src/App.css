@@ -52,28 +52,52 @@
 
 .primary-button,
 .ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  padding: 0 1.4rem;
   border-radius: 999px;
-  padding: 0.6rem 1.2rem;
   font-weight: 600;
-  border: none;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-decoration: none;
+  border: 1px solid transparent;
   cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .primary-button {
   background: var(--accent-green);
   color: #fff;
-  border: 1px solid var(--accent-green);
+  border-color: var(--accent-green);
+  box-shadow: 0 6px 16px rgba(47, 133, 90, 0.2);
+}
+
+.primary-button:hover:not(:disabled),
+.primary-button:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(47, 133, 90, 0.25);
 }
 
 .primary-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .ghost-button {
   background: transparent;
   color: var(--accent-green);
-  border: 1px solid var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.ghost-button:hover,
+.ghost-button:focus-visible {
+  background: rgba(47, 133, 90, 0.12);
 }
 
 .header-profile {
@@ -134,8 +158,23 @@
 }
 
 .tree > div {
-  padding: 0.75rem;
-  text-align: center;
+  padding: 1rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tree-label {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.tree-description {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .roots {
@@ -202,6 +241,17 @@ textarea {
   border: 1px solid var(--border);
   background: #fdfdfc;
   font-size: 1rem;
+}
+
+.compact-select {
+  width: auto;
+  min-width: 150px;
+}
+
+.section-action {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 label {
@@ -384,6 +434,42 @@ label {
 .badge-neutral {
   background: rgba(95, 111, 108, 0.2);
   color: var(--text-muted);
+}
+
+.badge-happy {
+  background: rgba(47, 133, 90, 0.15);
+  color: #2f855a;
+}
+
+.badge-loved {
+  background: rgba(213, 63, 140, 0.15);
+  color: #d53f8c;
+}
+
+.badge-proud {
+  background: rgba(183, 121, 31, 0.18);
+  color: #b7791f;
+}
+
+.badge-relaxed {
+  background: rgba(44, 122, 123, 0.18);
+  color: #2c7a7b;
+}
+
+.badge-tired {
+  background: rgba(113, 128, 150, 0.2);
+  color: #4a5568;
+}
+
+.badge-anxious,
+.badge-angry {
+  background: rgba(197, 48, 48, 0.16);
+  color: #c53030;
+}
+
+.badge-sad {
+  background: rgba(43, 108, 176, 0.18);
+  color: #2b6cb0;
 }
 
 .chip {

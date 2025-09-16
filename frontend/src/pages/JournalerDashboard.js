@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns";
+import { format, isAfter, isEqual, parseISO, subMonths, subWeeks } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import apiClient from "../api/client";
 import JournalEntryForm from "../components/JournalEntryForm";
@@ -7,6 +7,12 @@ import MetricCard from "../components/MetricCard";
 import MoodTrendChart from "../components/MoodTrendChart";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
+
+const TIMEFRAME_OPTIONS = [
+  { value: "week", label: "Weekly" },
+  { value: "month", label: "Monthly" },
+  { value: "quarter", label: "Quarterly" },
+];
 
 function JournalerDashboard() {
   const { token, user } = useAuth();
@@ -19,6 +25,8 @@ function JournalerDashboard() {
   const [error, setError] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
   const [statusVariant, setStatusVariant] = useState("info");
+  const [timeframe, setTimeframe] = useState("week");
+  const [formResetKey, setFormResetKey] = useState(0);
 
   useEffect(() => {
     if (!token) return;
@@ -74,6 +82,66 @@ function JournalerDashboard() {
     [forms, selectedFormId]
   );
 
+  const timeframeCutoff = useMemo(() => {
+    const now = new Date();
+    switch (timeframe) {
+      case "week":
+        return subWeeks(now, 1);
+      case "month":
+        return subMonths(now, 1);
+      case "quarter":
+        return subMonths(now, 3);
+      default:
+        return null;
+    }
+  }, [timeframe]);
+
+  const filteredTrend = useMemo(() => {
+    if (!dashboard?.trend?.length) {
+      return [];
+    }
+
+    if (!timeframeCutoff) {
+      return dashboard.trend;
+    }
+
+    return dashboard.trend.filter((point) => {
+      if (!point.date) {
+        return false;
+      }
+
+      const pointDate = parseISO(point.date);
+      if (Number.isNaN(pointDate.getTime())) {
+        return false;
+      }
+
+      return isAfter(pointDate, timeframeCutoff) || isEqual(pointDate, timeframeCutoff);
+    });
+  }, [dashboard?.trend, timeframeCutoff]);
+
+  const filteredEntries = useMemo(() => {
+    if (!entries.length) {
+      return [];
+    }
+
+    if (!timeframeCutoff) {
+      return entries;
+    }
+
+    return entries.filter((entry) => {
+      if (!entry.entryDate) {
+        return false;
+      }
+
+      const entryDate = parseISO(entry.entryDate);
+      if (Number.isNaN(entryDate.getTime())) {
+        return false;
+      }
+
+      return isAfter(entryDate, timeframeCutoff) || isEqual(entryDate, timeframeCutoff);
+    });
+  }, [entries, timeframeCutoff]);
+
   const handleSubmit = async (payload) => {
     setSubmitting(true);
     setStatusVariant("info");
@@ -87,6 +155,7 @@ function JournalerDashboard() {
       setDashboard(dash);
       setStatusVariant("success");
       setStatusMessage("Journal entry saved.");
+      setFormResetKey((prev) => prev + 1);
     } catch (err) {
       setStatusVariant("info");
       setStatusMessage(null);
@@ -150,6 +219,7 @@ function JournalerDashboard() {
           }
         >
           <JournalEntryForm
+            key={`${selectedFormId || "default"}-${formResetKey}`}
             form={selectedForm}
             onSubmit={handleSubmit}
             submitting={submitting}
@@ -158,9 +228,33 @@ function JournalerDashboard() {
           />
         </SectionCard>
 
-        <SectionCard title="Mood trend" subtitle="Last reflections in a glance">
+        <SectionCard
+          title="Mood trend"
+          subtitle="Last reflections in a glance"
+          action={
+            <select
+              className="compact-select"
+              aria-label="Filter journal data by timeframe"
+              value={timeframe}
+              onChange={(event) => setTimeframe(event.target.value)}
+            >
+              {TIMEFRAME_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          }
+        >
           {dashboard?.trend?.length ? (
-            <MoodTrendChart data={dashboard.trend} />
+            filteredTrend.length ? (
+              <MoodTrendChart data={filteredTrend} />
+            ) : (
+              <p className="empty-state">
+                No mood entries in this timeframe yet. Try a different filter to review
+                earlier reflections.
+              </p>
+            )
           ) : (
             <p className="empty-state">
               The chart grows after your first few entries.
@@ -170,9 +264,9 @@ function JournalerDashboard() {
       </div>
 
       <SectionCard title="Recent entries" subtitle="Revisit your notes and growth moments">
-        {entries.length ? (
+        {filteredEntries.length ? (
           <div className="entry-grid">
-            {entries.slice(0, 6).map((entry) => (
+            {filteredEntries.slice(0, 6).map((entry) => (
               <article key={entry.id} className="entry-card">
                 <header>
                   <span className={`badge badge-${entry.mood || "neutral"}`}>
@@ -202,7 +296,9 @@ function JournalerDashboard() {
           </div>
         ) : (
           <p className="empty-state">
-            Your journal is waiting. Capture today's mood to begin your tree-ring.
+            {entries.length
+              ? "No entries in this timeframe yet. Adjust the filter to revisit earlier notes."
+              : "Your journal is waiting. Capture today's mood to begin your tree-ring."}
           </p>
         )}
       </SectionCard>

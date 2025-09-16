@@ -1,5 +1,16 @@
 import { format, parseISO } from "date-fns";
 
+const MOOD_COLORS = {
+  happy: "#2f855a",
+  loved: "#d53f8c",
+  proud: "#b7791f",
+  relaxed: "#2c7a7b",
+  tired: "#4a5568",
+  anxious: "#c53030",
+  angry: "#c53030",
+  sad: "#2b6cb0",
+};
+
 function MoodTrendChart({ data = [] }) {
   if (!data.length) {
     return <p className="empty-state">Mood data will appear once entries are submitted.</p>;
@@ -12,6 +23,7 @@ function MoodTrendChart({ data = [] }) {
 
   const points = data.map((point, index) => {
     const score = point.score ?? (point.mood ? scoreFromMood(point.mood) : null);
+    const color = colorFromMood(point.mood, score);
     const x =
       data.length === 1
         ? width / 2
@@ -25,6 +37,7 @@ function MoodTrendChart({ data = [] }) {
       score: normalizedScore,
       label: point.mood,
       date: point.date,
+      color,
     };
   });
 
@@ -42,14 +55,14 @@ function MoodTrendChart({ data = [] }) {
             cx={point.x}
             cy={point.y}
             r={4}
-            fill="var(--accent-green)"
+            fill={point.color}
           />
         ))}
       </svg>
       <div className="mood-legend">
         {points.slice(-4).map((point) => (
           <div key={point.date} className="mood-legend-item">
-            <span className="mood-dot" />
+            <span className="mood-dot" style={{ background: point.color }} />
             <div>
               <p>{point.label || "—"}</p>
               <small>{format(parseISO(point.date), "MMM d")}</small>
@@ -59,6 +72,28 @@ function MoodTrendChart({ data = [] }) {
       </div>
     </div>
   );
+}
+
+function colorFromMood(mood, score) {
+  const normalized = mood?.toString().trim().toLowerCase();
+  if (normalized && MOOD_COLORS[normalized]) {
+    return MOOD_COLORS[normalized];
+  }
+
+  if (typeof score === "number") {
+    if (score >= 4.5) {
+      return "#2f855a";
+    }
+    if (score >= 3.5) {
+      return "#38a169";
+    }
+    if (score >= 2.5) {
+      return "#b7791f";
+    }
+    return "#c53030";
+  }
+
+  return "var(--accent-green)";
 }
 
 function scoreFromMood(mood) {

@@ -22,10 +22,30 @@ function LandingPage() {
         </div>
         <div className="hero-illustration">
           <div className="tree">
-            <div className="roots">Roots · self-care</div>
-            <div className="trunk">Trunk · purpose</div>
-            <div className="branches">Branches · learning & relationships</div>
-            <div className="fruit">Fruit · creative expression</div>
+            <div className="roots">
+              <span className="tree-label">Roots · Self-care</span>
+              <p className="tree-description">
+                Food, movement, and balance sustain growth.
+              </p>
+            </div>
+            <div className="trunk">
+              <span className="tree-label">Trunk · Purpose</span>
+              <p className="tree-description">
+                Strength comes from purpose, simplicity, and stability.
+              </p>
+            </div>
+            <div className="branches">
+              <span className="tree-label">Branches · Learning &amp; Relationships</span>
+              <p className="tree-description">
+                Growth means reaching, learning, and connecting.
+              </p>
+            </div>
+            <div className="fruit">
+              <span className="tree-label">Fruit · Creative Expression</span>
+              <p className="tree-description">
+                Creativity and legacy are the gifts we leave behind.
+              </p>
+            </div>
           </div>
         </div>
       </section>

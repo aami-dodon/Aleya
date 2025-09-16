@@ -133,9 +133,15 @@ const DEFAULT_FORM = {
       helperText: "Insights, gratitude, or a small win worth remembering.",
     },
     {
-      label: "Sleep quality (1-5)",
-      fieldType: "number",
+      label: "Sleep quality",
+      matchLabels: ["Sleep quality (1-5)"],
+      fieldType: "select",
       required: false,
+      options: [
+        { value: "high", label: "High" },
+        { value: "medium", label: "Steady" },
+        { value: "low", label: "Low" },
+      ],
       helperText: "Optional check-in with your rest and recovery.",
     },
     {
@@ -205,12 +211,25 @@ async function ensureDefaultForm() {
     } else {
       formId = existing.rows[0].id;
       for (const field of DEFAULT_FORM.fields) {
+        const labelsToMatch = Array.from(
+          new Set([field.label, ...(field.matchLabels || [])])
+        );
+
         // eslint-disable-next-line no-await-in-loop
         const fieldCheck = await client.query(
           `SELECT id FROM journal_form_fields
-             WHERE form_id = $1 AND label = $2`,
-          [formId, field.label]
+             WHERE form_id = $1 AND label = ANY($2::text[])
+             LIMIT 1`,
+          [formId, labelsToMatch]
         );
+
+        const params = [
+          field.label,
+          field.fieldType,
+          field.required || false,
+          JSON.stringify(field.options || []),
+          field.helperText || null,
+        ];
 
         if (!fieldCheck.rows.length) {
           // eslint-disable-next-line no-await-in-loop
@@ -218,14 +237,19 @@ async function ensureDefaultForm() {
             `INSERT INTO journal_form_fields
               (form_id, label, field_type, required, options, helper_text)
              VALUES ($1, $2, $3, $4, $5, $6)`,
-            [
-              formId,
-              field.label,
-              field.fieldType,
-              field.required || false,
-              JSON.stringify(field.options || []),
-              field.helperText || null,
-            ]
+            [formId, ...params]
+          );
+        } else {
+          // eslint-disable-next-line no-await-in-loop
+          await client.query(
+            `UPDATE journal_form_fields
+                SET label = $2,
+                    field_type = $3,
+                    required = $4,
+                    options = $5,
+                    helper_text = $6
+             WHERE id = $1`,
+            [fieldCheck.rows[0].id, ...params]
           );
         }
       }
