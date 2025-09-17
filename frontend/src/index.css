@@ -35,6 +35,10 @@
     @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-transparent px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:-translate-y-0.5 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:translate-y-0 disabled:opacity-60;
   }
 
+  .icon-button {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-white/80 text-emerald-700 shadow-sm shadow-emerald-900/10 transition hover:border-emerald-300 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600;
+  }
+
   .form-input {
     @apply mt-2 w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-3 text-base text-emerald-900 shadow-sm transition placeholder:text-emerald-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
   }
