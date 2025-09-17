@@ -1,31 +1,32 @@
-:root {
-  --background: #f7f8f5;
-  --surface: #ffffff;
-  --border: #d9dfd7;
-  --text-primary: #1f2a2a;
-  --text-muted: #5f6f6c;
-  --accent-green: #2f855a;
-  --accent-gold: #b7791f;
-  --accent-rose: #c53030;
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: var(--background);
-  color: var(--text-primary);
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  margin: 0;
-  background: var(--background);
-}
+@layer base {
+  :root {
+    --background: #f7f8f5;
+    --surface: #ffffff;
+    --border: #d9dfd7;
+    --text-primary: #1f2a2a;
+    --text-muted: #5f6f6c;
+    --accent-green: #2f855a;
+    --accent-gold: #b7791f;
+    --accent-rose: #c53030;
+  }
 
-a {
-  color: var(--accent-green);
-  text-decoration: none;
-}
+  body {
+    @apply m-0 min-h-screen bg-[var(--background)] text-text-primary font-sans;
+  }
 
-a:hover {
-  text-decoration: underline;
-}
+  a {
+    @apply text-[var(--accent-green)] no-underline;
+  }
 
-* {
-  box-sizing: border-box;
+  a:hover {
+    @apply underline;
+  }
+
+  * {
+    @apply box-border;
+  }
 }
