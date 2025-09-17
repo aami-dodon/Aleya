@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import MentorRequestList from "../components/MentorRequestList";
+import MentorProfileDialog from "../components/MentorProfileDialog";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -23,6 +24,7 @@ function MentorConnectionsPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
+  const [selectedMentor, setSelectedMentor] = useState(null);
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -86,6 +88,7 @@ function MentorConnectionsPage() {
       token
     );
     setMessage(`Request sent to ${mentor.name}.`);
+    setSelectedMentor(null);
     load();
   };
 
@@ -152,12 +155,16 @@ function MentorConnectionsPage() {
                       key={mentor.id}
                       className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-5"
                     >
-                      <div className="space-y-1">
-                        <p className="text-base font-semibold text-emerald-900">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMentor(mentor)}
+                        className="group flex-1 space-y-1 text-left"
+                      >
+                        <p className="text-base font-semibold text-emerald-900 group-hover:text-emerald-700">
                           {mentor.name}
                         </p>
                         <p className={infoTextClasses}>{mentor.expertise || "Mentor"}</p>
-                      </div>
+                      </button>
                       <button
                         type="button"
                         className={`${primaryButtonClasses} px-5 py-2.5 text-sm`}
@@ -240,6 +247,12 @@ function MentorConnectionsPage() {
           )}
         </SectionCard>
       )}
+      <MentorProfileDialog
+        mentor={selectedMentor}
+        onClose={() => setSelectedMentor(null)}
+        onRequest={sendRequest}
+        canRequest={canRequestMentor}
+      />
     </div>
   );
 }
