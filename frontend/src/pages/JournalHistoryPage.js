@@ -1,14 +1,17 @@
 import { format, parseISO } from "date-fns";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
+import JournalEntryForm from "../components/JournalEntryForm";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
 import {
+  bodySmallStrongTextClasses,
   chipBaseClasses,
   emptyStateClasses,
   getMoodBadgeClasses,
   selectCompactClasses,
+  subtleButtonClasses,
 } from "../styles/ui";
 
 function JournalHistoryPage() {
@@ -18,6 +21,12 @@ function JournalHistoryPage() {
   const [selectedMentee, setSelectedMentee] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [forms, setForms] = useState([]);
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [updating, setUpdating] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [actionMessage, setActionMessage] = useState(null);
+  const [actionVariant, setActionVariant] = useState("success");
 
   const loadEntries = useCallback(async () => {
     if (!token) return;
@@ -44,6 +53,137 @@ function JournalHistoryPage() {
   useEffect(() => {
     loadEntries();
   }, [loadEntries]);
+
+  useEffect(() => {
+    if (user.role !== "journaler" || !token) {
+      return;
+    }
+
+    let isActive = true;
+
+    const loadForms = async () => {
+      try {
+        const response = await apiClient.get("/forms", token);
+        if (isActive) {
+          setForms(response.forms || []);
+        }
+      } catch (err) {
+        if (isActive) {
+          setForms([]);
+        }
+      }
+    };
+
+    loadForms();
+    return () => {
+      isActive = false;
+    };
+  }, [token, user.role]);
+
+  useEffect(() => {
+    if (!actionMessage) {
+      return undefined;
+    }
+
+    const timeout = setTimeout(() => setActionMessage(null), 4000);
+    return () => clearTimeout(timeout);
+  }, [actionMessage]);
+
+  const editingForm = useMemo(() => {
+    if (!editingEntry) {
+      return null;
+    }
+    return forms.find((form) => form.id === editingEntry.formId) || null;
+  }, [editingEntry, forms]);
+
+  const editingValues = useMemo(() => {
+    if (!editingEntry || !editingForm) {
+      return {};
+    }
+
+    const mapped = {};
+    (editingForm.fields || []).forEach((field) => {
+      const key = field.id ?? field.label;
+      const response = (editingEntry.responses || []).find((item) => {
+        if (field.id && item.fieldId) {
+          return item.fieldId === field.id;
+        }
+        return item.label === field.label;
+      });
+      mapped[key] = response?.value ?? "";
+    });
+    return mapped;
+  }, [editingEntry, editingForm]);
+
+  const handleEditEntry = useCallback((entry) => {
+    setEditingEntry(entry);
+    setActionMessage(null);
+    setActionVariant("success");
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingEntry(null);
+  }, []);
+
+  const handleUpdateEntry = useCallback(
+    async (payload) => {
+      if (!editingEntry) {
+        return;
+      }
+
+      try {
+        setUpdating(true);
+        setActionMessage(null);
+        const { entry } = await apiClient.patch(
+          `/journal-entries/${editingEntry.id}`,
+          payload,
+          token
+        );
+        setEntries((prev) =>
+          prev.map((item) => (item.id === entry.id ? entry : item))
+        );
+        setActionVariant("success");
+        setActionMessage("Entry updated.");
+        setEditingEntry(null);
+      } catch (err) {
+        setActionVariant("error");
+        setActionMessage(err.message);
+      } finally {
+        setUpdating(false);
+      }
+    },
+    [editingEntry, token]
+  );
+
+  const handleDeleteEntry = useCallback(
+    async (entryId) => {
+      if (!token) return;
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this entry? This action cannot be undone."
+      );
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        setDeletingId(entryId);
+        setActionMessage(null);
+        await apiClient.del(`/journal-entries/${entryId}`, token);
+        setEntries((prev) => prev.filter((entry) => entry.id !== entryId));
+        if (editingEntry?.id === entryId) {
+          setEditingEntry(null);
+        }
+        setActionVariant("success");
+        setActionMessage("Entry deleted.");
+      } catch (err) {
+        setActionVariant("error");
+        setActionMessage(err.message);
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [editingEntry, token]
+  );
 
   if (loading) {
     return <LoadingState label="Fetching entries" />;
@@ -74,6 +214,17 @@ function JournalHistoryPage() {
         {error && (
           <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
             {error}
+          </p>
+        )}
+        {actionMessage && (
+          <p
+            className={`rounded-2xl px-4 py-3 ${bodySmallStrongTextClasses} ${
+              actionVariant === "success"
+                ? "border border-emerald-100 bg-emerald-50/80 text-emerald-700"
+                : "border border-rose-100 bg-rose-50/80 text-rose-600"
+            }`}
+          >
+            {actionMessage}
           </p>
         )}
         {entries.length ? (
@@ -115,6 +266,25 @@ function JournalHistoryPage() {
                     </ul>
                   </details>
                 )}
+                {user.role === "journaler" && (
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <button
+                      type="button"
+                      className={`${subtleButtonClasses} text-sm`}
+                      onClick={() => handleEditEntry(entry)}
+                    >
+                      Edit entry
+                    </button>
+                    <button
+                      type="button"
+                      className={`${subtleButtonClasses} text-sm text-rose-600 hover:text-rose-500`}
+                      onClick={() => handleDeleteEntry(entry.id)}
+                      disabled={deletingId === entry.id}
+                    >
+                      {deletingId === entry.id ? "Deleting..." : "Delete"}
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -122,6 +292,31 @@ function JournalHistoryPage() {
           <p className={emptyStateClasses}>No entries available yet.</p>
         )}
       </SectionCard>
+      {user.role === "journaler" && editingEntry && (
+        <SectionCard
+          title="Edit journal entry"
+          subtitle={`Update your reflection from ${format(
+            parseISO(editingEntry.entryDate),
+            "MMMM d, yyyy"
+          )}`}
+        >
+          {editingForm ? (
+            <JournalEntryForm
+              form={editingForm}
+              submitting={updating}
+              onSubmit={handleUpdateEntry}
+              onCancel={handleCancelEdit}
+              initialSharing={editingEntry.sharedLevel}
+              initialValues={editingValues}
+              submitLabel="Update entry"
+            />
+          ) : (
+            <p className={emptyStateClasses}>
+              This form is no longer available for editing.
+            </p>
+          )}
+        </SectionCard>
+      )}
     </div>
   );
 }

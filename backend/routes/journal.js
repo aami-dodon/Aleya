@@ -65,6 +65,73 @@ function shapeForMentor(entry) {
   return shaped;
 }
 
+function cleanResponses(form, responses = {}) {
+  if (!form) {
+    throw new Error("Form not found");
+  }
+
+  return form.fields.map((field) => {
+    const keyById = field.id ? responses[field.id] : undefined;
+    const keyByLabel = responses[field.label];
+    const value = keyById ?? keyByLabel ?? null;
+
+    if (field.required && (value === null || value === "")) {
+      throw new Error(`Field "${field.label}" is required`);
+    }
+
+    return {
+      fieldId: field.id,
+      label: field.label,
+      value,
+    };
+  });
+}
+
+function summarizeResponses(cleaned) {
+  if (!Array.isArray(cleaned)) {
+    return { summary: "", mood: null };
+  }
+
+  let summaryParts = [];
+  const moodField = cleaned.find((entry) =>
+    entry.label.toLowerCase().includes("mood")
+  );
+  const causeField = cleaned.find((entry) =>
+    entry.label.toLowerCase().startsWith("what caused")
+  );
+  const learningField = cleaned.find((entry) =>
+    entry.label.toLowerCase().startsWith("what did i learn")
+  );
+
+  if (moodField?.value) {
+    summaryParts.push(`Mood: ${moodField.value}`);
+  }
+
+  if (causeField?.value) {
+    summaryParts.push(`Cause: ${causeField.value}`);
+  }
+
+  if (learningField?.value) {
+    summaryParts.push(`Insight: ${learningField.value}`);
+  }
+
+  if (!summaryParts.length) {
+    summaryParts = cleaned
+      .map((entry) => (entry.value ? `${entry.label}: ${entry.value}` : null))
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+
+  return {
+    summary: summaryParts.join(" | "),
+    mood: normalizeMood(moodField?.value),
+  };
+}
+
+function resolveVisibility(sharedLevel, fallback = "private") {
+  return SHARING_LEVELS.includes(sharedLevel) ? sharedLevel : fallback;
+}
+
 async function fetchFormWithFields(formId) {
   const { rows } = await pool.query(
     `SELECT f.id, f.title, f.is_default,
@@ -133,56 +200,9 @@ router.post(
         }
       }
 
-      const cleaned = form.fields.map((field) => {
-        const keyById = field.id ? responses[field.id] : undefined;
-        const keyByLabel = responses[field.label];
-        const value = keyById ?? keyByLabel ?? null;
-
-        if (field.required && (value === null || value === "")) {
-          throw new Error(`Field "${field.label}" is required`);
-        }
-
-        return {
-          fieldId: field.id,
-          label: field.label,
-          value,
-        };
-      });
-
-      let summaryParts = [];
-      const moodField = cleaned.find((entry) =>
-        entry.label.toLowerCase().includes("mood")
-      );
-      const causeField = cleaned.find((entry) =>
-        entry.label.toLowerCase().startsWith("what caused")
-      );
-      const learningField = cleaned.find((entry) =>
-        entry.label.toLowerCase().startsWith("what did i learn")
-      );
-
-      if (moodField?.value) {
-        summaryParts.push(`Mood: ${moodField.value}`);
-      }
-
-      if (causeField?.value) {
-        summaryParts.push(`Cause: ${causeField.value}`);
-      }
-
-      if (learningField?.value) {
-        summaryParts.push(`Insight: ${learningField.value}`);
-      }
-
-      if (!summaryParts.length) {
-        summaryParts = cleaned
-          .map((entry) => (entry.value ? `${entry.label}: ${entry.value}` : null))
-          .filter(Boolean)
-          .slice(0, 3);
-      }
-
-      const normalizedMood = normalizeMood(moodField?.value);
-      const visibility = SHARING_LEVELS.includes(sharedLevel)
-        ? sharedLevel
-        : "private";
+      const cleaned = cleanResponses(form, responses);
+      const { summary, mood: normalizedMood } = summarizeResponses(cleaned);
+      const visibility = resolveVisibility(sharedLevel);
 
       const { rows } = await pool.query(
         `INSERT INTO journal_entries (journaler_id, form_id, responses, mood, shared_level, summary)
@@ -194,7 +214,7 @@ router.post(
           JSON.stringify(cleaned),
           normalizedMood,
           visibility,
-          summaryParts.join(" | "),
+          summary,
         ]
       );
 
@@ -226,6 +246,147 @@ router.post(
       if (error.message && error.message.includes("Field")) {
         return res.status(400).json({ error: error.message });
       }
+      return next(error);
+    }
+  }
+);
+
+router.patch(
+  "/:id",
+  authenticate,
+  requireRole("journaler"),
+  [
+    body("responses")
+      .exists()
+      .withMessage("responses are required")
+      .bail()
+      .custom((value) => typeof value === "object" && value !== null)
+      .withMessage("responses must be an object"),
+    body("sharedLevel")
+      .optional()
+      .isIn(SHARING_LEVELS)
+      .withMessage("Invalid sharing preference"),
+  ],
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const entryId = Number(req.params.id);
+    if (!Number.isInteger(entryId) || entryId <= 0) {
+      return res.status(400).json({ error: "Invalid entry id" });
+    }
+
+    try {
+      const { rows } = await pool.query(
+        `SELECT e.id, e.journaler_id, e.form_id, e.shared_level, f.title AS form_title
+         FROM journal_entries e
+         JOIN journal_forms f ON f.id = e.form_id
+         WHERE e.id = $1`,
+        [entryId]
+      );
+
+      if (!rows.length) {
+        return res.status(404).json({ error: "Entry not found" });
+      }
+
+      const existing = rows[0];
+
+      if (existing.journaler_id !== req.user.id) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const form = await fetchFormWithFields(existing.form_id);
+      if (!form) {
+        return res.status(404).json({ error: "Form not found" });
+      }
+
+      const cleaned = cleanResponses(form, req.body.responses);
+      const { summary, mood } = summarizeResponses(cleaned);
+      const visibility = resolveVisibility(req.body.sharedLevel, existing.shared_level);
+
+      const updated = await pool.query(
+        `UPDATE journal_entries
+         SET responses = $1, mood = $2, shared_level = $3, summary = $4
+         WHERE id = $5
+         RETURNING id, journaler_id, form_id, entry_date, created_at, mood, shared_level, summary`,
+        [
+          JSON.stringify(cleaned),
+          mood,
+          visibility,
+          summary,
+          entryId,
+        ]
+      );
+
+      const entry = formatEntry({
+        ...updated.rows[0],
+        form_title: form.title,
+        responses: JSON.stringify(cleaned),
+      });
+
+      if (visibility === "private") {
+        await pool.query(
+          `DELETE FROM mentor_notifications WHERE entry_id = $1`,
+          [entryId]
+        );
+      } else {
+        const result = await pool.query(
+          `UPDATE mentor_notifications SET visibility = $1 WHERE entry_id = $2`,
+          [visibility, entryId]
+        );
+
+        if (!result.rowCount) {
+          const { rows: mentors } = await pool.query(
+            `SELECT mentor_id FROM mentor_links WHERE journaler_id = $1`,
+            [req.user.id]
+          );
+
+          await Promise.all(
+            mentors.map((mentor) =>
+              pool.query(
+                `INSERT INTO mentor_notifications (mentor_id, entry_id, visibility)
+                 VALUES ($1, $2, $3)` ,
+                [mentor.mentor_id, entryId, visibility]
+              )
+            )
+          );
+        }
+      }
+
+      return res.json({ entry });
+    } catch (error) {
+      if (error.message && error.message.includes("Field")) {
+        return res.status(400).json({ error: error.message });
+      }
+      return next(error);
+    }
+  }
+);
+
+router.delete(
+  "/:id",
+  authenticate,
+  requireRole("journaler"),
+  async (req, res, next) => {
+    const entryId = Number(req.params.id);
+    if (!Number.isInteger(entryId) || entryId <= 0) {
+      return res.status(400).json({ error: "Invalid entry id" });
+    }
+
+    try {
+      const result = await pool.query(
+        `DELETE FROM journal_entries WHERE id = $1 AND journaler_id = $2 RETURNING id`,
+        [entryId, req.user.id]
+      );
+
+      if (!result.rows.length) {
+        return res.status(404).json({ error: "Entry not found" });
+      }
+
+      return res.json({ success: true });
+    } catch (error) {
       return next(error);
     }
   }
