@@ -1,5 +1,6 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
+const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
@@ -253,6 +254,7 @@ router.delete(
   "/links/:mentorId",
   authenticate,
   requireRole("journaler"),
+  [body("password").isString().notEmpty().withMessage("Password is required")],
   async (req, res, next) => {
     const mentorId = Number(req.params.mentorId);
 
@@ -260,57 +262,80 @@ router.delete(
       return res.status(400).json({ error: "Invalid mentor id" });
     }
 
-    const client = await pool.connect();
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
     try {
-      await client.query("BEGIN");
-
-      const link = await client.query(
-        `SELECT id FROM mentor_links
-         WHERE journaler_id = $1 AND mentor_id = $2
-         FOR UPDATE`,
-        [req.user.id, mentorId]
+      const { rows } = await pool.query(
+        `SELECT password_hash FROM users WHERE id = $1`,
+        [req.user.id]
       );
 
-      if (!link.rows.length) {
-        await client.query("ROLLBACK");
-        return res.status(404).json({ error: "Mentor link not found" });
+      if (!rows.length) {
+        return res.status(401).json({ error: "User not found" });
       }
 
-      await client.query(
-        `DELETE FROM mentor_links WHERE journaler_id = $1 AND mentor_id = $2`,
-        [req.user.id, mentorId]
-      );
+      const isValid = await bcrypt.compare(req.body.password, rows[0].password_hash);
+      if (!isValid) {
+        return res.status(401).json({ error: "Incorrect password" });
+      }
 
-      await client.query(
-        `UPDATE mentor_requests
-         SET status = 'ended', updated_at = NOW()
-         WHERE journaler_id = $1 AND mentor_id = $2 AND status = 'confirmed'`,
-        [req.user.id, mentorId]
-      );
+      const client = await pool.connect();
 
-      await client.query(
-        `DELETE FROM mentor_form_assignments
-         WHERE journaler_id = $1 AND mentor_id = $2`,
-        [req.user.id, mentorId]
-      );
+      try {
+        await client.query("BEGIN");
 
-      await client.query(
-        `DELETE FROM mentor_notifications
-         WHERE mentor_id = $2
-           AND entry_id IN (
-             SELECT id FROM journal_entries WHERE journaler_id = $1
-           )`,
-        [req.user.id, mentorId]
-      );
+        const link = await client.query(
+          `SELECT id FROM mentor_links
+           WHERE journaler_id = $1 AND mentor_id = $2
+           FOR UPDATE`,
+          [req.user.id, mentorId]
+        );
 
-      await client.query("COMMIT");
-      return res.json({ success: true });
+        if (!link.rows.length) {
+          await client.query("ROLLBACK");
+          return res.status(404).json({ error: "Mentor link not found" });
+        }
+
+        await client.query(
+          `DELETE FROM mentor_links WHERE journaler_id = $1 AND mentor_id = $2`,
+          [req.user.id, mentorId]
+        );
+
+        await client.query(
+          `UPDATE mentor_requests
+           SET status = 'ended', updated_at = NOW()
+           WHERE journaler_id = $1 AND mentor_id = $2 AND status = 'confirmed'`,
+          [req.user.id, mentorId]
+        );
+
+        await client.query(
+          `DELETE FROM mentor_form_assignments
+           WHERE journaler_id = $1 AND mentor_id = $2`,
+          [req.user.id, mentorId]
+        );
+
+        await client.query(
+          `DELETE FROM mentor_notifications
+           WHERE mentor_id = $2
+             AND entry_id IN (
+               SELECT id FROM journal_entries WHERE journaler_id = $1
+             )`,
+          [req.user.id, mentorId]
+        );
+
+        await client.query("COMMIT");
+        return res.json({ success: true });
+      } catch (error) {
+        await client.query("ROLLBACK");
+        return next(error);
+      } finally {
+        client.release();
+      }
     } catch (error) {
-      await client.query("ROLLBACK");
       return next(error);
-    } finally {
-      client.release();
     }
   }
 );
