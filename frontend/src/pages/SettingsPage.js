@@ -17,6 +17,7 @@ function SettingsPage() {
   const { user, token, updateProfile, deleteAccount } = useAuth();
   const [form, setForm] = useState({
     name: "",
+    email: "",
     timezone: "",
     remindersDaily: false,
     remindersWeekly: true,
@@ -36,6 +37,7 @@ function SettingsPage() {
     if (!user) return;
     setForm({
       name: user.name,
+      email: user.email,
       timezone: user.timezone,
       remindersDaily: user.notificationPreferences?.reminders?.daily ?? false,
       remindersWeekly: user.notificationPreferences?.reminders?.weekly ?? true,
@@ -100,6 +102,7 @@ function SettingsPage() {
     event.preventDefault();
     const payload = {
       name: form.name,
+      email: form.email,
       timezone: form.timezone,
       notificationPreferences: {
         reminders: {
@@ -186,6 +189,16 @@ function SettingsPage() {
               name="name"
               className={inputClasses}
               value={form.name}
+              onChange={handleChange}
+            />
+          </label>
+          <label className="block text-sm font-semibold text-emerald-900/80">
+            Email address
+            <input
+              type="email"
+              name="email"
+              className={inputClasses}
+              value={form.email}
               onChange={handleChange}
             />
           </label>
