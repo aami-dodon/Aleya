@@ -530,6 +530,43 @@ router.patch("/me", authenticate, async (req, res, next) => {
   }
 });
 
+router.delete("/me", authenticate, async (req, res, next) => {
+  const { password } = req.body;
+
+  if (!password) {
+    return res.status(400).json({ error: "Password is required" });
+  }
+
+  try {
+    const {
+      rows: existingRows,
+    } = await pool.query(
+      "SELECT password_hash FROM users WHERE id = $1",
+      [req.user.id]
+    );
+
+    if (!existingRows.length) {
+      return res.status(404).json({ error: "Account not found" });
+    }
+
+    const [userRecord] = existingRows;
+    const isValidPassword = await bcrypt.compare(
+      password,
+      userRecord.password_hash
+    );
+
+    if (!isValidPassword) {
+      return res.status(401).json({ error: "Incorrect password" });
+    }
+
+    await pool.query("DELETE FROM users WHERE id = $1", [req.user.id]);
+
+    return res.json({ message: "Account deleted" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.get(
   "/mentor/profiles",
   authenticate,

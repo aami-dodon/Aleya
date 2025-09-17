@@ -83,6 +83,18 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
+  const deleteAccount = async (password) => {
+    if (!state.token) throw new Error("Not authenticated");
+    if (!password) throw new Error("Password is required");
+
+    const response = await apiClient.del("/auth/me", state.token, {
+      data: { password },
+    });
+
+    clear();
+    return response;
+  };
+
   const value = {
     ...state,
     login,
@@ -90,6 +102,7 @@ export function AuthProvider({ children }) {
     logout,
     refreshProfile,
     updateProfile,
+    deleteAccount,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

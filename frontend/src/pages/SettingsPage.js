@@ -3,6 +3,7 @@ import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
 import {
   checkboxClasses,
+  bodySmallTextClasses,
   infoTextClasses,
   inputClasses,
   primaryButtonClasses,
@@ -13,7 +14,7 @@ import {
 import TIMEZONE_OPTIONS from "../utils/timezones";
 
 function SettingsPage() {
-  const { user, token, updateProfile } = useAuth();
+  const { user, token, updateProfile, deleteAccount } = useAuth();
   const [form, setForm] = useState({
     name: "",
     timezone: "",
@@ -28,6 +29,8 @@ function SettingsPage() {
     },
   });
   const [message, setMessage] = useState(null);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -56,6 +59,41 @@ function SettingsPage() {
       ...prev,
       mentorProfile: { ...prev.mentorProfile, [name]: value },
     }));
+  };
+
+  const handleDeletePasswordChange = (event) => {
+    setDeletePassword(event.target.value);
+  };
+
+  const handleDeleteAccount = async (event) => {
+    event.preventDefault();
+
+    if (!deletePassword) {
+      setMessage("Please enter your password to delete your account.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Deleting your Aleya account will permanently remove all of your data. This cannot be undone. Do you want to continue?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setMessage(null);
+    setIsDeleting(true);
+
+    try {
+      await deleteAccount(deletePassword);
+      window.alert("Your Aleya account has been permanently deleted.");
+    } catch (error) {
+      console.error("Failed to delete account", error);
+      setMessage(error?.message || "Failed to delete account.");
+    } finally {
+      setDeletePassword("");
+      setIsDeleting(false);
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -260,13 +298,51 @@ function SettingsPage() {
       </SectionCard>
 
       <SectionCard title="Data & privacy" subtitle="You can request an export anytime">
-        <button
-          type="button"
-          className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
-          onClick={requestExport}
-        >
-          Request journal export
-        </button>
+        <div className="space-y-5">
+          <p className={`${bodySmallTextClasses} text-emerald-900/80`}>
+            Download your reflections before you close your account. Once you
+            request deletion, Aleya permanently removes your journals and we
+            will not be able to recover them.
+          </p>
+
+          <button
+            type="button"
+            className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+            onClick={requestExport}
+          >
+            Request journal export
+          </button>
+
+          <form
+            className="space-y-4 rounded-2xl border border-emerald-100 bg-white/60 p-5"
+            onSubmit={handleDeleteAccount}
+          >
+            <p className={`${bodySmallTextClasses} text-rose-600`}>
+              Deleting your account is permanent. Enter your password to
+              confirm you understand Aleya will not retain any of your data.
+            </p>
+
+            <label className="block text-sm font-semibold text-emerald-900/80">
+              Account password
+              <input
+                type="password"
+                name="deletePassword"
+                className={inputClasses}
+                value={deletePassword}
+                onChange={handleDeletePasswordChange}
+                placeholder="Enter your password to continue"
+              />
+            </label>
+
+            <button
+              type="submit"
+              className={`${secondaryButtonClasses} border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50`}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting account..." : "Delete account"}
+            </button>
+          </form>
+        </div>
       </SectionCard>
     </div>
   );

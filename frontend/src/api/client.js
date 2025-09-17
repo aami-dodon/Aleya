@@ -45,7 +45,10 @@ const apiClient = {
     request(path, { ...config, method: "POST", data, token }),
   patch: (path, data, token, config = {}) =>
     request(path, { ...config, method: "PATCH", data, token }),
-  del: (path, token, config = {}) => request(path, { ...config, method: "DELETE", token }),
+  del: (path, token, config = {}) => {
+    const { data, ...rest } = config;
+    return request(path, { ...rest, method: "DELETE", token, data });
+  },
 };
 
 export default apiClient;
