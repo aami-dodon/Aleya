@@ -229,80 +229,82 @@ function JournalerDashboard() {
           />
         </SectionCard>
 
-        <SectionCard
-          title="Mood trend"
-          subtitle="Last reflections in a glance"
-          action={
-            <select
-              className={`${selectCompactClasses} w-full md:w-40`}
-              aria-label="Filter journal data by timeframe"
-              value={timeframe}
-              onChange={(event) => setTimeframe(event.target.value)}
-            >
-              {TIMEFRAME_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          }
-        >
-          {dashboard?.trend?.length ? (
-            filteredMoodTrend.length ? (
-              <MoodTrendChart data={filteredMoodTrend} />
+        <div className="flex flex-col gap-6">
+          <SectionCard
+            title="Mood trend"
+            subtitle="Last reflections in a glance"
+            action={
+              <select
+                className={`${selectCompactClasses} w-full md:w-40`}
+                aria-label="Filter journal data by timeframe"
+                value={timeframe}
+                onChange={(event) => setTimeframe(event.target.value)}
+              >
+                {TIMEFRAME_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            }
+          >
+            {dashboard?.trend?.length ? (
+              filteredMoodTrend.length ? (
+                <MoodTrendChart data={filteredMoodTrend} />
+              ) : (
+                <p className={emptyStateClasses}>
+                  No mood entries in this timeframe yet. Try a different filter to review
+                  earlier reflections.
+                </p>
+              )
             ) : (
               <p className={emptyStateClasses}>
-                No mood entries in this timeframe yet. Try a different filter to review
-                earlier reflections.
+                The chart grows after your first few entries.
               </p>
-            )
-          ) : (
-            <p className={emptyStateClasses}>
-              The chart grows after your first few entries.
-            </p>
-          )}
-        </SectionCard>
+            )}
+          </SectionCard>
+
+          <SectionCard
+            title="Sleep quality"
+            subtitle="Log how you slept each day to observe restorative patterns."
+          >
+            {dashboard?.sleepTrend?.length ? (
+              filteredSleepTrend.length ? (
+                <MoodTrendChart data={filteredSleepTrend} />
+              ) : (
+                <p className={emptyStateClasses}>
+                  No sleep entries in this timeframe yet. Try a different filter to review earlier
+                  rest notes.
+                </p>
+              )
+            ) : (
+              <p className={emptyStateClasses}>
+                Track your rest by adding sleep quality when you journal.
+              </p>
+            )}
+          </SectionCard>
+
+          <SectionCard
+            title="Energy level"
+            subtitle="Capture how energized you feel to spot ebb-and-flow trends."
+          >
+            {dashboard?.energyTrend?.length ? (
+              filteredEnergyTrend.length ? (
+                <MoodTrendChart data={filteredEnergyTrend} />
+              ) : (
+                <p className={emptyStateClasses}>
+                  No energy entries in this timeframe yet. Try a different filter to explore earlier
+                  check-ins.
+                </p>
+              )
+            ) : (
+              <p className={emptyStateClasses}>
+                Note your energy levels in the form to unlock this insight.
+              </p>
+            )}
+          </SectionCard>
+        </div>
       </div>
-
-      <SectionCard
-        title="Sleep quality"
-        subtitle="Log how you slept each day to observe restorative patterns."
-      >
-        {dashboard?.sleepTrend?.length ? (
-          filteredSleepTrend.length ? (
-            <MoodTrendChart data={filteredSleepTrend} />
-          ) : (
-            <p className={emptyStateClasses}>
-              No sleep entries in this timeframe yet. Try a different filter to review earlier
-              rest notes.
-            </p>
-          )
-        ) : (
-          <p className={emptyStateClasses}>
-            Track your rest by adding sleep quality when you journal.
-          </p>
-        )}
-      </SectionCard>
-
-      <SectionCard
-        title="Energy level"
-        subtitle="Capture how energized you feel to spot ebb-and-flow trends."
-      >
-        {dashboard?.energyTrend?.length ? (
-          filteredEnergyTrend.length ? (
-            <MoodTrendChart data={filteredEnergyTrend} />
-          ) : (
-            <p className={emptyStateClasses}>
-              No energy entries in this timeframe yet. Try a different filter to explore earlier
-              check-ins.
-            </p>
-          )
-        ) : (
-          <p className={emptyStateClasses}>
-            Note your energy levels in the form to unlock this insight.
-          </p>
-        )}
-      </SectionCard>
 
       <SectionCard title="Recent entries" subtitle="Revisit your notes and growth moments">
         {filteredEntries.length ? (
