@@ -65,6 +65,28 @@ async function fetchForms(whereClause = "", params = []) {
   }));
 }
 
+async function fetchJournalerAssignments(journalerId) {
+  const { rows } = await pool.query(
+    `SELECT mfa.form_id,
+            mfa.assigned_at,
+            mentor.id AS mentor_id,
+            mentor.name AS mentor_name
+     FROM mentor_form_assignments mfa
+     LEFT JOIN users mentor ON mentor.id = mfa.mentor_id
+     WHERE mfa.journaler_id = $1`,
+    [journalerId]
+  );
+
+  return rows.reduce((map, row) => {
+    map.set(row.form_id, {
+      assignedAt: row.assigned_at,
+      mentorId: row.mentor_id,
+      mentorName: row.mentor_name,
+    });
+    return map;
+  }, new Map());
+}
+
 router.get("/default", async (req, res, next) => {
   try {
     const forms = await fetchForms("WHERE f.is_default = TRUE");
@@ -83,15 +105,23 @@ router.get("/", authenticate, async (req, res, next) => {
     const { role, id } = req.user;
 
     if (role === "journaler") {
-      const forms = await fetchForms(
-        `WHERE f.is_default = TRUE
-           OR f.id IN (
-             SELECT form_id FROM mentor_form_assignments WHERE journaler_id = $1
-           )`,
-        [id]
-      );
+      const [forms, assignments] = await Promise.all([
+        fetchForms(
+          `WHERE f.is_default = TRUE
+             OR f.id IN (
+               SELECT form_id FROM mentor_form_assignments WHERE journaler_id = $1
+             )`,
+          [id]
+        ),
+        fetchJournalerAssignments(id),
+      ]);
 
-      return res.json({ forms });
+      const enriched = forms.map((form) => ({
+        ...form,
+        assignment: assignments.get(form.id) || null,
+      }));
+
+      return res.json({ forms: enriched });
     }
 
     if (role === "mentor") {
@@ -248,6 +278,49 @@ router.delete(
          WHERE form_id = $1 AND journaler_id = $2`,
         [formId, journalerId]
       );
+
+      return res.json({ success: true });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+router.delete(
+  "/:formId/assignment",
+  authenticate,
+  requireRole("journaler"),
+  async (req, res, next) => {
+    const { formId } = req.params;
+
+    try {
+      const { rows } = await pool.query(
+        "SELECT is_default FROM journal_forms WHERE id = $1",
+        [formId]
+      );
+
+      if (!rows.length) {
+        return res.status(404).json({ error: "Form not found" });
+      }
+
+      if (rows[0].is_default) {
+        return res
+          .status(400)
+          .json({ error: "The default form cannot be unlinked" });
+      }
+
+      const result = await pool.query(
+        `DELETE FROM mentor_form_assignments
+         WHERE journaler_id = $1 AND form_id = $2
+         RETURNING id`,
+        [req.user.id, formId]
+      );
+
+      if (!result.rows.length) {
+        return res
+          .status(404)
+          .json({ error: "Form assignment not found" });
+      }
 
       return res.json({ success: true });
     } catch (error) {
