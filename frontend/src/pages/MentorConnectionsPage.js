@@ -3,8 +3,10 @@ import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import MentorRequestList from "../components/MentorRequestList";
 import MentorProfileDialog from "../components/MentorProfileDialog";
+import NotificationList from "../components/NotificationList";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
+import { useNotifications } from "../context/NotificationContext";
 import {
   chipBaseClasses,
   emptyStateClasses,
@@ -25,6 +27,12 @@ function MentorConnectionsPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [selectedMentor, setSelectedMentor] = useState(null);
+  const {
+    notifications,
+    loading: notificationsLoading,
+    markAsRead,
+    isEnabled: notificationsEnabled,
+  } = useNotifications();
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -113,6 +121,14 @@ function MentorConnectionsPage() {
     setMessage(`You ended your mentorship with ${request.mentor.name}.`);
   };
 
+  const handleNotificationRead = async (notificationId) => {
+    if (!notificationsEnabled) {
+      return;
+    }
+
+    await markAsRead(notificationId);
+  };
+
   if (loading) {
     return <LoadingState label="Loading mentorship" />;
   }
@@ -198,6 +214,19 @@ function MentorConnectionsPage() {
             </SectionCard>
           )}
         </>
+      )}
+
+      {notificationsEnabled && (
+        <SectionCard
+          title="Mentor notifications"
+          subtitle="Recent reflections shared by your mentees"
+        >
+          <NotificationList
+            notifications={notifications}
+            loading={notificationsLoading}
+            onMarkRead={handleNotificationRead}
+          />
+        </SectionCard>
       )}
 
       <SectionCard

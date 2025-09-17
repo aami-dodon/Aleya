@@ -5,6 +5,8 @@ const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 const { normalizeMood } = require("../utils/mood");
+const { shapeEntryForMentor } = require("../utils/entries");
+const { sendMentorEntryEmail } = require("../utils/notifications");
 
 const router = express.Router();
 
@@ -34,35 +36,6 @@ function formatEntry(row) {
     formTitle: row.form_title,
     responses: parseResponses(row.responses),
   };
-}
-
-function shapeForMentor(entry) {
-  const shaped = {
-    id: entry.id,
-    formId: entry.formId,
-    entryDate: entry.entryDate,
-    mood: entry.mood,
-    sharedLevel: entry.sharedLevel,
-    summary: null,
-    responses: [],
-    formTitle: entry.formTitle,
-  };
-
-  if (entry.sharedLevel === "mood") {
-    return shaped;
-  }
-
-  if (entry.sharedLevel === "summary") {
-    shaped.summary = entry.summary;
-    return shaped;
-  }
-
-  if (entry.sharedLevel === "full") {
-    shaped.summary = entry.summary;
-    shaped.responses = entry.responses;
-  }
-
-  return shaped;
 }
 
 function cleanResponses(form, responses = {}) {
@@ -226,7 +199,10 @@ router.post(
 
       if (visibility !== "private") {
         const { rows: mentors } = await pool.query(
-          `SELECT mentor_id FROM mentor_links WHERE journaler_id = $1`,
+          `SELECT m.id, m.email, m.name, m.notification_preferences
+           FROM mentor_links ml
+           JOIN users m ON m.id = ml.mentor_id
+           WHERE ml.journaler_id = $1`,
           [req.user.id]
         );
 
@@ -235,8 +211,22 @@ router.post(
             pool.query(
               `INSERT INTO mentor_notifications (mentor_id, entry_id, visibility)
                VALUES ($1, $2, $3)` ,
-              [mentor.mentor_id, entry.id, visibility]
+              [mentor.id, entry.id, visibility]
             )
+          )
+        );
+
+        await Promise.all(
+          mentors.map((mentor) =>
+            sendMentorEntryEmail(req.app, {
+              mentor,
+              journaler: {
+                id: req.user.id,
+                name: req.user.name,
+                email: req.user.email,
+              },
+              entry,
+            })
           )
         );
       }
@@ -437,7 +427,9 @@ router.get("/", authenticate, async (req, res, next) => {
         [journalerId, limit]
       );
 
-      const entries = rows.map((row) => shapeForMentor(formatEntry(row)));
+      const entries = rows.map((row) =>
+        shapeEntryForMentor(formatEntry(row))
+      );
       return res.json({ entries });
     }
 
@@ -490,7 +482,7 @@ router.get("/export", authenticate, async (req, res, next) => {
         [journalerId]
       );
 
-      entries = rows.map((row) => shapeForMentor(formatEntry(row)));
+      entries = rows.map((row) => shapeEntryForMentor(formatEntry(row)));
       targetJournalerId = journalerId;
     } else {
       return res.status(403).json({ error: "Access denied" });
@@ -561,7 +553,7 @@ router.get("/:id", authenticate, async (req, res, next) => {
         return res.status(403).json({ error: "Entry is private" });
       }
 
-      return res.json({ entry: shapeForMentor(entry) });
+      return res.json({ entry: shapeEntryForMentor(entry) });
     }
 
     return res.status(403).json({ error: "Access denied" });

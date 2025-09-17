@@ -2,13 +2,13 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
 const { body, validationResult } = require("express-validator");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 const { DEFAULT_NOTIFICATION_PREFS } = require("../utils/bootstrap");
 const { logger } = require("../utils/logger");
+const { sendEmail } = require("../utils/mailer");
 
 const router = express.Router();
 
@@ -32,20 +32,6 @@ function resolveVerificationTtlHours() {
 }
 
 const VERIFICATION_TOKEN_TTL_HOURS = resolveVerificationTtlHours();
-
-function getMailTransporter(app) {
-  if (!app?.locals?.mailSettings) {
-    throw new Error("Mail settings are not configured");
-  }
-
-  if (!app.locals.mailTransporter) {
-    app.locals.mailTransporter = nodemailer.createTransport(
-      app.locals.mailSettings
-    );
-  }
-
-  return app.locals.mailTransporter;
-}
 
 function buildVerificationLink(token) {
   const explicit = process.env.EMAIL_VERIFICATION_URL;
@@ -93,7 +79,6 @@ function escapeHtml(value) {
 }
 
 async function sendVerificationEmail(app, { email, name }, token) {
-  const transporter = getMailTransporter(app);
   const verificationUrl = buildVerificationLink(token);
 
   const displayName = name ? name.trim() : "there";
@@ -103,23 +88,26 @@ async function sendVerificationEmail(app, { email, name }, token) {
       ? "1 hour"
       : `${VERIFICATION_TOKEN_TTL_HOURS} hours`;
 
-  await transporter.sendMail({
-    to: email,
-    from: app.locals.mailSettings.from,
-    subject: "Verify your Aleya email address",
-    text: `Hi ${displayName || "there"},\n\n` +
-      "Thanks for joining Aleya. Please confirm your email address by visiting the link below:\n" +
-      `${verificationUrl}\n\n` +
-      `The link expires in ${expiresText}. If you didn't create an account, you can safely ignore this message.\n\n` +
-      "Rooted in care,\nThe Aleya team",
-    html: `<p>Hi ${safeName},</p>` +
-      `<p>Thanks for joining Aleya. Please confirm your email address by clicking the button below.</p>` +
-      `<p><a href="${verificationUrl}" style="display:inline-block;padding:12px 20px;background:#2f855a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Verify email</a></p>` +
-      `<p>This link expires in ${escapeHtml(
-        expiresText
-      )}. If you didn't create an account you can safely ignore this email.</p>` +
-      `<p>Rooted in care,<br/>The Aleya team</p>`,
-  });
+  await sendEmail(
+    app,
+    {
+      to: email,
+      subject: "Verify your Aleya email address",
+      text: `Hi ${displayName || "there"},\n\n` +
+        "Thanks for joining Aleya. Please confirm your email address by visiting the link below:\n" +
+        `${verificationUrl}\n\n` +
+        `The link expires in ${expiresText}. If you didn't create an account, you can safely ignore this message.\n\n` +
+        "Rooted in care,\nThe Aleya team",
+      html: `<p>Hi ${safeName},</p>` +
+        `<p>Thanks for joining Aleya. Please confirm your email address by clicking the button below.</p>` +
+        `<p><a href="${verificationUrl}" style="display:inline-block;padding:12px 20px;background:#2f855a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Verify email</a></p>` +
+        `<p>This link expires in ${escapeHtml(
+          expiresText
+        )}. If you didn't create an account you can safely ignore this email.</p>` +
+        `<p>Rooted in care,<br/>The Aleya team</p>`,
+    },
+    { type: "verification", email }
+  );
 
   logger.info("Sent verification email to %s", email);
 }
