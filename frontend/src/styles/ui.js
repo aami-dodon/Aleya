@@ -1,6 +1,7 @@
 export const primaryButtonClasses = "btn-primary";
 export const secondaryButtonClasses = "btn-secondary";
 export const subtleButtonClasses = "btn-subtle";
+export const iconButtonClasses = "icon-button";
 
 export const inputClasses = "form-input";
 export const inputCompactClasses = "form-input-compact";
