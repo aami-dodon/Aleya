@@ -249,6 +249,72 @@ router.post(
   }
 );
 
+router.delete(
+  "/links/:mentorId",
+  authenticate,
+  requireRole("journaler"),
+  async (req, res, next) => {
+    const mentorId = Number(req.params.mentorId);
+
+    if (!Number.isInteger(mentorId) || mentorId <= 0) {
+      return res.status(400).json({ error: "Invalid mentor id" });
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const link = await client.query(
+        `SELECT id FROM mentor_links
+         WHERE journaler_id = $1 AND mentor_id = $2
+         FOR UPDATE`,
+        [req.user.id, mentorId]
+      );
+
+      if (!link.rows.length) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "Mentor link not found" });
+      }
+
+      await client.query(
+        `DELETE FROM mentor_links WHERE journaler_id = $1 AND mentor_id = $2`,
+        [req.user.id, mentorId]
+      );
+
+      await client.query(
+        `UPDATE mentor_requests
+         SET status = 'ended', updated_at = NOW()
+         WHERE journaler_id = $1 AND mentor_id = $2 AND status = 'confirmed'`,
+        [req.user.id, mentorId]
+      );
+
+      await client.query(
+        `DELETE FROM mentor_form_assignments
+         WHERE journaler_id = $1 AND mentor_id = $2`,
+        [req.user.id, mentorId]
+      );
+
+      await client.query(
+        `DELETE FROM mentor_notifications
+         WHERE mentor_id = $2
+           AND entry_id IN (
+             SELECT id FROM journal_entries WHERE journaler_id = $1
+           )`,
+        [req.user.id, mentorId]
+      );
+
+      await client.query("COMMIT");
+      return res.json({ success: true });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return next(error);
+    } finally {
+      client.release();
+    }
+  }
+);
+
 router.get(
   "/mentees",
   authenticate,

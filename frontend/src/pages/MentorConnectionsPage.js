@@ -104,6 +104,12 @@ function MentorConnectionsPage() {
     load();
   };
 
+  const endMentorship = async (request) => {
+    await apiClient.del(`/mentors/links/${request.mentor.id}`, token);
+    await load();
+    setMessage(`You ended your mentorship with ${request.mentor.name}.`);
+  };
+
   if (loading) {
     return <LoadingState label="Loading mentorship" />;
   }
@@ -197,6 +203,7 @@ function MentorConnectionsPage() {
           onAccept={acceptRequest}
           onConfirm={confirmRequest}
           onDecline={declineRequest}
+          onEnd={endMentorship}
         />
       </SectionCard>
 
