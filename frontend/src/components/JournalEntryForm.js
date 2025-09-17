@@ -8,6 +8,7 @@ import {
   inputClasses,
   mediumHeadingClasses,
   primaryButtonClasses,
+  subtleButtonClasses,
   selectClasses,
   textareaClasses,
 } from "../styles/ui";
@@ -25,27 +26,38 @@ function JournalEntryForm({
   onSubmit,
   submitting,
   defaultSharing,
+  initialSharing,
+  initialValues = null,
   statusMessage,
   statusVariant = "info",
+  submitLabel = "Save entry",
+  onCancel,
 }) {
-  const [sharing, setSharing] = useState(defaultSharing || DEFAULT_SHARING);
+  const [sharing, setSharing] = useState(
+    initialSharing || defaultSharing || DEFAULT_SHARING
+  );
   const [values, setValues] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setSharing(defaultSharing || DEFAULT_SHARING);
-  }, [defaultSharing]);
+    setSharing(initialSharing || defaultSharing || DEFAULT_SHARING);
+  }, [defaultSharing, initialSharing]);
 
   useEffect(() => {
     if (form) {
       const initial = {};
+      const seededValues = initialValues || {};
       form.fields.forEach((field) => {
         const key = field.id ?? field.label;
-        initial[key] = "";
+        const rawValue =
+          seededValues[key] ??
+          seededValues[field.id] ??
+          seededValues[field.label];
+        initial[key] = rawValue ?? "";
       });
       setValues(initial);
     }
-  }, [form]);
+  }, [form, initialValues]);
 
   const canSubmit = useMemo(() => {
     if (!form) return false;
@@ -152,13 +164,25 @@ function JournalEntryForm({
           {statusMessage}
         </p>
       )}
-      <button
-        type="submit"
-        className={`${primaryButtonClasses} w-full`}
-        disabled={!canSubmit || submitting}
-      >
-        {submitting ? "Saving..." : "Save entry"}
-      </button>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <button
+          type="submit"
+          className={`${primaryButtonClasses} w-full sm:w-auto`}
+          disabled={!canSubmit || submitting}
+        >
+          {submitting ? "Saving..." : submitLabel}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            className={`${subtleButtonClasses} w-full sm:w-auto`}
+            onClick={onCancel}
+            disabled={submitting}
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 }
