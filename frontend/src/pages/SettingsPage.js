@@ -10,6 +10,7 @@ import {
   selectClasses,
   textareaClasses,
 } from "../styles/ui";
+import TIMEZONE_OPTIONS from "../utils/timezones";
 
 function SettingsPage() {
   const { user, token, updateProfile } = useAuth();
@@ -152,13 +153,19 @@ function SettingsPage() {
           </label>
           <label className="block text-sm font-semibold text-emerald-900/80">
             Timezone
-            <input
-              type="text"
+            <select
               name="timezone"
-              className={inputClasses}
+              className={`${selectClasses} appearance-none pr-10`}
               value={form.timezone}
               onChange={handleChange}
-            />
+            >
+              <option value="">Select your timezone</option>
+              {TIMEZONE_OPTIONS.map((timezone) => (
+                <option key={timezone} value={timezone}>
+                  {timezone}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="block text-sm font-semibold text-emerald-900/80">
             New password

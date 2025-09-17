@@ -14,6 +14,7 @@ import {
   textareaClasses,
   xSmallHeadingClasses,
 } from "../styles/ui";
+import TIMEZONE_OPTIONS from "../utils/timezones";
 
 const ROLES = [
   { value: "journaler", label: "Journaler" },
@@ -251,13 +252,19 @@ function RegisterPage() {
             </label>
             <label className={`block ${formLabelClasses}`}>
               Timezone
-              <input
-                type="text"
+              <select
                 name="timezone"
                 value={form.timezone}
                 onChange={handleChange}
-                className={inputClasses}
-              />
+                className={`${selectClasses} appearance-none pr-10`}
+              >
+                <option value="">Select your timezone</option>
+                {TIMEZONE_OPTIONS.map((timezone) => (
+                  <option key={timezone} value={timezone}>
+                    {timezone}
+                  </option>
+                ))}
+              </select>
             </label>
 
             {form.role === "mentor" && (
