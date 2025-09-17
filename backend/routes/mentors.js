@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
+const { sendMentorLinkEmails } = require("../utils/notifications");
 
 const router = express.Router();
 
@@ -213,7 +214,37 @@ router.post(
         [request.journaler_id, request.mentor_id]
       );
 
+      const { rows: participants } = await client.query(
+        `SELECT id, name, email
+         FROM users
+         WHERE id = ANY($1::int[])`,
+        [[request.journaler_id, request.mentor_id]]
+      );
+
       await client.query("COMMIT");
+
+      const mentor = participants.find(
+        (user) => user.id === request.mentor_id
+      );
+      const journaler = participants.find(
+        (user) => user.id === request.journaler_id
+      );
+
+      if (mentor && journaler) {
+        await sendMentorLinkEmails(req.app, {
+          mentor: {
+            id: mentor.id,
+            name: mentor.name,
+            email: mentor.email,
+          },
+          journaler: {
+            id: journaler.id,
+            name: journaler.name,
+            email: journaler.email,
+          },
+        });
+      }
+
       return res.json({ success: true });
     } catch (error) {
       await client.query("ROLLBACK");

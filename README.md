@@ -196,6 +196,16 @@ tail -f backend/logs/aleya.log
 
 If you customise `LOG_FILE` in `.env`, the logger will create the directory automatically. Log rotation is controlled by `LOG_MAX_SIZE` (bytes) and `LOG_MAX_FILES`.
 
+## Notification system
+
+Aleya pairs in-app notifications with transactional emails so mentors never miss important activity.
+
+- **Global bell:** Mentors see a bell icon in the navigation bar. Clicking it opens a panel with the five most recent mentee updates and a shortcut back to the dashboard. The same feed appears on the mentor dashboard and mentorship pages so updates are always within reach.
+- **Respect sharing choices:** Notification payloads only include the information a journaler agreed to share (mood, summary, or full form responses). Mentor notification preferences further limit the detail that appears in email digests.
+- **Email triggers:** The backend sends emails for account verification, when a mentorship link is confirmed, and whenever a journaler submits either the default check-in or an assigned form. Emails go to the linked mentor(s) and reuse the same privacy filtering logic as the in-app feed.
+- **Configuration:** Set the SMTP variables described in [Configure environment variables](#1-configure-environment-variables). The server validates the credentials on boot, so you'll see a descriptive error if anything is missing.
+- **Testing locally:** With SMTP credentials in place, submit a journal entry that is shared beyond "Private" to generate both the in-app badge and mentor email. Marking a notification as read immediately updates the unread badge count across the interface.
+
 ## 5. Running with Docker (optional)
 
 You can develop with Docker once your database is reachable from the containers (for a locally running Postgres instance on macOS/Windows use `host.docker.internal` in `DATABASE_URL`).

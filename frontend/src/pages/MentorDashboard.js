@@ -4,36 +4,38 @@ import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import MetricCard from "../components/MetricCard";
 import MentorRequestList from "../components/MentorRequestList";
+import NotificationList from "../components/NotificationList";
 import MoodTrendChart from "../components/MoodTrendChart";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
+import { useNotifications } from "../context/NotificationContext";
 import {
   emptyStateClasses,
   getShareChipClasses,
-  infoTextClasses,
-  secondaryButtonClasses,
 } from "../styles/ui";
 
 function MentorDashboard() {
   const { token } = useAuth();
   const [dashboard, setDashboard] = useState(null);
   const [requests, setRequests] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const {
+    notifications,
+    loading: notificationsLoading,
+    markAsRead,
+  } = useNotifications();
 
   const loadAll = useCallback(async () => {
     if (!token) return;
     try {
       setLoading(true);
-      const [dashRes, requestRes, notificationRes] = await Promise.all([
+      const [dashRes, requestRes] = await Promise.all([
         apiClient.get("/dashboard/mentor", token),
         apiClient.get("/mentors/requests", token),
-        apiClient.get("/mentors/notifications", token),
       ]);
       setDashboard(dashRes);
       setRequests(requestRes.requests || []);
-      setNotifications(notificationRes.notifications || []);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -62,11 +64,7 @@ function MentorDashboard() {
   };
 
   const markNotification = async (notification) => {
-    await apiClient.post(
-      `/mentors/notifications/${notification.id}/read`,
-      null,
-      token
-    );
+    await markAsRead(notification.id);
     loadAll();
   };
 
@@ -195,41 +193,16 @@ function MentorDashboard() {
         title="Notifications"
         subtitle="Entries shared with you based on mentee privacy settings"
       >
-        {notifications.length ? (
-          <ul className="grid gap-4">
-            {notifications.map((notification) => (
-              <li
-                key={notification.id}
-                className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-emerald-100 bg-white/70 p-5"
-              >
-                <div className="space-y-2">
-                  <h4 className="text-base font-semibold text-emerald-900">
-                    {notification.journaler.name}
-                  </h4>
-                  <p className={infoTextClasses}>
-                    {format(parseISO(notification.entry.entryDate), "MMM d, yyyy")} · Mood: {notification.entry.mood || "—"}
-                  </p>
-                  {notification.entry.summary && (
-                    <p className="text-sm text-emerald-900/80">
-                      {notification.entry.summary}
-                    </p>
-                  )}
-                </div>
-                {!notification.readAt && (
-                  <button
-                    type="button"
-                    className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
-                    onClick={() => markNotification(notification)}
-                  >
-                    Mark as read
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className={emptyStateClasses}>You're all caught up.</p>
-        )}
+        <NotificationList
+          notifications={notifications}
+          onMarkRead={(id) => {
+            const target = notifications.find((item) => item.id === id);
+            if (target) {
+              markNotification(target);
+            }
+          }}
+          loading={notificationsLoading}
+        />
       </SectionCard>
     </div>
   );

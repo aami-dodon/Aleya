@@ -1,9 +1,9 @@
-function LoadingState({ label = "Loading" }) {
-  return (
-    <div className="flex min-h-[40vh] items-center justify-center text-sm font-medium text-emerald-900/70">
-      {label}…
-    </div>
-  );
+function LoadingState({ label = "Loading", compact = false }) {
+  const containerClasses = compact
+    ? "flex items-center justify-center text-sm font-medium text-emerald-900/70"
+    : "flex min-h-[40vh] items-center justify-center text-sm font-medium text-emerald-900/70";
+
+  return <div className={containerClasses}>{label}…</div>;
 }
 
 export default LoadingState;

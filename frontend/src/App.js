@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -50,8 +51,9 @@ function AppRoutes() {
   const { user } = useAuth();
 
   return (
-    <Layout>
-      <Routes>
+    <NotificationProvider>
+      <Layout>
+        <Routes>
         <Route
           path="/"
           element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />}
@@ -106,8 +108,9 @@ function AppRoutes() {
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Layout>
+        </Routes>
+      </Layout>
+    </NotificationProvider>
   );
 }
 
