@@ -8,10 +8,12 @@ import MoodTrendChart from "../components/MoodTrendChart";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
 import {
+  bodySmallMutedTextClasses,
   emptyStateClasses,
   getMoodBadgeClasses,
   getShareChipClasses,
   selectCompactClasses,
+  smallHeadingClasses,
 } from "../styles/ui";
 
 const TIMEFRAME_OPTIONS = [
@@ -102,28 +104,20 @@ function JournalerDashboard() {
     }
   }, [timeframe]);
 
-  const filteredTrend = useMemo(() => {
-    if (!dashboard?.trend?.length) {
-      return [];
-    }
+  const filteredMoodTrend = useMemo(
+    () => filterTrendData(dashboard?.trend || [], timeframeCutoff),
+    [dashboard?.trend, timeframeCutoff]
+  );
 
-    if (!timeframeCutoff) {
-      return dashboard.trend;
-    }
+  const filteredSleepTrend = useMemo(
+    () => filterTrendData(dashboard?.sleepTrend || [], timeframeCutoff),
+    [dashboard?.sleepTrend, timeframeCutoff]
+  );
 
-    return dashboard.trend.filter((point) => {
-      if (!point.date) {
-        return false;
-      }
-
-      const pointDate = parseISO(point.date);
-      if (Number.isNaN(pointDate.getTime())) {
-        return false;
-      }
-
-      return isAfter(pointDate, timeframeCutoff) || isEqual(pointDate, timeframeCutoff);
-    });
-  }, [dashboard?.trend, timeframeCutoff]);
+  const filteredEnergyTrend = useMemo(
+    () => filterTrendData(dashboard?.energyTrend || [], timeframeCutoff),
+    [dashboard?.energyTrend, timeframeCutoff]
+  );
 
   const filteredEntries = useMemo(() => {
     if (!entries.length) {
@@ -258,8 +252,8 @@ function JournalerDashboard() {
           }
         >
           {dashboard?.trend?.length ? (
-            filteredTrend.length ? (
-              <MoodTrendChart data={filteredTrend} />
+            filteredMoodTrend.length ? (
+              <MoodTrendChart data={filteredMoodTrend} />
             ) : (
               <p className={emptyStateClasses}>
                 No mood entries in this timeframe yet. Try a different filter to review
@@ -273,6 +267,58 @@ function JournalerDashboard() {
           )}
         </SectionCard>
       </div>
+
+      <SectionCard
+        title="Sleep and energy"
+        subtitle="Notice how rest and vitality shift alongside your reflections"
+      >
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <p className={`${smallHeadingClasses} text-emerald-900`}>Sleep quality</p>
+              <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
+                Log how you slept each day to observe restorative patterns.
+              </p>
+            </div>
+            {dashboard?.sleepTrend?.length ? (
+              filteredSleepTrend.length ? (
+                <MoodTrendChart data={filteredSleepTrend} />
+              ) : (
+                <p className={emptyStateClasses}>
+                  No sleep entries in this timeframe yet. Try a different filter to review
+                  earlier rest notes.
+                </p>
+              )
+            ) : (
+              <p className={emptyStateClasses}>
+                Track your rest by adding sleep quality when you journal.
+              </p>
+            )}
+          </div>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <p className={`${smallHeadingClasses} text-emerald-900`}>Energy level</p>
+              <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
+                Capture how energized you feel to spot ebb-and-flow trends.
+              </p>
+            </div>
+            {dashboard?.energyTrend?.length ? (
+              filteredEnergyTrend.length ? (
+                <MoodTrendChart data={filteredEnergyTrend} />
+              ) : (
+                <p className={emptyStateClasses}>
+                  No energy entries in this timeframe yet. Try a different filter to explore
+                  earlier check-ins.
+                </p>
+              )
+            ) : (
+              <p className={emptyStateClasses}>
+                Note your energy levels in the form to unlock this insight.
+              </p>
+            )}
+          </div>
+        </div>
+      </SectionCard>
 
       <SectionCard title="Recent entries" subtitle="Revisit your notes and growth moments">
         {filteredEntries.length ? (
@@ -329,3 +375,26 @@ function JournalerDashboard() {
 }
 
 export default JournalerDashboard;
+
+function filterTrendData(data = [], cutoff) {
+  if (!Array.isArray(data) || !data.length) {
+    return [];
+  }
+
+  if (!cutoff) {
+    return data;
+  }
+
+  return data.filter((point) => {
+    if (!point?.date) {
+      return false;
+    }
+
+    const pointDate = parseISO(point.date);
+    if (Number.isNaN(pointDate.getTime())) {
+      return false;
+    }
+
+    return isAfter(pointDate, cutoff) || isEqual(pointDate, cutoff);
+  });
+}

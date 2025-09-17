@@ -6,6 +6,7 @@ const {
   calculateStreak,
   calculateAverageMood,
   buildMoodTrend,
+  buildWellbeingTrend,
   detectCrisisKeywords,
 } = require("../utils/metrics");
 const { describeMood, getMoodScore } = require("../utils/mood");
@@ -39,12 +40,35 @@ router.get(
         [req.user.id]
       );
 
-      const streak = calculateStreak(rows);
-      const averageMood = calculateAverageMood(rows);
-      const moodDescriptor = describeMood(averageMood);
-      const trend = buildMoodTrend(rows, 21);
+      const entries = rows.map((row) => ({
+        ...row,
+        responses: parseResponses(row.responses),
+      }));
 
-      const highlights = rows.slice(0, 5).map((row) => ({
+      const streak = calculateStreak(entries);
+      const averageMood = calculateAverageMood(entries);
+      const moodDescriptor = describeMood(averageMood);
+      const trend = buildMoodTrend(entries, 21);
+      const sleepTrend = buildWellbeingTrend(entries, {
+        fieldMatchers: ["sleep quality"],
+        valueMap: {
+          high: { score: 5, label: "High" },
+          medium: { score: 3, label: "Steady" },
+          low: { score: 1, label: "Low" },
+        },
+        limit: 21,
+      });
+      const energyTrend = buildWellbeingTrend(entries, {
+        fieldMatchers: ["energy level"],
+        valueMap: {
+          high: { score: 5, label: "High" },
+          medium: { score: 3, label: "Steady" },
+          low: { score: 1, label: "Low" },
+        },
+        limit: 21,
+      });
+
+      const highlights = entries.slice(0, 5).map((row) => ({
         id: row.id,
         entryDate: row.entry_date,
         mood: row.mood,
@@ -52,27 +76,27 @@ router.get(
         formTitle: row.form_title,
       }));
 
-      const lastEntry = rows.length
+      const lastEntry = entries.length
         ? {
-            entryDate: rows[0].entry_date,
-            summary: rows[0].summary,
-            sharedLevel: rows[0].shared_level,
-            mood: rows[0].mood,
+            entryDate: entries[0].entry_date,
+            summary: entries[0].summary,
+            sharedLevel: entries[0].shared_level,
+            mood: entries[0].mood,
           }
         : null;
 
-      const startDate = rows.length
-        ? new Date(rows[rows.length - 1].entry_date)
+      const startDate = entries.length
+        ? new Date(entries[entries.length - 1].entry_date)
         : new Date();
       const daysTracked = Math.max(
         1,
         Math.ceil((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24))
       );
       const consistency = Number(
-        ((rows.length / daysTracked) * 7).toFixed(2)
+        ((entries.length / daysTracked) * 7).toFixed(2)
       );
 
-      const moodBreakdown = rows.reduce((acc, row) => {
+      const moodBreakdown = entries.reduce((acc, row) => {
         if (!row.mood) return acc;
         acc[row.mood] = (acc[row.mood] || 0) + 1;
         return acc;
@@ -83,10 +107,12 @@ router.get(
         averageMood,
         moodDescriptor,
         trend,
+        sleepTrend,
+        energyTrend,
         highlights,
         lastEntry,
         stats: {
-          totalEntries: rows.length,
+          totalEntries: entries.length,
           consistency,
           moodBreakdown,
         },
