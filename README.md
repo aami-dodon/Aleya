@@ -25,7 +25,7 @@ Aleya is a journaling and mentorship platform that pairs reflective journaling t
 ### Core features (MVP)
 
 - **Journal entry forms:** A collection of customizable forms rather than a single template. The default form captures mood (happy, loved, proud, relaxed, tired, anxious, angry, sad), the causes of today's emotions, and learnings. Optional fields include sleep, energy, and activities. Mentors can assign additional or specialised forms after both parties confirm the mentorship link.
-- **Authentication:** Email + password or a magic-link flow.
+- **Authentication:** Email + password with email verification.
 - **Mentor linking:** Journalers can invite or select mentors, forming a mentorship connection only after mutual consent.
 - **Reminders:** Daily or weekly reminders delivered via email.
 - **Mentor notifications:** Email summaries of mentee entries with privacy controls to respect journaler choices.
@@ -227,7 +227,6 @@ All endpoints are served from the `/api` prefix and return JSON. Supply an `Auth
 - `POST /api/auth/register` – Create a journaler or mentor account and trigger a verification email. *(Public)*
 - `POST /api/auth/verify-email` – Confirm a pending account using the emailed token. *(Public)*
 - `POST /api/auth/login` – Exchange credentials for a JWT and hydrated profile. *(Public)*
-- `POST /api/auth/magic-link` – Stub endpoint that acknowledges a magic-link request. *(Public)*
 - `GET /api/auth/me` – Return the authenticated user profile, including mentor metadata when applicable. *(Authenticated)*
 - `PATCH /api/auth/me` – Update name, timezone, notification preferences, password, and mentor profile fields. *(Authenticated)*
 - `GET /api/auth/mentor/profiles` – List mentor profiles for administrative review. *(Admin only)*

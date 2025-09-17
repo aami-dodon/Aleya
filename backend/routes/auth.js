@@ -452,21 +452,6 @@ router.post(
   }
 );
 
-router.post(
-  "/magic-link",
-  [body("email").isEmail().withMessage("Email is required")],
-  async (req, res) => {
-    if (!handleValidation(req, res)) return;
-
-    // The actual email delivery would be implemented with an email provider.
-    // We simply acknowledge the request for now.
-    res.json({
-      message:
-        "Magic link requested. In production this would email a secure login link.",
-    });
-  }
-);
-
 router.get("/me", authenticate, async (req, res, next) => {
   try {
     const user = await fetchUserById(req.user.id);

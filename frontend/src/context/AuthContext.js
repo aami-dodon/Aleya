@@ -83,12 +83,6 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
-  const requestMagicLink = async (email) => {
-    if (!email) throw new Error("Email is required for magic link");
-    await apiClient.post("/auth/magic-link", { email });
-    return true;
-  };
-
   const value = {
     ...state,
     login,
@@ -96,7 +90,6 @@ export function AuthProvider({ children }) {
     logout,
     refreshProfile,
     updateProfile,
-    requestMagicLink,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

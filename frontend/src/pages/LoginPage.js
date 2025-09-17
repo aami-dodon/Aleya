@@ -3,11 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function LoginPage() {
-  const { login, requestMagicLink, error } = useAuth();
+  const { login, error } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [magicStatus, setMagicStatus] = useState(null);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -27,21 +26,11 @@ function LoginPage() {
     }
   };
 
-  const handleMagicLink = async () => {
-    try {
-      await requestMagicLink(form.email);
-      setMagicStatus("Magic link sent! Check your inbox.");
-    } catch (err) {
-      setMagicStatus(err.message);
-    }
-  };
-
   return (
     <div className="auth-page">
       <h1>Welcome back</h1>
       <p className="page-subtitle">
-        Continue tending your growth journey. Log in with your credentials or
-        request a magic link.
+        Continue tending your growth journey. Log in with your credentials.
       </p>
       <form className="auth-form" onSubmit={handleSubmit}>
         <label>
@@ -70,10 +59,6 @@ function LoginPage() {
           {loading ? "Signing in..." : "Sign in"}
         </button>
       </form>
-      <button type="button" className="ghost-button" onClick={handleMagicLink}>
-        Send me a magic link
-      </button>
-      {magicStatus && <p className="info-text">{magicStatus}</p>}
       <p className="info-text">
         New to Aleya? <Link to="/register">Create an account</Link>
       </p>
