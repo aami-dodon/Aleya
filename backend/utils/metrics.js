@@ -60,6 +60,88 @@ function buildMoodTrend(entries, limit = 14) {
   }));
 }
 
+function buildWellbeingTrend(
+  entries,
+  { fieldMatchers = [], valueMap = {}, limit = 14 } = {}
+) {
+  if (!Array.isArray(entries) || !entries.length) {
+    return [];
+  }
+
+  const normalizedMatchers = fieldMatchers
+    .map((matcher) => matcher?.toString().toLowerCase())
+    .filter(Boolean);
+
+  const normalizedValueMap = Object.entries(valueMap).reduce(
+    (acc, [key, config]) => {
+      if (!key) {
+        return acc;
+      }
+
+      const normalizedKey = key.toString().toLowerCase();
+      acc[normalizedKey] = {
+        score: Number(config?.score) || null,
+        label: config?.label || key,
+      };
+      return acc;
+    },
+    {}
+  );
+
+  const recent = [...entries]
+    .sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date))
+    .slice(-limit);
+
+  return recent
+    .map((entry) => {
+      if (!normalizedMatchers.length) {
+        return null;
+      }
+
+      const responses = Array.isArray(entry.responses)
+        ? entry.responses
+        : [];
+
+      const match = responses.find((response) => {
+        const label = response?.label?.toString().toLowerCase();
+        if (!label) {
+          return false;
+        }
+
+        return normalizedMatchers.some((matcher) => label.includes(matcher));
+      });
+
+      if (!match || match.value === null || match.value === undefined) {
+        return null;
+      }
+
+      const value = Array.isArray(match.value)
+        ? match.value[0]
+        : match.value;
+
+      if (value === null || value === undefined) {
+        return null;
+      }
+
+      const normalizedValue = value.toString().trim();
+      if (!normalizedValue) {
+        return null;
+      }
+
+      const valueConfig = normalizedValueMap[normalizedValue.toLowerCase()];
+      if (!valueConfig || valueConfig.score === null) {
+        return null;
+      }
+
+      return {
+        date: entry.entry_date,
+        mood: valueConfig.label,
+        score: valueConfig.score,
+      };
+    })
+    .filter(Boolean);
+}
+
 function extractResponseText(responses = []) {
   if (!Array.isArray(responses)) {
     return String(responses || "");
@@ -103,6 +185,7 @@ module.exports = {
   calculateStreak,
   calculateAverageMood,
   buildMoodTrend,
+  buildWellbeingTrend,
   detectCrisisKeywords,
   extractResponseText,
 };
