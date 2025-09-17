@@ -1,4 +1,5 @@
 import { format, parseISO } from "date-fns";
+import { emptyStateClasses } from "../styles/ui";
 
 const MOOD_COLORS = {
   happy: "#2f855a",
@@ -13,7 +14,11 @@ const MOOD_COLORS = {
 
 function MoodTrendChart({ data = [] }) {
   if (!data.length) {
-    return <p className="empty-state">Mood data will appear once entries are submitted.</p>;
+    return (
+      <p className={emptyStateClasses}>
+        Mood data will appear once entries are submitted.
+      </p>
+    );
   }
 
   const width = 320;
@@ -46,9 +51,13 @@ function MoodTrendChart({ data = [] }) {
     .join(" ");
 
   return (
-    <div className="mood-trend">
-      <svg viewBox={`0 0 ${width} ${height}`} className="mood-chart" role="img">
-        <path d={path} fill="none" stroke="var(--accent-green)" strokeWidth="2" />
+    <div className="flex flex-col gap-4">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="h-40 w-full"
+        role="img"
+      >
+        <path d={path} fill="none" stroke="#047857" strokeWidth="2" />
         {points.map((point) => (
           <circle
             key={`${point.x}-${point.y}`}
@@ -59,13 +68,20 @@ function MoodTrendChart({ data = [] }) {
           />
         ))}
       </svg>
-      <div className="mood-legend">
+      <div className="grid gap-3 sm:grid-cols-2">
         {points.slice(-4).map((point) => (
-          <div key={point.date} className="mood-legend-item">
-            <span className="mood-dot" style={{ background: point.color }} />
-            <div>
-              <p>{point.label || "—"}</p>
-              <small>{format(parseISO(point.date), "MMM d")}</small>
+          <div key={point.date} className="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-white/70 px-3 py-2">
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ background: point.color }}
+            />
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-emerald-900">
+                {point.label || "—"}
+              </p>
+              <p className="text-xs text-emerald-900/60">
+                {format(parseISO(point.date), "MMM d")}
+              </p>
             </div>
           </div>
         ))}
@@ -93,7 +109,7 @@ function colorFromMood(mood, score) {
     return "#c53030";
   }
 
-  return "var(--accent-green)";
+  return "#047857";
 }
 
 function scoreFromMood(mood) {

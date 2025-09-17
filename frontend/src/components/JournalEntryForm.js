@@ -1,4 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  emptyStateClasses,
+  infoTextClasses,
+  inputClasses,
+  primaryButtonClasses,
+  selectClasses,
+  textareaClasses,
+} from "../styles/ui";
 
 const DEFAULT_SHARING = "private";
 const SHARING_OPTIONS = [
@@ -46,7 +54,7 @@ function JournalEntryForm({
   }, [form, values]);
 
   if (!form) {
-    return <p className="empty-state">Select a form to start journaling.</p>;
+    return <p className={emptyStateClasses}>Select a form to start journaling.</p>;
   }
 
   const handleChange = (field, value) => {
@@ -75,29 +83,39 @@ function JournalEntryForm({
   };
 
   return (
-    <form className="journal-form" onSubmit={handleSubmit}>
-      <h3>{form.title}</h3>
-      {form.description && <p className="form-description">{form.description}</p>}
+    <form className="space-y-5" onSubmit={handleSubmit}>
+      <div>
+        <h3 className="text-xl font-semibold text-emerald-900">{form.title}</h3>
+        {form.description && (
+          <p className={infoTextClasses}>{form.description}</p>
+        )}
+      </div>
       {form.fields.map((field) => (
-        <div className="form-field" key={field.id ?? field.label}>
-          <label>
+        <div className="space-y-2" key={field.id ?? field.label}>
+          <label className="block text-sm font-semibold text-emerald-900/80">
             <span>
               {field.label}
-              {field.required && <span className="required">*</span>}
+              {field.required && <span className="ml-1 text-rose-500">*</span>}
             </span>
             {renderField(field, values[field.id ?? field.label] || "", (value) =>
               handleChange(field, value)
             )}
           </label>
           {field.helperText && (
-            <small className="helper-text">{field.helperText}</small>
+            <p className="text-sm text-emerald-900/60">{field.helperText}</p>
           )}
         </div>
       ))}
-      <div className="form-field">
-        <label htmlFor="sharing">Sharing preference</label>
+      <div className="space-y-2">
+        <label
+          htmlFor="sharing"
+          className="block text-sm font-semibold text-emerald-900/80"
+        >
+          Sharing preference
+        </label>
         <select
           id="sharing"
+          className={selectClasses}
           value={sharing}
           onChange={(event) => setSharing(event.target.value)}
         >
@@ -107,21 +125,31 @@ function JournalEntryForm({
             </option>
           ))}
         </select>
-        <small className="helper-text">
+        <p className="text-sm text-emerald-900/60">
           Control what mentors can see when you submit entries.
-        </small>
+        </p>
       </div>
-      {error && <p className="form-error">{error}</p>}
+      {error && (
+        <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
+          {error}
+        </p>
+      )}
       {statusMessage && (
         <p
-          className={`form-feedback ${
-            statusVariant === "success" ? "form-success" : "form-info"
+          className={`rounded-2xl px-4 py-3 text-sm font-medium ${
+            statusVariant === "success"
+              ? "border border-emerald-100 bg-emerald-50/80 text-emerald-700"
+              : "border border-emerald-100 bg-white/80 text-emerald-900/70"
           }`}
         >
           {statusMessage}
         </p>
       )}
-      <button type="submit" className="primary-button" disabled={!canSubmit || submitting}>
+      <button
+        type="submit"
+        className={`${primaryButtonClasses} w-full`}
+        disabled={!canSubmit || submitting}
+      >
         {submitting ? "Saving..." : "Save entry"}
       </button>
     </form>
@@ -137,10 +165,10 @@ function renderField(field, value, onChange) {
 
   switch (field.fieldType) {
     case "textarea":
-      return <textarea rows={4} {...commonProps} />;
+      return <textarea rows={4} className={textareaClasses} {...commonProps} />;
     case "select":
       return (
-        <select {...commonProps}>
+        <select className={selectClasses} {...commonProps}>
           <option value="">Select...</option>
           {(field.options || []).map((option) => (
             <option key={option.value || option} value={option.value || option}>
@@ -150,9 +178,9 @@ function renderField(field, value, onChange) {
         </select>
       );
     case "number":
-      return <input type="number" {...commonProps} />;
+      return <input type="number" className={inputClasses} {...commonProps} />;
     default:
-      return <input type="text" {...commonProps} />;
+      return <input type="text" className={inputClasses} {...commonProps} />;
   }
 }
 

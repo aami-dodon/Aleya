@@ -1,17 +1,23 @@
+import {
+  cardContainerClasses,
+  sectionSubtitleClasses,
+  sectionTitleClasses,
+} from "../styles/ui";
+
 function SectionCard({ title, subtitle, action, children, icon }) {
   return (
-    <section className="section-card">
-      <div className="section-card-header">
-        <div>
-          <h2>
-            {icon && <span className="section-icon">{icon}</span>}
+    <section className={`${cardContainerClasses} w-full`}> 
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className={sectionTitleClasses}>
+            {icon && <span className="mr-2 inline-flex items-center">{icon}</span>}
             {title}
           </h2>
-          {subtitle && <p className="section-subtitle">{subtitle}</p>}
+          {subtitle && <p className={sectionSubtitleClasses}>{subtitle}</p>}
         </div>
-        {action && <div className="section-action">{action}</div>}
+        {action && <div className="flex items-center gap-3">{action}</div>}
       </div>
-      <div className="section-body">{children}</div>
+      <div className="mt-6 space-y-4">{children}</div>
     </section>
   );
 }

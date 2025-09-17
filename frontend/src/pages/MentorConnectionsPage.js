@@ -4,6 +4,14 @@ import LoadingState from "../components/LoadingState";
 import MentorRequestList from "../components/MentorRequestList";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
+import {
+  chipBaseClasses,
+  emptyStateClasses,
+  infoTextClasses,
+  inputCompactClasses,
+  primaryButtonClasses,
+  secondaryButtonClasses,
+} from "../styles/ui";
 
 const ACTIVE_MENTOR_STATUSES = new Set(["pending", "mentor_accepted", "confirmed"]);
 
@@ -101,8 +109,8 @@ function MentorConnectionsPage() {
   }
 
   return (
-    <div className="dashboard-page">
-      {message && <p className="info-text">{message}</p>}
+    <div className="flex w-full flex-1 flex-col gap-8">
+      {message && <p className={infoTextClasses}>{message}</p>}
 
       {user.role === "journaler" && (
         <>
@@ -111,30 +119,42 @@ function MentorConnectionsPage() {
               title="Find a mentor"
               subtitle="Invite someone who can check in on your reflections"
               action={
-                <form className="inline-form" onSubmit={handleSearch}>
+                <form
+                  className="flex flex-wrap items-center gap-3"
+                  onSubmit={handleSearch}
+                >
                   <input
                     type="text"
                     placeholder="Search by name or expertise"
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
+                    className={`${inputCompactClasses} w-full sm:w-72`}
                   />
-                  <button type="submit" className="ghost-button">
+                  <button
+                    type="submit"
+                    className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+                  >
                     Search
                   </button>
                 </form>
               }
             >
               {mentors.length ? (
-                <ul className="mentor-list">
+                <ul className="grid gap-4">
                   {mentors.map((mentor) => (
-                    <li key={mentor.id}>
-                      <div>
-                        <strong>{mentor.name}</strong>
-                        <p>{mentor.expertise || "Mentor"}</p>
+                    <li
+                      key={mentor.id}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-5"
+                    >
+                      <div className="space-y-1">
+                        <p className="text-base font-semibold text-emerald-900">
+                          {mentor.name}
+                        </p>
+                        <p className={infoTextClasses}>{mentor.expertise || "Mentor"}</p>
                       </div>
                       <button
                         type="button"
-                        className="primary-button"
+                        className={`${primaryButtonClasses} px-5 py-2.5 text-sm`}
                         onClick={() => sendRequest(mentor)}
                       >
                         Request mentorship
@@ -143,7 +163,7 @@ function MentorConnectionsPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="empty-state">No mentors match that search yet.</p>
+                <p className={emptyStateClasses}>No mentors match that search yet.</p>
               )}
             </SectionCard>
           ) : (
@@ -151,7 +171,7 @@ function MentorConnectionsPage() {
               title="You're linked with a mentor"
               subtitle="Your current mentorship needs to close before inviting someone new"
             >
-              <p className="info-text">
+              <p className={infoTextClasses}>
                 {activeMentorRequest?.mentor?.name
                   ? `You're connected with ${activeMentorRequest.mentor.name}.`
                   : "You already have an active mentor request."}
@@ -186,25 +206,30 @@ function MentorConnectionsPage() {
           subtitle="Celebrate consistency and see who might need encouragement"
         >
           {mentees.length ? (
-            <ul className="mentor-list">
+            <ul className="grid gap-4">
               {mentees.map((mentee) => (
-                <li key={mentee.id}>
-                  <div>
-                    <strong>{mentee.name}</strong>
-                    <p>{mentee.email}</p>
+                <li
+                  key={mentee.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-5"
+                >
+                  <div className="space-y-1">
+                    <p className="text-base font-semibold text-emerald-900">
+                      {mentee.name}
+                    </p>
+                    <p className={infoTextClasses}>{mentee.email}</p>
                   </div>
                   {mentee.latestEntry ? (
-                    <span className="chip">
+                    <span className={chipBaseClasses}>
                       Last entry {mentee.latestEntry.mood || "—"} · {mentee.latestEntry.sharedLevel}
                     </span>
                   ) : (
-                    <span className="chip">No entries yet</span>
+                    <span className={chipBaseClasses}>No entries yet</span>
                   )}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="empty-state">No mentees linked yet.</p>
+            <p className={emptyStateClasses}>No mentees linked yet.</p>
           )}
         </SectionCard>
       )}

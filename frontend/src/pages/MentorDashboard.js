@@ -7,6 +7,12 @@ import MentorRequestList from "../components/MentorRequestList";
 import MoodTrendChart from "../components/MoodTrendChart";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
+import {
+  emptyStateClasses,
+  getShareChipClasses,
+  infoTextClasses,
+  secondaryButtonClasses,
+} from "../styles/ui";
 
 function MentorDashboard() {
   const { token } = useAuth();
@@ -69,14 +75,18 @@ function MentorDashboard() {
   }
 
   return (
-    <div className="dashboard-page">
+    <div className="flex w-full flex-1 flex-col gap-8">
       <SectionCard
         title="Mentor overview"
         subtitle="Encourage consistency and spot tender seasons quickly"
       >
-        {error && <p className="form-error">{error}</p>}
+        {error && (
+          <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
+            {error}
+          </p>
+        )}
         {dashboard ? (
-          <div className="metrics-grid">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <MetricCard
               title="Active mentees"
               value={dashboard.overview?.menteeCount || 0}
@@ -94,7 +104,9 @@ function MentorDashboard() {
             />
           </div>
         ) : (
-          <p className="empty-state">Link with a journaler to begin mentoring.</p>
+          <p className={emptyStateClasses}>
+            Link with a journaler to begin mentoring.
+          </p>
         )}
       </SectionCard>
 
@@ -116,24 +128,29 @@ function MentorDashboard() {
         subtitle="Recent reflections shared with you"
       >
         {dashboard?.mentees?.length ? (
-          <div className="mentee-grid">
+          <div className="grid gap-4 lg:grid-cols-2">
             {dashboard.mentees.map((mentee) => (
-              <article key={mentee.id} className="mentee-card">
-                <header>
-                  <h3>{mentee.name}</h3>
-                  <span className="chip">
+              <article
+                key={mentee.id}
+                className="flex flex-col gap-4 rounded-2xl border border-emerald-100 bg-white/70 p-5 shadow-inner shadow-emerald-900/5"
+              >
+                <header className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="text-lg font-semibold text-emerald-900">{mentee.name}</h3>
+                  <span className={getShareChipClasses("summary")}>
                     Avg mood: {mentee.averageMood ? mentee.averageMood.toFixed(2) : "—"}
                   </span>
                 </header>
                 {mentee.trend?.length ? (
                   <MoodTrendChart data={mentee.trend} />
                 ) : (
-                  <p className="empty-state">No shared entries yet.</p>
+                  <p className={emptyStateClasses}>No shared entries yet.</p>
                 )}
                 {mentee.alerts?.lowMood?.length > 0 && (
-                  <div className="alert">
-                    <strong>Low mood flags</strong>
-                    <ul>
+                  <div className="rounded-2xl border-l-4 border-amber-400 bg-amber-50/80 p-4">
+                    <strong className="block text-sm text-amber-700">
+                      Low mood flags
+                    </strong>
+                    <ul className="mt-2 space-y-1 text-sm text-amber-800">
                       {mentee.alerts.lowMood.map((alert) => (
                         <li key={alert.id}>
                           {format(parseISO(alert.entryDate), "MMM d")} – {alert.mood}
@@ -143,9 +160,11 @@ function MentorDashboard() {
                   </div>
                 )}
                 {mentee.alerts?.crisis?.length > 0 && (
-                  <div className="alert alert-critical">
-                    <strong>Attention needed</strong>
-                    <ul>
+                  <div className="rounded-2xl border-l-4 border-rose-500 bg-rose-50/80 p-4">
+                    <strong className="block text-sm text-rose-600">
+                      Attention needed
+                    </strong>
+                    <ul className="mt-2 space-y-1 text-sm text-rose-700">
                       {mentee.alerts.crisis.map((alert) => (
                         <li key={alert.id}>{alert.summary}</li>
                       ))}
@@ -153,10 +172,13 @@ function MentorDashboard() {
                   </div>
                 )}
                 {mentee.recentEntries?.length > 0 && (
-                  <ul className="entry-responses">
+                  <ul className="grid gap-1 text-sm text-emerald-900/70">
                     {mentee.recentEntries.slice(0, 2).map((entry) => (
                       <li key={entry.id}>
-                        <span>{format(parseISO(entry.entryDate), "MMM d")}:</span> {entry.summary || entry.mood}
+                        <span className="font-semibold text-emerald-900">
+                          {format(parseISO(entry.entryDate), "MMM d")}:
+                        </span>{" "}
+                        {entry.summary || entry.mood}
                       </li>
                     ))}
                   </ul>
@@ -165,7 +187,7 @@ function MentorDashboard() {
             ))}
           </div>
         ) : (
-          <p className="empty-state">No mentees yet. Accept a request to begin.</p>
+          <p className={emptyStateClasses}>No mentees yet. Accept a request to begin.</p>
         )}
       </SectionCard>
 
@@ -174,17 +196,21 @@ function MentorDashboard() {
         subtitle="Entries shared with you based on mentee privacy settings"
       >
         {notifications.length ? (
-          <ul className="notification-list">
+          <ul className="grid gap-4">
             {notifications.map((notification) => (
-              <li key={notification.id} className="notification-item">
-                <div>
-                  <h4>{notification.journaler.name}</h4>
-                  <p>
-                    {format(parseISO(notification.entry.entryDate), "MMM d, yyyy")} ·
-                    Mood: {notification.entry.mood || "—"}
+              <li
+                key={notification.id}
+                className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-emerald-100 bg-white/70 p-5"
+              >
+                <div className="space-y-2">
+                  <h4 className="text-base font-semibold text-emerald-900">
+                    {notification.journaler.name}
+                  </h4>
+                  <p className={infoTextClasses}>
+                    {format(parseISO(notification.entry.entryDate), "MMM d, yyyy")} · Mood: {notification.entry.mood || "—"}
                   </p>
                   {notification.entry.summary && (
-                    <p className="notification-summary">
+                    <p className="text-sm text-emerald-900/80">
                       {notification.entry.summary}
                     </p>
                   )}
@@ -192,7 +218,7 @@ function MentorDashboard() {
                 {!notification.readAt && (
                   <button
                     type="button"
-                    className="ghost-button"
+                    className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
                     onClick={() => markNotification(notification)}
                   >
                     Mark as read
@@ -202,7 +228,7 @@ function MentorDashboard() {
             ))}
           </ul>
         ) : (
-          <p className="empty-state">You're all caught up.</p>
+          <p className={emptyStateClasses}>You're all caught up.</p>
         )}
       </SectionCard>
     </div>

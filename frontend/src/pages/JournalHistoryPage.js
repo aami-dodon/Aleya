@@ -4,6 +4,12 @@ import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
+import {
+  chipBaseClasses,
+  emptyStateClasses,
+  getMoodBadgeClasses,
+  selectCompactClasses,
+} from "../styles/ui";
 
 function JournalHistoryPage() {
   const { token, user } = useAuth();
@@ -44,13 +50,14 @@ function JournalHistoryPage() {
   }
 
   return (
-    <div className="dashboard-page">
+    <div className="flex w-full flex-1 flex-col gap-8">
       <SectionCard
         title="Journal history"
         subtitle="Browse past reflections and notice patterns"
         action={
           user.role === "mentor" && (
             <select
+              className={`${selectCompactClasses} w-full md:w-56`}
               value={selectedMentee}
               onChange={(event) => setSelectedMentee(event.target.value)}
             >
@@ -64,28 +71,45 @@ function JournalHistoryPage() {
           )
         }
       >
-        {error && <p className="form-error">{error}</p>}
+        {error && (
+          <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
+            {error}
+          </p>
+        )}
         {entries.length ? (
-          <ul className="history-list">
+          <ul className="grid gap-4">
             {entries.map((entry) => (
-              <li key={entry.id}>
-                <header>
-                  <span className={`badge badge-${entry.mood || "neutral"}`}>
+              <li
+                key={entry.id}
+                className="space-y-3 rounded-2xl border border-emerald-100 bg-white/70 p-5 shadow-inner shadow-emerald-900/5"
+              >
+                <header className="flex flex-wrap items-center gap-3">
+                  <span className={getMoodBadgeClasses(entry.mood)}>
                     {entry.mood || "No mood"}
                   </span>
-                  <time dateTime={entry.entryDate}>
+                  <time
+                    dateTime={entry.entryDate}
+                    className="text-sm font-medium text-emerald-900/70"
+                  >
                     {format(parseISO(entry.entryDate), "MMMM d, yyyy")}
                   </time>
-                  <span className="chip">{entry.formTitle}</span>
+                  <span className={`${chipBaseClasses} normal-case`}>{entry.formTitle}</span>
                 </header>
-                {entry.summary && <p>{entry.summary}</p>}
+                {entry.summary && (
+                  <p className="text-sm text-emerald-900/80">{entry.summary}</p>
+                )}
                 {Array.isArray(entry.responses) && entry.responses.length > 0 && (
-                  <details>
-                    <summary>View responses</summary>
-                    <ul className="entry-responses">
+                  <details className="rounded-2xl border border-emerald-100 bg-white/60 p-4">
+                    <summary className="cursor-pointer text-sm font-semibold text-emerald-900">
+                      View responses
+                    </summary>
+                    <ul className="mt-3 grid gap-2 text-sm text-emerald-900/70">
                       {entry.responses.map((response) => (
                         <li key={response.fieldId || response.label}>
-                          <strong>{response.label}:</strong> {String(response.value || "")}
+                          <span className="font-semibold text-emerald-900">
+                            {response.label}:
+                          </span>{" "}
+                          {String(response.value || "")}
                         </li>
                       ))}
                     </ul>
@@ -95,7 +119,7 @@ function JournalHistoryPage() {
             ))}
           </ul>
         ) : (
-          <p className="empty-state">No entries available yet.</p>
+          <p className={emptyStateClasses}>No entries available yet.</p>
         )}
       </SectionCard>
     </div>
