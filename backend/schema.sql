@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS mentor_requests (
   id SERIAL PRIMARY KEY,
   journaler_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   mentor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','mentor_accepted','confirmed','declined')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','mentor_accepted','confirmed','declined','ended')),
   message TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
