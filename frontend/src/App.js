@@ -13,7 +13,6 @@ import FormBuilderPage from "./pages/FormBuilderPage";
 import SettingsPage from "./pages/SettingsPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import LoadingState from "./components/LoadingState";
-import "./App.css";
 
 function DashboardRouter() {
   const { user } = useAuth();

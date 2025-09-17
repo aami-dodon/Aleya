@@ -3,27 +3,16 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: #f7f8f5;
-    --surface: #ffffff;
-    --border: #d9dfd7;
-    --text-primary: #1f2a2a;
-    --text-muted: #5f6f6c;
-    --accent-green: #2f855a;
-    --accent-gold: #b7791f;
-    --accent-rose: #c53030;
-  }
-
   body {
-    @apply m-0 min-h-screen bg-[var(--background)] text-text-primary font-sans;
+    @apply m-0 min-h-screen bg-emerald-50 font-sans text-emerald-950 antialiased;
   }
 
   a {
-    @apply text-[var(--accent-green)] no-underline;
+    @apply text-emerald-700 no-underline;
   }
 
   a:hover {
-    @apply underline;
+    @apply text-emerald-600 underline;
   }
 
   * {

@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
+import {
+  checkboxClasses,
+  infoTextClasses,
+  inputClasses,
+  primaryButtonClasses,
+  secondaryButtonClasses,
+  selectClasses,
+  textareaClasses,
+} from "../styles/ui";
 
 function SettingsPage() {
   const { user, token, updateProfile } = useAuth();
@@ -127,49 +136,59 @@ function SettingsPage() {
   };
 
   return (
-    <div className="dashboard-page">
-      {message && <p className="info-text">{message}</p>}
+    <div className="flex w-full flex-1 flex-col gap-8">
+      {message && <p className={infoTextClasses}>{message}</p>}
       <SectionCard title="Profile" subtitle="Tune your account details">
-        <form className="settings-form" onSubmit={handleSubmit}>
-          <label>
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          <label className="block text-sm font-semibold text-emerald-900/80">
             Name
-            <input type="text" name="name" value={form.name} onChange={handleChange} />
+            <input
+              type="text"
+              name="name"
+              className={inputClasses}
+              value={form.name}
+              onChange={handleChange}
+            />
           </label>
-          <label>
+          <label className="block text-sm font-semibold text-emerald-900/80">
             Timezone
             <input
               type="text"
               name="timezone"
+              className={inputClasses}
               value={form.timezone}
               onChange={handleChange}
             />
           </label>
-          <label>
+          <label className="block text-sm font-semibold text-emerald-900/80">
             New password
             <input
               type="password"
               name="password"
+              className={inputClasses}
               value={form.password}
               onChange={handleChange}
               placeholder="Leave blank to keep current"
             />
           </label>
 
-          <fieldset>
-            <legend>Email reminders</legend>
-            <label className="checkbox">
+          <fieldset className="space-y-3 rounded-2xl border border-emerald-100 bg-white/60 p-4">
+            <legend className="text-sm font-semibold text-emerald-900">Email reminders</legend>
+            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
               <input
                 type="checkbox"
                 name="remindersDaily"
+                className={checkboxClasses}
                 checked={form.remindersDaily}
                 onChange={handleChange}
               />
               Daily reflection reminders
             </label>
-            <label className="checkbox">
+            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
               <input
                 type="checkbox"
                 name="remindersWeekly"
+                className={checkboxClasses}
                 checked={form.remindersWeekly}
                 onChange={handleChange}
               />
@@ -177,10 +196,11 @@ function SettingsPage() {
             </label>
           </fieldset>
 
-          <label>
+          <label className="block text-sm font-semibold text-emerald-900/80">
             Mentor notifications
             <select
               name="mentorNotifications"
+              className={selectClasses}
               value={form.mentorNotifications}
               onChange={handleChange}
             >
@@ -191,31 +211,34 @@ function SettingsPage() {
           </label>
 
           {user.role === "mentor" && (
-            <div className="mentor-fields">
-              <h3>Mentor profile</h3>
-              <label>
+            <div className="space-y-4 rounded-2xl border border-emerald-100 bg-white/60 p-5">
+              <h3 className="text-lg font-semibold text-emerald-900">Mentor profile</h3>
+              <label className="block text-sm font-semibold text-emerald-900/80">
                 Expertise
                 <input
                   type="text"
                   name="expertise"
+                  className={inputClasses}
                   value={form.mentorProfile.expertise}
                   onChange={handleMentorChange}
                 />
               </label>
-              <label>
+              <label className="block text-sm font-semibold text-emerald-900/80">
                 Availability
                 <input
                   type="text"
                   name="availability"
+                  className={inputClasses}
                   value={form.mentorProfile.availability}
                   onChange={handleMentorChange}
                 />
               </label>
-              <label>
+              <label className="block text-sm font-semibold text-emerald-900/80">
                 Bio
                 <textarea
                   name="bio"
                   rows={3}
+                  className={textareaClasses}
                   value={form.mentorProfile.bio}
                   onChange={handleMentorChange}
                 />
@@ -223,14 +246,18 @@ function SettingsPage() {
             </div>
           )}
 
-          <button type="submit" className="primary-button">
+          <button type="submit" className={`${primaryButtonClasses} w-full md:w-auto`}>
             Save changes
           </button>
         </form>
       </SectionCard>
 
       <SectionCard title="Data & privacy" subtitle="You can request an export anytime">
-        <button type="button" className="ghost-button" onClick={requestExport}>
+        <button
+          type="button"
+          className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+          onClick={requestExport}
+        >
           Request journal export
         </button>
       </SectionCard>
