@@ -415,7 +415,43 @@ router.get(
   async (req, res, next) => {
     const entryId = Number(req.params.id);
 
+    if (!Number.isInteger(entryId) || entryId <= 0) {
+      return res.status(400).json({ error: "Invalid entry id" });
+    }
+
     try {
+      const { rows: entryRows } = await pool.query(
+        `SELECT journaler_id, shared_level FROM journal_entries WHERE id = $1`,
+        [entryId]
+      );
+
+      if (!entryRows.length) {
+        return res.status(404).json({ error: "Entry not found" });
+      }
+
+      const entry = entryRows[0];
+
+      if (req.user.role === "journaler") {
+        if (entry.journaler_id !== req.user.id) {
+          return res.status(403).json({ error: "Access denied" });
+        }
+      } else if (req.user.role === "mentor") {
+        if (entry.shared_level === "private") {
+          return res.status(403).json({ error: "Entry is private" });
+        }
+
+        const { rows: linkRows } = await pool.query(
+          `SELECT id FROM mentor_links WHERE mentor_id = $1 AND journaler_id = $2`,
+          [req.user.id, entry.journaler_id]
+        );
+
+        if (!linkRows.length) {
+          return res.status(403).json({ error: "No mentorship link established" });
+        }
+      } else {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
       const { rows } = await pool.query(
         `SELECT c.id, c.comment, c.created_at,
                 m.id AS mentor_id, m.name AS mentor_name

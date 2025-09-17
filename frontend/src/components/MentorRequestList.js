@@ -11,6 +11,7 @@ function MentorRequestList({
   onAccept,
   onConfirm,
   onDecline,
+  onEnd,
 }) {
   if (!requests.length) {
     return (
@@ -75,6 +76,17 @@ function MentorRequestList({
                 </button>
               </>
             )}
+            {role === "journaler" &&
+              request.status === "confirmed" &&
+              typeof onEnd === "function" && (
+                <button
+                  type="button"
+                  className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+                  onClick={() => onEnd(request)}
+                >
+                  End mentorship
+                </button>
+              )}
           </div>
         </li>
       ))}
@@ -92,6 +104,8 @@ function formatStatus(status) {
       return "Linked";
     case "declined":
       return "Declined";
+    case "ended":
+      return "Mentorship ended";
     default:
       return status;
   }

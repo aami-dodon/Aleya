@@ -77,6 +77,8 @@ export function getStatusToneClasses(status) {
       return "text-emerald-600";
     case "declined":
       return "text-rose-600";
+    case "ended":
+      return "text-slate-500";
     default:
       return "text-emerald-900/70";
   }
