@@ -205,8 +205,6 @@ function JournalerDashboard() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <SectionCard
-          title="Daily reflection"
-          subtitle="Root yourself with the default Aleya prompt or a mentor form"
           action={
             forms.length > 1 && (
               <select
