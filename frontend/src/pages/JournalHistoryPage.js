@@ -10,11 +10,42 @@ import {
   bodySmallStrongTextClasses,
   chipBaseClasses,
   emptyStateClasses,
+  formLabelClasses,
   getMoodBadgeClasses,
+  inputCompactClasses,
   selectCompactClasses,
   smallHeadingClasses,
   subtleButtonClasses,
 } from "../styles/ui";
+
+const SLEEP_FIELD_MATCHERS = ["sleep quality"];
+const ENERGY_FIELD_MATCHERS = ["energy level"];
+
+function findResponseValue(entry, matchers = []) {
+  if (!entry || !Array.isArray(entry.responses)) {
+    return null;
+  }
+
+  const lowered = matchers.map((matcher) => matcher.toLowerCase());
+  const target = entry.responses.find((response) => {
+    const label = response.label?.toString().toLowerCase();
+    if (!label) {
+      return false;
+    }
+    return lowered.some((matcher) => label.includes(matcher));
+  });
+
+  if (target === undefined || target === null) {
+    return null;
+  }
+
+  const value = target.value;
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  return typeof value === "string" ? value.trim() : value;
+}
 
 function JournalHistoryPage() {
   const { token, user } = useAuth();
@@ -29,6 +60,12 @@ function JournalHistoryPage() {
   const [deletingId, setDeletingId] = useState(null);
   const [actionMessage, setActionMessage] = useState(null);
   const [actionVariant, setActionVariant] = useState("success");
+  const [moodFilter, setMoodFilter] = useState("");
+  const [sleepFilter, setSleepFilter] = useState("");
+  const [energyFilter, setEnergyFilter] = useState("");
+  const [formFilter, setFormFilter] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const editingEntryRef = useRef(null);
 
   const loadEntries = useCallback(async () => {
@@ -169,6 +206,131 @@ function JournalHistoryPage() {
     [editingEntry, token]
   );
 
+  const availableMoods = useMemo(() => {
+    const set = new Set();
+    entries.forEach((entry) => {
+      if (entry.mood) {
+        set.add(entry.mood);
+      }
+    });
+    return Array.from(set).sort((a, b) =>
+      a.toString().localeCompare(b.toString(), undefined, { sensitivity: "base" })
+    );
+  }, [entries]);
+
+  const availableSleepLevels = useMemo(() => {
+    const set = new Set();
+    entries.forEach((entry) => {
+      const value = findResponseValue(entry, SLEEP_FIELD_MATCHERS);
+      if (value !== null && value !== "") {
+        const label = typeof value === "string" ? value : String(value);
+        if (label.trim()) {
+          set.add(label.trim());
+        }
+      }
+    });
+    return Array.from(set).sort((a, b) =>
+      a.toString().localeCompare(b.toString(), undefined, { sensitivity: "base" })
+    );
+  }, [entries]);
+
+  const availableEnergyLevels = useMemo(() => {
+    const set = new Set();
+    entries.forEach((entry) => {
+      const value = findResponseValue(entry, ENERGY_FIELD_MATCHERS);
+      if (value !== null && value !== "") {
+        const label = typeof value === "string" ? value : String(value);
+        if (label.trim()) {
+          set.add(label.trim());
+        }
+      }
+    });
+    return Array.from(set).sort((a, b) =>
+      a.toString().localeCompare(b.toString(), undefined, { sensitivity: "base" })
+    );
+  }, [entries]);
+
+  const availableForms = useMemo(() => {
+    const set = new Set();
+    entries.forEach((entry) => {
+      if (entry.formTitle) {
+        set.add(entry.formTitle.trim());
+      }
+    });
+    return Array.from(set).sort((a, b) =>
+      a.toString().localeCompare(b.toString(), undefined, { sensitivity: "base" })
+    );
+  }, [entries]);
+
+  const filteredEntries = useMemo(() => {
+    return entries.filter((entry) => {
+      if (moodFilter && entry.mood !== moodFilter) {
+        return false;
+      }
+
+      if (formFilter && entry.formTitle?.trim() !== formFilter) {
+        return false;
+      }
+
+      const sleepValue = findResponseValue(entry, SLEEP_FIELD_MATCHERS);
+      if (
+        sleepFilter &&
+        (!sleepValue ||
+          sleepValue.toString().toLowerCase() !== sleepFilter.toLowerCase())
+      ) {
+        return false;
+      }
+
+      const energyValue = findResponseValue(entry, ENERGY_FIELD_MATCHERS);
+      if (
+        energyFilter &&
+        (!energyValue ||
+          energyValue.toString().toLowerCase() !== energyFilter.toLowerCase())
+      ) {
+        return false;
+      }
+
+      const entryDate = parseISO(entry.entryDate);
+      if (startDate) {
+        const fromDate = parseISO(startDate);
+        if (entryDate < fromDate) {
+          return false;
+        }
+      }
+
+      if (endDate) {
+        const toDate = parseISO(endDate);
+        if (entryDate > toDate) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [entries, energyFilter, formFilter, moodFilter, sleepFilter, startDate, endDate]);
+
+  const filtersActive = useMemo(
+    () =>
+      Boolean(
+        moodFilter ||
+          sleepFilter ||
+          energyFilter ||
+          formFilter ||
+          startDate ||
+          endDate
+      ),
+    [moodFilter, sleepFilter, energyFilter, formFilter, startDate, endDate]
+  );
+
+  const handleResetFilters = useCallback(() => {
+    setMoodFilter("");
+    setSleepFilter("");
+    setEnergyFilter("");
+    setFormFilter("");
+    setStartDate("");
+    setEndDate("");
+  }, []);
+
   const handleDeleteEntry = useCallback(
     async (entryId) => {
       if (!token) return;
@@ -230,6 +392,135 @@ function JournalHistoryPage() {
             {error}
           </p>
         )}
+        <div className="space-y-3 rounded-2xl border border-emerald-100 bg-white/70 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className={`${smallHeadingClasses} text-emerald-900`}>
+              Filter entries
+            </h3>
+            {filtersActive && (
+              <button
+                type="button"
+                className={`${subtleButtonClasses} text-sm`}
+                onClick={handleResetFilters}
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="filter-mood" className={`block ${formLabelClasses}`}>
+                Mood
+              </label>
+              <select
+                id="filter-mood"
+                className={`${selectCompactClasses} w-full`}
+                value={moodFilter}
+                onChange={(event) => setMoodFilter(event.target.value)}
+              >
+                <option value="">All moods</option>
+                {availableMoods.map((mood) => (
+                  <option key={mood} value={mood}>
+                    {mood}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="filter-sleep"
+                className={`block ${formLabelClasses}`}
+              >
+                Sleep quality
+              </label>
+              <select
+                id="filter-sleep"
+                className={`${selectCompactClasses} w-full`}
+                value={sleepFilter}
+                onChange={(event) => setSleepFilter(event.target.value)}
+              >
+                <option value="">All sleep quality</option>
+                {availableSleepLevels.map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="filter-energy"
+                className={`block ${formLabelClasses}`}
+              >
+                Energy level
+              </label>
+              <select
+                id="filter-energy"
+                className={`${selectCompactClasses} w-full`}
+                value={energyFilter}
+                onChange={(event) => setEnergyFilter(event.target.value)}
+              >
+                <option value="">All energy levels</option>
+                {availableEnergyLevels.map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="filter-form"
+                className={`block ${formLabelClasses}`}
+              >
+                Form name
+              </label>
+              <select
+                id="filter-form"
+                className={`${selectCompactClasses} w-full`}
+                value={formFilter}
+                onChange={(event) => setFormFilter(event.target.value)}
+              >
+                <option value="">All forms</option>
+                {availableForms.map((formName) => (
+                  <option key={formName} value={formName}>
+                    {formName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="filter-start-date"
+                className={`block ${formLabelClasses}`}
+              >
+                From date
+              </label>
+              <input
+                id="filter-start-date"
+                type="date"
+                className={`${inputCompactClasses} w-full`}
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="filter-end-date"
+                className={`block ${formLabelClasses}`}
+              >
+                To date
+              </label>
+              <input
+                id="filter-end-date"
+                type="date"
+                className={`${inputCompactClasses} w-full`}
+                value={endDate}
+                onChange={(event) => setEndDate(event.target.value)}
+              />
+            </div>
+          </div>
+        </div>
         {actionMessage && (
           <p
             className={`rounded-2xl px-4 py-3 ${bodySmallStrongTextClasses} ${
@@ -242,12 +533,13 @@ function JournalHistoryPage() {
           </p>
         )}
         {entries.length ? (
-          <ul className="grid gap-4">
-            {entries.map((entry) => (
-              <li
-                key={entry.id}
-                className="space-y-3 rounded-2xl border border-emerald-100 bg-white/70 p-5 shadow-inner shadow-emerald-900/5"
-              >
+          filteredEntries.length ? (
+            <ul className="grid gap-4">
+              {filteredEntries.map((entry) => (
+                <li
+                  key={entry.id}
+                  className="space-y-3 rounded-2xl border border-emerald-100 bg-white/70 p-5 shadow-inner shadow-emerald-900/5"
+                >
                 <header className="flex flex-wrap items-center gap-3">
                   <span className={getMoodBadgeClasses(entry.mood)}>
                     {entry.mood || "No mood"}
@@ -331,8 +623,13 @@ function JournalHistoryPage() {
                   </div>
                 )}
               </li>
-            ))}
-          </ul>
+              ))}
+            </ul>
+          ) : (
+            <p className={emptyStateClasses}>
+              No entries match the selected filters.
+            </p>
+          )
         ) : (
           <p className={emptyStateClasses}>No entries available yet.</p>
         )}
