@@ -1,18 +1,31 @@
 import { Link } from "react-router-dom";
-import { primaryButtonClasses, secondaryButtonClasses } from "../styles/ui";
+import {
+  bodySmallMutedTextClasses,
+  bodySmallStrongTextClasses,
+  bodySmallTextClasses,
+  captionTextClasses,
+  displayTextClasses,
+  largeHeadingClasses,
+  leadTextClasses,
+  primaryButtonClasses,
+  secondaryButtonClasses,
+  smallHeadingClasses,
+} from "../styles/ui";
 
 function LandingPage() {
   return (
     <div className="flex w-full flex-1 flex-col gap-12 text-emerald-900">
       <section className="grid gap-10 rounded-3xl border border-emerald-100 bg-white/80 p-10 shadow-xl shadow-emerald-900/10 backdrop-blur md:grid-cols-[1.1fr_1fr]">
         <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm shadow-emerald-900/5">
+          <div
+            className={`inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-2 shadow-sm shadow-emerald-900/5 ${bodySmallStrongTextClasses} text-emerald-700`}
+          >
             🌿 Grow whole
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-emerald-950 sm:text-5xl">
+          <h1 className={`${displayTextClasses} text-emerald-950`}>
             Grow whole, not in fragments.
           </h1>
-          <p className="text-lg leading-relaxed text-emerald-900/80">
+          <p className={`${leadTextClasses} text-emerald-900/80`}>
             Aleya weaves journaling, mentorship, and gentle accountability so you can
             notice your emotions, nurture your habits, and share progress with the
             guides who support you.
@@ -76,10 +89,10 @@ function LandingPage() {
       </section>
 
       <section className="rounded-3xl bg-emerald-600 px-8 py-10 text-white shadow-xl shadow-emerald-900/20">
-        <h2 className="text-3xl font-semibold tracking-tight">
+        <h2 className={`${largeHeadingClasses} tracking-tight`}>
           Your day is a living ecosystem.
         </h2>
-        <p className="mt-4 text-lg leading-relaxed text-white/80">
+        <p className={`mt-4 ${leadTextClasses} text-white/80`}>
           Aleya keeps the ecosystem connected—so when you tend to sleep, learning,
           relationships, and creative sparks, you can see the whole tree flourish.
         </p>
@@ -91,8 +104,8 @@ function LandingPage() {
 function FeatureCard({ title, description }) {
   return (
     <article className="rounded-3xl border border-emerald-100 bg-white/70 p-6 shadow-inner shadow-emerald-900/5">
-      <h2 className="text-xl font-semibold text-emerald-900">{title}</h2>
-      <p className="mt-3 text-sm text-emerald-900/70">{description}</p>
+      <h2 className={`${smallHeadingClasses} text-emerald-900`}>{title}</h2>
+      <p className={`mt-3 ${bodySmallMutedTextClasses} text-emerald-900/70`}>{description}</p>
     </article>
   );
 }
@@ -100,10 +113,10 @@ function FeatureCard({ title, description }) {
 function TreeLayer({ title, description, className }) {
   return (
     <div className={`space-y-2 px-6 py-5 ${className}`}>
-      <span className="text-sm font-semibold uppercase tracking-wide text-white/80">
+      <span className={`${captionTextClasses} text-white/80`}>
         {title}
       </span>
-      <p className="text-sm leading-relaxed text-white/80">{description}</p>
+      <p className={`${bodySmallTextClasses} leading-relaxed text-white/80`}>{description}</p>
     </div>
   );
 }

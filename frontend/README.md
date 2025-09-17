@@ -1,70 +1,62 @@
-# Getting Started with Create React App
+# Aleya frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The Aleya web client is a [Create React App](https://create-react-app.dev/) project that uses Tailwind CSS for layout and component styling.
 
-## Available Scripts
+## Local development
 
-In the project directory, you can run:
+```bash
+cd frontend
+npm install
+npm start
+```
 
-### `npm start`
+The development server runs on http://localhost:3000. Use `npm test` to launch the Jest test runner and `npm run build` to create a production build.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Design system
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+All reusable styles live in `src/index.css` under a `@layer components` block. These classes wrap Tailwind utilities so that typography, buttons, form controls, and feedback states stay consistent across the application.
 
-### `npm test`
+### Typography
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| Token | Description |
+| --- | --- |
+| `text-display` | Hero headlines (4xl/5xl, bold, tight tracking). |
+| `text-heading-lg`, `text-heading-md`, `text-heading-sm`, `text-heading-xs` | Section titles from 3xl down to lg weights. |
+| `text-body-lg`, `text-body`, `text-body-strong` | Paragraph copy with relaxed leading and optional emphasis. |
+| `text-body-sm`, `text-body-sm-strong`, `text-body-sm-muted` | Small copy, helper text, and compact emphasis. |
+| `text-eyebrow`, `text-caption` | Uppercase eyebrow and caption treatments. |
+| `form-label` | Standard field label styling. |
 
-### `npm run build`
+Typography tokens only control font sizing, weight, and tracking. Apply contextual colours (e.g. `text-emerald-900`, `text-white/80`) alongside these classes where required.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Buttons
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+| Token | Description |
+| --- | --- |
+| `btn-primary` | Primary call-to-action button with emerald background. |
+| `btn-secondary` | Secondary action with subtle border and white backdrop. |
+| `btn-subtle` | Minimal button for tertiary actions and links. |
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Form controls
 
-### `npm run eject`
+| Token | Description |
+| --- | --- |
+| `form-input`, `form-input-compact` | Text inputs for regular and dense layouts. |
+| `form-textarea` | Multiline journal fields. |
+| `form-select`, `form-select-compact` | Dropdowns with matching rounded styling. |
+| `form-checkbox` | Checkbox styling aligned with emerald focus rings. |
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Feedback & layout helpers
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+| Token | Description |
+| --- | --- |
+| `card-container` | Frosted glass card container used on dashboards. |
+| `table-header`, `table-row` | Dashboard tables with responsive grids. |
+| `chip-base`, `badge-base` | Base styling for chips and badges (tone comes from context). |
+| `empty-state`, `text-info`, `text-muted` | Empty state containers and helper copy. |
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Refer to `src/styles/ui.js` for the exported constants and helper functions (`getMoodBadgeClasses`, `getShareChipClasses`, etc.) used throughout the component tree.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Linting & formatting
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project relies on Prettier formatting through Tailwind's `@apply` utilities. Run `npm test` to execute the Jest suite; additional linters can be added later if needed.

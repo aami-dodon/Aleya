@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  bodySmallMutedTextClasses,
+  bodySmallStrongTextClasses,
   emptyStateClasses,
+  formLabelClasses,
   infoTextClasses,
   inputClasses,
+  mediumHeadingClasses,
   primaryButtonClasses,
   selectClasses,
   textareaClasses,
@@ -85,14 +89,16 @@ function JournalEntryForm({
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
       <div>
-        <h3 className="text-xl font-semibold text-emerald-900">{form.title}</h3>
+        <h3 className={`${mediumHeadingClasses} text-emerald-900`}>
+          {form.title}
+        </h3>
         {form.description && (
           <p className={infoTextClasses}>{form.description}</p>
         )}
       </div>
       {form.fields.map((field) => (
         <div className="space-y-2" key={field.id ?? field.label}>
-          <label className="block text-sm font-semibold text-emerald-900/80">
+          <label className={`block ${formLabelClasses}`}>
             <span>
               {field.label}
               {field.required && <span className="ml-1 text-rose-500">*</span>}
@@ -102,15 +108,14 @@ function JournalEntryForm({
             )}
           </label>
           {field.helperText && (
-            <p className="text-sm text-emerald-900/60">{field.helperText}</p>
+            <p className={`${bodySmallMutedTextClasses} text-emerald-900/60`}>
+              {field.helperText}
+            </p>
           )}
         </div>
       ))}
       <div className="space-y-2">
-        <label
-          htmlFor="sharing"
-          className="block text-sm font-semibold text-emerald-900/80"
-        >
+        <label htmlFor="sharing" className={`block ${formLabelClasses}`}>
           Sharing preference
         </label>
         <select
@@ -125,18 +130,20 @@ function JournalEntryForm({
             </option>
           ))}
         </select>
-        <p className="text-sm text-emerald-900/60">
+        <p className={`${bodySmallMutedTextClasses} text-emerald-900/60`}>
           Control what mentors can see when you submit entries.
         </p>
       </div>
       {error && (
-        <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
+        <p
+          className={`rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 ${bodySmallStrongTextClasses} text-rose-600`}
+        >
           {error}
         </p>
       )}
       {statusMessage && (
         <p
-          className={`rounded-2xl px-4 py-3 text-sm font-medium ${
+          className={`rounded-2xl px-4 py-3 ${bodySmallStrongTextClasses} ${
             statusVariant === "success"
               ? "border border-emerald-100 bg-emerald-50/80 text-emerald-700"
               : "border border-emerald-100 bg-white/80 text-emerald-900/70"

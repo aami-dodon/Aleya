@@ -1,6 +1,10 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
+  bodySmallMutedTextClasses,
+  bodySmallStrongTextClasses,
+  captionTextClasses,
+  largeHeadingClasses,
   primaryButtonClasses,
   secondaryButtonClasses,
   subtleButtonClasses,
@@ -44,12 +48,14 @@ function Layout({ children }) {
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
           <button
             type="button"
-            className="rounded-full border border-transparent bg-transparent font-display text-3xl font-semibold leading-none tracking-tight text-emerald-700 transition hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+            className={`rounded-full border border-transparent bg-transparent leading-none tracking-tight text-emerald-700 transition hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 ${largeHeadingClasses}`}
             onClick={() => navigate(user ? "/dashboard" : "/")}
           >
             Aleya
           </button>
-          <nav className="flex flex-1 flex-wrap items-center justify-center gap-2 text-sm font-semibold text-emerald-900/70">
+          <nav
+            className={`flex flex-1 flex-wrap items-center justify-center gap-2 ${bodySmallStrongTextClasses} text-emerald-900/70`}
+          >
             {links.map((link) => (
               <NavLink
                 key={link.to}
@@ -70,10 +76,10 @@ function Layout({ children }) {
             {user ? (
               <>
                 <div className="text-right">
-                  <span className="block text-sm font-semibold text-emerald-900">
+                  <span className={`block ${bodySmallStrongTextClasses} text-emerald-900`}>
                     {user.name}
                   </span>
-                  <span className="text-xs uppercase tracking-wide text-emerald-900/60">
+                  <span className={`${captionTextClasses} text-emerald-900/60`}>
                     {user.role}
                   </span>
                 </div>
@@ -105,7 +111,9 @@ function Layout({ children }) {
         {children}
       </main>
       <footer className="border-t border-emerald-100 bg-white/70">
-        <div className="mx-auto w-full max-w-6xl px-6 py-6 text-center text-sm text-emerald-900/70">
+        <div
+          className={`mx-auto w-full max-w-6xl px-6 py-6 text-center ${bodySmallMutedTextClasses} text-emerald-900/70`}
+        >
           Root your days in care, grow with guidance, and share the harvest.
         </div>
       </footer>
