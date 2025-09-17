@@ -1,16 +1,18 @@
 import { format, parseISO } from "date-fns";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import JournalEntryForm from "../components/JournalEntryForm";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
 import {
+  bodySmallMutedTextClasses,
   bodySmallStrongTextClasses,
   chipBaseClasses,
   emptyStateClasses,
   getMoodBadgeClasses,
   selectCompactClasses,
+  smallHeadingClasses,
   subtleButtonClasses,
 } from "../styles/ui";
 
@@ -27,6 +29,7 @@ function JournalHistoryPage() {
   const [deletingId, setDeletingId] = useState(null);
   const [actionMessage, setActionMessage] = useState(null);
   const [actionVariant, setActionVariant] = useState("success");
+  const editingEntryRef = useRef(null);
 
   const loadEntries = useCallback(async () => {
     if (!token) return;
@@ -124,6 +127,17 @@ function JournalHistoryPage() {
   const handleCancelEdit = useCallback(() => {
     setEditingEntry(null);
   }, []);
+
+  useEffect(() => {
+    if (!editingEntry || !editingEntryRef.current) {
+      return;
+    }
+
+    editingEntryRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [editingEntry]);
 
   const handleUpdateEntry = useCallback(
     async (payload) => {
@@ -285,6 +299,37 @@ function JournalHistoryPage() {
                     </button>
                   </div>
                 )}
+                {user.role === "journaler" && editingEntry?.id === entry.id && (
+                  <div
+                    ref={editingEntryRef}
+                    className="mt-4 space-y-3 rounded-2xl border border-emerald-100 bg-white/80 p-5"
+                  >
+                    <div className="space-y-1">
+                      <h3 className={`${smallHeadingClasses} text-emerald-900`}>
+                        Edit journal entry
+                      </h3>
+                      <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
+                        Update your reflection from {" "}
+                        {format(parseISO(editingEntry.entryDate), "MMMM d, yyyy")}.
+                      </p>
+                    </div>
+                    {editingForm ? (
+                      <JournalEntryForm
+                        form={editingForm}
+                        submitting={updating}
+                        onSubmit={handleUpdateEntry}
+                        onCancel={handleCancelEdit}
+                        initialSharing={editingEntry.sharedLevel}
+                        initialValues={editingValues}
+                        submitLabel="Update entry"
+                      />
+                    ) : (
+                      <p className={emptyStateClasses}>
+                        This form is no longer available for editing.
+                      </p>
+                    )}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -292,31 +337,6 @@ function JournalHistoryPage() {
           <p className={emptyStateClasses}>No entries available yet.</p>
         )}
       </SectionCard>
-      {user.role === "journaler" && editingEntry && (
-        <SectionCard
-          title="Edit journal entry"
-          subtitle={`Update your reflection from ${format(
-            parseISO(editingEntry.entryDate),
-            "MMMM d, yyyy"
-          )}`}
-        >
-          {editingForm ? (
-            <JournalEntryForm
-              form={editingForm}
-              submitting={updating}
-              onSubmit={handleUpdateEntry}
-              onCancel={handleCancelEdit}
-              initialSharing={editingEntry.sharedLevel}
-              initialValues={editingValues}
-              submitLabel="Update entry"
-            />
-          ) : (
-            <p className={emptyStateClasses}>
-              This form is no longer available for editing.
-            </p>
-          )}
-        </SectionCard>
-      )}
     </div>
   );
 }
