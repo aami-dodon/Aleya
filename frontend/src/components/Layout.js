@@ -44,7 +44,7 @@ function Layout({ children }) {
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
           <button
             type="button"
-            className="rounded-full border border-transparent bg-transparent text-2xl font-bold text-emerald-700 transition hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+            className="rounded-full border border-transparent bg-transparent font-display text-3xl font-semibold leading-none tracking-tight text-emerald-700 transition hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
             onClick={() => navigate(user ? "/dashboard" : "/")}
           >
             Aleya
