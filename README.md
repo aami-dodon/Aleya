@@ -90,6 +90,10 @@ Aleya is a journaling and mentorship platform that pairs reflective journaling t
 └── README.md
 ```
 
+### Frontend styling system
+
+The React client uses Tailwind CSS with a small design system exposed in `frontend/src/index.css`. Buttons, form controls, and typography tokens are wrapped in named classes (e.g. `btn-primary`, `form-input`, `text-display`) and re-exported from `frontend/src/styles/ui.js` for ergonomic use inside React components.
+
 ## Prerequisites
 
 Before running Aleya locally make sure you have:

@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import apiClient from "../api/client";
 import {
+  bodySmallStrongTextClasses,
   infoTextClasses,
+  mediumHeadingClasses,
   primaryButtonClasses,
   secondaryButtonClasses,
 } from "../styles/ui";
@@ -49,14 +51,18 @@ function VerifyEmailPage() {
       case "pending":
         return (
           <>
-            <p className="text-sm font-semibold text-emerald-900/80">{message}</p>
+            <p className={`${bodySmallStrongTextClasses} text-emerald-900/80`}>
+              {message}
+            </p>
             <p className={infoTextClasses}>This will only take a moment.</p>
           </>
         );
       case "success":
         return (
           <>
-            <p className="text-sm font-semibold text-emerald-900/80">{message}</p>
+            <p className={`${bodySmallStrongTextClasses} text-emerald-900/80`}>
+              {message}
+            </p>
             <Link to="/login" className={`${primaryButtonClasses} w-full`}>
               Continue to sign in
             </Link>
@@ -65,7 +71,9 @@ function VerifyEmailPage() {
       case "error":
         return (
           <>
-            <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
+            <p
+              className={`rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 ${bodySmallStrongTextClasses} text-rose-600`}
+            >
               {message}
             </p>
             <p className={infoTextClasses}>
@@ -92,7 +100,9 @@ function VerifyEmailPage() {
       default:
         return (
           <>
-            <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
+            <p
+              className={`rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 ${bodySmallStrongTextClasses} text-rose-600`}
+            >
               {message}
             </p>
             <p className={infoTextClasses}>
@@ -119,7 +129,7 @@ function VerifyEmailPage() {
 
   return (
     <div className="mx-auto w-full max-w-xl rounded-3xl border border-emerald-100 bg-white/80 p-8 text-center shadow-2xl shadow-emerald-900/10 backdrop-blur">
-      <h1 className="text-3xl font-semibold text-emerald-900">{heading}</h1>
+      <h1 className={`${mediumHeadingClasses} text-emerald-900`}>{heading}</h1>
       <div className="mt-4 space-y-4 text-left">{renderContent()}</div>
     </div>
   );

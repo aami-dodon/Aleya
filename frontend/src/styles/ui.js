@@ -1,40 +1,42 @@
-export const primaryButtonClasses =
-  "inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:translate-y-0 disabled:opacity-60";
+export const primaryButtonClasses = "btn-primary";
+export const secondaryButtonClasses = "btn-secondary";
+export const subtleButtonClasses = "btn-subtle";
 
-export const secondaryButtonClasses =
-  "inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-white/70 px-6 py-3.5 text-base font-semibold text-emerald-700 shadow-sm shadow-emerald-900/10 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:translate-y-0 disabled:opacity-60";
+export const inputClasses = "form-input";
+export const inputCompactClasses = "form-input-compact";
+export const textareaClasses = "form-textarea";
+export const selectClasses = "form-select";
+export const selectCompactClasses = "form-select-compact";
+export const checkboxClasses = "form-checkbox";
 
-export const subtleButtonClasses =
-  "inline-flex items-center justify-center gap-2 rounded-2xl border border-transparent px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:-translate-y-0.5 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:translate-y-0 disabled:opacity-60";
+export const infoTextClasses = "text-info";
+export const mutedTextClasses = "text-muted";
+export const emptyStateClasses = "empty-state";
 
-export const inputClasses =
-  "mt-2 w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-3 text-base text-emerald-900 shadow-sm transition placeholder:text-emerald-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100";
+export const chipBaseClasses = "chip-base";
+export const badgeBaseClasses = "badge-base";
 
-export const inputCompactClasses =
-  "w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-2.5 text-sm text-emerald-900 shadow-sm transition placeholder:text-emerald-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100";
+export const tableHeaderClasses = "table-header";
+export const tableRowClasses = "table-row";
+export const cardContainerClasses = "card-container";
+export const sectionTitleClasses = "section-title";
+export const sectionSubtitleClasses = "section-subtitle";
 
-export const textareaClasses =
-  "mt-2 w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-3 text-base text-emerald-900 shadow-sm transition placeholder:text-emerald-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100";
-
-export const selectClasses =
-  "mt-2 w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-3 text-base text-emerald-900 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100";
-
-export const selectCompactClasses =
-  "w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-2.5 text-sm text-emerald-900 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100";
-
-export const checkboxClasses =
-  "h-5 w-5 rounded-md border-emerald-200 text-emerald-600 focus:ring-emerald-500";
-
-export const infoTextClasses = "text-sm text-emerald-900/70";
-export const mutedTextClasses = "text-sm text-emerald-900/60";
-export const emptyStateClasses =
-  "rounded-2xl border border-emerald-100 bg-white/60 p-6 text-center text-sm font-medium text-emerald-900/70";
-
-export const chipBaseClasses =
-  "inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700";
-
-export const badgeBaseClasses =
-  "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize tracking-wide";
+export const displayTextClasses = "text-display";
+export const largeHeadingClasses = "text-heading-lg";
+export const mediumHeadingClasses = "text-heading-md";
+export const smallHeadingClasses = "text-heading-sm";
+export const xSmallHeadingClasses = "text-heading-xs";
+export const leadTextClasses = "text-body-lg";
+export const bodyTextClasses = "text-body";
+export const bodyStrongTextClasses = "text-body-strong";
+export const bodyMutedTextClasses = "text-body-muted";
+export const bodySmallTextClasses = "text-body-sm";
+export const bodySmallStrongTextClasses = "text-body-sm-strong";
+export const bodySmallMutedTextClasses = "text-body-sm-muted";
+export const eyebrowTextClasses = "text-eyebrow";
+export const captionTextClasses = "text-caption";
+export const formLabelClasses = "form-label";
 
 const moodClassMap = {
   happy: "bg-emerald-100 text-emerald-700",
@@ -78,15 +80,3 @@ export function getStatusToneClasses(status) {
       return "text-emerald-900/70";
   }
 }
-
-export const tableHeaderClasses =
-  "grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-4 text-sm font-semibold text-emerald-900/70";
-
-export const tableRowClasses =
-  "grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-4 rounded-2xl border border-emerald-100 bg-white/70 px-4 py-3 text-sm text-emerald-900";
-
-export const cardContainerClasses =
-  "rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-lg shadow-emerald-900/10 backdrop-blur";
-
-export const sectionTitleClasses = "text-2xl font-semibold text-emerald-950";
-export const sectionSubtitleClasses = "mt-1 text-sm text-emerald-900/70";
