@@ -12,6 +12,9 @@
   integrity checks remain in place and update the wiki when adjusting these flows.
 - Admin journaler stewardship now lists mentor relationships and allows deleting journaler accounts via `/admin/journalers` and
   `DELETE /admin/journalers/:id`; keep the aggregated mentor metadata accurate and rely on cascading deletes for related data.
+- Admin journal entries are now available through `/admin/journals` and `DELETE /admin/journals/:id`. Keep the shared level
+  validation aligned with `SHARING_LEVELS`, accept lowercase search filters (`q`, `mood`, `mentorId`, etc.), and return mentor
+  aggregates so the frontend can show linkage chips beside each entry.
 - Admin `/forms` responses must continue returning `creatorName` metadata and the `mentees` association array so the frontend can
   surface who built each form and which journalers are linked.
 - Leave the `/forms` creation route restricted to mentors; admins now manage forms without crafting new templates through that

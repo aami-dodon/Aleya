@@ -6,6 +6,7 @@ const requireRole = require("../middleware/requireRole");
 const router = express.Router();
 
 const APPROVAL_STATUSES = ["pending", "approved", "rejected"];
+const SHARING_LEVELS = ["private", "mood", "summary", "full"];
 
 router.get(
   "/overview",
@@ -835,6 +836,193 @@ router.delete(
       return next(error);
     } finally {
       client.release();
+    }
+  }
+);
+
+router.get(
+  "/journals",
+  authenticate,
+  requireRole("admin"),
+  async (req, res, next) => {
+    const search = (req.query.q || "").trim().toLowerCase();
+    const sharedLevelFilter = (req.query.sharedLevel || "").trim().toLowerCase();
+    const moodFilter = (req.query.mood || "").trim().toLowerCase();
+    const journalerIdParam = req.query.journalerId;
+    const mentorIdParam = req.query.mentorId;
+    const formIdParam = req.query.formId;
+    const limit = Math.min(Number.parseInt(req.query.limit, 10) || 50, 200);
+
+    const journalerId =
+      journalerIdParam !== undefined
+        ? Number.parseInt(journalerIdParam, 10)
+        : null;
+    const mentorId =
+      mentorIdParam !== undefined ? Number.parseInt(mentorIdParam, 10) : null;
+    const formId =
+      formIdParam !== undefined ? Number.parseInt(formIdParam, 10) : null;
+
+    if (journalerIdParam !== undefined && (!Number.isInteger(journalerId) || journalerId <= 0)) {
+      return res.status(400).json({ error: "Invalid journalerId" });
+    }
+
+    if (mentorIdParam !== undefined && (!Number.isInteger(mentorId) || mentorId <= 0)) {
+      return res.status(400).json({ error: "Invalid mentorId" });
+    }
+
+    if (formIdParam !== undefined && (!Number.isInteger(formId) || formId <= 0)) {
+      return res.status(400).json({ error: "Invalid formId" });
+    }
+
+    if (
+      sharedLevelFilter &&
+      !SHARING_LEVELS.includes(sharedLevelFilter.toLowerCase())
+    ) {
+      return res.status(400).json({ error: "Invalid shared level" });
+    }
+
+    const conditions = [];
+    const params = [];
+
+    if (sharedLevelFilter) {
+      params.push(sharedLevelFilter);
+      conditions.push(`je.shared_level = $${params.length}`);
+    }
+
+    if (moodFilter) {
+      params.push(moodFilter);
+      conditions.push(`LOWER(COALESCE(je.mood, '')) = $${params.length}`);
+    }
+
+    if (journalerId) {
+      params.push(journalerId);
+      conditions.push(`je.journaler_id = $${params.length}`);
+    }
+
+    if (formId) {
+      params.push(formId);
+      conditions.push(`je.form_id = $${params.length}`);
+    }
+
+    if (mentorId) {
+      params.push(mentorId);
+      conditions.push(
+        `EXISTS (
+           SELECT 1 FROM mentor_links ml
+           WHERE ml.journaler_id = je.journaler_id AND ml.mentor_id = $${params.length}
+         )`
+      );
+    }
+
+    if (search) {
+      params.push(`%${search}%`);
+      const index = params.length;
+      conditions.push(
+        `(
+           LOWER(journaler.name) LIKE $${index}
+           OR LOWER(journaler.email) LIKE $${index}
+           OR LOWER(COALESCE(form.title, '')) LIKE $${index}
+           OR LOWER(COALESCE(je.summary, '')) LIKE $${index}
+         )`
+      );
+    }
+
+    params.push(limit);
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    try {
+      const { rows } = await pool.query(
+        `SELECT
+           je.id,
+           je.journaler_id,
+           je.form_id,
+           je.entry_date,
+           je.created_at,
+           je.mood,
+           je.shared_level,
+           je.summary,
+           journaler.name AS journaler_name,
+           journaler.email AS journaler_email,
+           form.title AS form_title,
+           COALESCE(
+             JSON_AGG(
+               DISTINCT JSONB_BUILD_OBJECT(
+                 'id', mentor.id,
+                 'name', mentor.name,
+                 'email', mentor.email
+               )
+             ) FILTER (WHERE mentor.id IS NOT NULL),
+             '[]'
+           ) AS mentors
+         FROM journal_entries je
+         JOIN users journaler ON journaler.id = je.journaler_id
+         LEFT JOIN journal_forms form ON form.id = je.form_id
+         LEFT JOIN mentor_links links ON links.journaler_id = je.journaler_id
+         LEFT JOIN users mentor ON mentor.id = links.mentor_id
+         ${whereClause}
+         GROUP BY
+           je.id,
+           journaler.id,
+           journaler.name,
+           journaler.email,
+           form.id,
+           form.title
+         ORDER BY je.created_at DESC
+         LIMIT $${params.length}`,
+        params
+      );
+
+      const entries = rows.map((row) => ({
+        id: row.id,
+        entryDate: row.entry_date,
+        createdAt: row.created_at,
+        mood: row.mood,
+        sharedLevel: row.shared_level,
+        summary: row.summary,
+        journaler: {
+          id: row.journaler_id,
+          name: row.journaler_name,
+          email: row.journaler_email,
+        },
+        form: row.form_id
+          ? { id: row.form_id, title: row.form_title }
+          : null,
+        mentors: Array.isArray(row.mentors) ? row.mentors : [],
+      }));
+
+      return res.json({ entries });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+router.delete(
+  "/journals/:id",
+  authenticate,
+  requireRole("admin"),
+  async (req, res, next) => {
+    const entryId = Number.parseInt(req.params.id, 10);
+
+    if (!Number.isInteger(entryId) || entryId <= 0) {
+      return res.status(400).json({ error: "Invalid journal entry id" });
+    }
+
+    try {
+      const result = await pool.query(
+        `DELETE FROM journal_entries WHERE id = $1`,
+        [entryId]
+      );
+
+      if (!result.rowCount) {
+        return res.status(404).json({ error: "Journal entry not found" });
+      }
+
+      return res.json({ success: true });
+    } catch (error) {
+      return next(error);
     }
   }
 );
