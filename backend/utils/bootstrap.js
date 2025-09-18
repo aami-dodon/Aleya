@@ -9,6 +9,17 @@ const DEFAULT_NOTIFICATION_PREFS = {
     weekly: true,
   },
   mentorNotifications: "summary",
+  channels: {
+    email: true,
+    inApp: true,
+  },
+  categories: {
+    account: true,
+    mentorship: true,
+    forms: true,
+    exports: true,
+    alerts: true,
+  },
 };
 
 const createTableStatements = [
@@ -100,13 +111,17 @@ const createTableStatements = [
       summary TEXT,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`,
-  `CREATE TABLE IF NOT EXISTS mentor_notifications (
+  `CREATE TABLE IF NOT EXISTS user_notifications (
       id SERIAL PRIMARY KEY,
-      mentor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      type TEXT NOT NULL DEFAULT 'entry',
-      entry_id INTEGER REFERENCES journal_entries(id) ON DELETE CASCADE,
-      visibility TEXT,
-      payload JSONB DEFAULT '{}'::jsonb,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      type TEXT NOT NULL,
+      category TEXT NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT,
+      metadata JSONB DEFAULT '{}'::jsonb,
+      action_url TEXT,
+      action_label TEXT,
+      email_template TEXT NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       read_at TIMESTAMPTZ
     )`,
@@ -118,19 +133,12 @@ const createTableStatements = [
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`,
   `CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date ON journal_entries (journaler_id, entry_date DESC)` ,
-  `CREATE INDEX IF NOT EXISTS idx_mentor_notifications_mentor ON mentor_notifications (mentor_id, created_at DESC)` ,
+  `CREATE INDEX IF NOT EXISTS idx_user_notifications_user ON user_notifications (user_id, created_at DESC)` ,
   `CREATE INDEX IF NOT EXISTS idx_mentor_assignments_journaler ON mentor_form_assignments (journaler_id)` ,
   `CREATE INDEX IF NOT EXISTS idx_mentor_links_journaler ON mentor_links (journaler_id)` ,
   `CREATE INDEX IF NOT EXISTS idx_mentor_approvals_status ON mentor_approvals (status)` ,
   `ALTER TABLE mentor_requests DROP CONSTRAINT IF EXISTS mentor_requests_status_check` ,
   `ALTER TABLE mentor_requests ADD CONSTRAINT mentor_requests_status_check CHECK (status IN ('pending','mentor_accepted','confirmed','declined','ended'))` ,
-  `ALTER TABLE mentor_notifications ADD COLUMN IF NOT EXISTS type TEXT` ,
-  `UPDATE mentor_notifications SET type = 'entry' WHERE type IS NULL` ,
-  `ALTER TABLE mentor_notifications ALTER COLUMN type SET DEFAULT 'entry'` ,
-  `ALTER TABLE mentor_notifications ALTER COLUMN type SET NOT NULL` ,
-  `ALTER TABLE mentor_notifications ADD COLUMN IF NOT EXISTS payload JSONB DEFAULT '{}'::jsonb` ,
-  `ALTER TABLE mentor_notifications ALTER COLUMN entry_id DROP NOT NULL` ,
-  `ALTER TABLE mentor_notifications ALTER COLUMN visibility DROP NOT NULL` ,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE` ,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_hash TEXT` ,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires_at TIMESTAMPTZ` ,
