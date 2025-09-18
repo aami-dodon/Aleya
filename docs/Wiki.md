@@ -1,4 +1,9 @@
 
+# 2025-09-28
+- Added a live password confirmation check on `RegisterPage` so the retype field highlights mismatches, shares a gentle reminder,
+  and keeps the submit action disabled until both entries match. Noted the guidance in `frontend/AGENTS.md` for future frontend
+  contributors.
+
 - Added an admin-only Journaler navigation entry that links to the new `/journalers` route where the entire journaler management
   experience now lives. The mentorship view for admins focuses solely on mentor stewardship while the new page handles search,
   unlinking mentors, and deleting journaler accounts with the existing admin endpoints.

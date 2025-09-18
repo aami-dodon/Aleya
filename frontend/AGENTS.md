@@ -32,4 +32,6 @@ tays balanced across breakpoints.
   accessible labels (use `sr-only` utilities) so screen readers announce each option clearly.
 - Journalers see their assigned forms within `JournalHistoryPage`; keep the poetic CTA that links to `/dashboard?formId=...` using
   the shared `primaryButtonClasses` so each card offers the single-word "Bloom" invitation.
+- The registration form validates password confirmation on the client: highlight the retype input, surface a gentle error message,
+  and prevent submission until both fields match.
 
