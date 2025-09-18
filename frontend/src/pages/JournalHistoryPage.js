@@ -559,7 +559,7 @@ function JournalHistoryPage() {
                         to={`/dashboard?formId=${form.id}`}
                         className={`${primaryButtonClasses} w-full text-center sm:w-auto`}
                       >
-                        Begin this gentle check-in
+                        Bloom
                       </Link>
                     </div>
                   </li>
