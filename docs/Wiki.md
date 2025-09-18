@@ -1,3 +1,8 @@
+# 2025-09-26
+- Extended the admin mentorship hub with a new Journaler management panel that lets admins search by name/email, review linked
+  mentors, unlink relationships, and delete journaler accounts. Backed the UI with enriched `/admin/journalers` data and a new
+  `DELETE /admin/journalers/:id` route so cascades clean up reflections, assignments, and links automatically.
+
 # 2025-09-25
 - Added admin mentor management endpoints: `/admin/mentor-links` to link journalers, `/admin/mentor-links/:mentorId/:journalerId`
   to sever connections, `/admin/journalers` for quick journaler lookups, and `/admin/mentors/:id` for removing mentor accounts

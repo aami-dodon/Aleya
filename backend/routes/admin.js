@@ -592,21 +592,40 @@ router.get(
     const limit = Math.min(Number.parseInt(req.query.limit, 10) || 25, 100);
 
     try {
-      const params = [limit];
-      let whereClause = "WHERE role = 'journaler'";
+      const params = [];
+      let whereClause = "WHERE j.role = 'journaler'";
 
       if (search) {
         params.push(`%${search}%`);
         whereClause +=
-          " AND (LOWER(name) LIKE $2 OR LOWER(email) LIKE $2)";
+          ` AND (LOWER(j.name) LIKE $${params.length} OR LOWER(j.email) LIKE $${params.length})`;
       }
 
+      params.push(limit);
+
       const { rows } = await pool.query(
-        `SELECT id, name, email
-         FROM users
+        `SELECT
+            j.id,
+            j.name,
+            j.email,
+            COALESCE(
+              JSON_AGG(
+                DISTINCT JSONB_BUILD_OBJECT(
+                  'id', mentor.id,
+                  'name', mentor.name,
+                  'email', mentor.email
+                )
+              ) FILTER (WHERE mentor.id IS NOT NULL),
+              '[]'
+            ) AS mentors,
+            COUNT(mentor.id) AS mentor_count
+         FROM users j
+         LEFT JOIN mentor_links links ON links.journaler_id = j.id
+         LEFT JOIN users mentor ON mentor.id = links.mentor_id
          ${whereClause}
-         ORDER BY name
-         LIMIT $1`,
+         GROUP BY j.id
+         ORDER BY j.name
+         LIMIT $${params.length}`,
         params
       );
 
@@ -844,6 +863,48 @@ router.delete(
       }
 
       await client.query(`DELETE FROM users WHERE id = $1`, [mentorId]);
+
+      await client.query("COMMIT");
+
+      return res.json({ success: true });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return next(error);
+    } finally {
+      client.release();
+    }
+  }
+);
+
+router.delete(
+  "/journalers/:id",
+  authenticate,
+  requireRole("admin"),
+  async (req, res, next) => {
+    const journalerId = Number.parseInt(req.params.id, 10);
+
+    if (!Number.isInteger(journalerId) || journalerId <= 0) {
+      return res.status(400).json({ error: "Invalid journaler id" });
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const { rows } = await client.query(
+        `SELECT id FROM users
+         WHERE id = $1 AND role = 'journaler'
+         FOR UPDATE`,
+        [journalerId]
+      );
+
+      if (!rows.length) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "Journaler not found" });
+      }
+
+      await client.query(`DELETE FROM users WHERE id = $1`, [journalerId]);
 
       await client.query("COMMIT");
 

@@ -8,6 +8,8 @@
   deleted by mistake.
 - Admin mentor management now includes routes for linking/unlinking journalers and deleting mentors; ensure mentor/journaler
   integrity checks remain in place and update the wiki when adjusting these flows.
+- Admin journaler stewardship now lists mentor relationships and allows deleting journaler accounts via `/admin/journalers` and
+  `DELETE /admin/journalers/:id`; keep the aggregated mentor metadata accurate and rely on cascading deletes for related data.
 - Admin `/forms` responses must continue returning `creatorName` metadata and the `mentees` association array so the frontend can
   surface who built each form and which journalers are linked.
 - Leave the `/forms` creation route restricted to mentors; admins now manage forms without crafting new templates through that

@@ -23,5 +23,7 @@ tays balanced across breakpoints.
   actions, and the data export/deletion tools whenever `user.role === "admin"`.
 - Admin mentor management lives on `/mentorship`: show mentor cards with linked mentees, allow linking by email, and surface a
   `Delete mentor` control using the shared button tokens so admins can curate relationships gracefully.
+- Admin journaler management also lives on `/mentorship`: surface a journaler list with linked mentors, include a search affordance,
+  and use the shared button tokens for unlinking mentors and deleting journaler accounts when an admin needs to retire access.
 - In the Forms builder page, keep the admin view focused on stewardship: do not reintroduce the creation UI for admins, preserve
   the filter controls, and ensure the mentee association list stays actionable with the existing remove affordance.
