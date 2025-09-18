@@ -367,7 +367,7 @@ router.post(
             verification_token_expires_at
          )
          VALUES ($1, $2, $3, $4, $5, $6, FALSE, $7, $8)
-         RETURNING id`,
+         RETURNING id, name, email, notification_preferences`,
         [
           normalizedEmail,
           passwordHash,
@@ -380,7 +380,8 @@ router.post(
         ]
       );
 
-      const userId = inserted.rows[0].id;
+      const insertedUser = inserted.rows[0];
+      const userId = insertedUser.id;
 
       if (role === "mentor") {
         const profile = mentorProfile || {};
@@ -416,6 +417,14 @@ router.post(
         email: normalizedEmail,
       };
 
+      const mentorRecipient = {
+        id: userId,
+        name: insertedUser.name || newUser.name,
+        email: insertedUser.email || normalizedEmail,
+        notification_preferences:
+          insertedUser.notification_preferences || DEFAULT_NOTIFICATION_PREFS,
+      };
+
       if (role === "journaler") {
         await notifyAdmins(req.app, "mentee_registered_admin", () => ({
           mentee: newUser,
@@ -425,6 +434,14 @@ router.post(
           req.app,
           "mentor_application_submitted_admin",
           () => ({ mentor: newUser })
+        );
+        await dispatchNotification(
+          req.app,
+          "mentor_application_submitted_mentor",
+          {
+            recipient: mentorRecipient,
+            mentor: newUser,
+          }
         );
       }
 
