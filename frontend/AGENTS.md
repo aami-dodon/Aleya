@@ -32,4 +32,6 @@ tays balanced across breakpoints.
   accessible labels (use `sr-only` utilities) so screen readers announce each option clearly.
 - Journalers see their assigned forms within `JournalHistoryPage`; keep the poetic CTA that links to `/dashboard?formId=...` using
   the shared `primaryButtonClasses` so each card offers the single-word "Bloom" invitation.
+- The shared `TagInput` now highlights matching expertise while listing the top 10 popular tags beneath the field. When supplying
+  suggestions, pass them in popularity order so mentors always see the gentlest guidance first.
 

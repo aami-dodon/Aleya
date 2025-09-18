@@ -17,6 +17,7 @@ import {
 import TIMEZONE_OPTIONS from "../utils/timezones";
 import TagInput from "../components/TagInput";
 import { formatExpertise, parseExpertise } from "../utils/expertise";
+import { useExpertiseSuggestions } from "../hooks/useExpertiseSuggestions";
 
 const ROLES = [
   { value: "journaler", label: "Journaler" },
@@ -46,6 +47,8 @@ function RegisterPage() {
       bio: "",
     },
   });
+
+  const { suggestions: expertiseSuggestions } = useExpertiseSuggestions({ limit: 40 });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -354,6 +357,7 @@ function RegisterPage() {
                     value={form.mentorProfile.expertise}
                     onChange={handleExpertiseChange}
                     placeholder="Press Enter to add each area of expertise"
+                    suggestions={expertiseSuggestions}
                   />
                 </label>
                 <label className={`block ${formLabelClasses}`}>

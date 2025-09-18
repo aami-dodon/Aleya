@@ -1,4 +1,13 @@
 
+# 2025-09-28
+- Introduced a public `/api/auth/expertise` endpoint that aggregates mentor profile keywords, returning the most common tags in
+  popularity order so registration flows can suggest existing expertise. The splitter mirrors `parseExpertise` to keep frontend
+  and backend normalization aligned.
+- Refined the shared `TagInput` component to surface matching suggestions and the top ten popular expertise tags beneath the
+  field, preventing duplicates and preferring the canonical casing when mentors add items.
+- Wired mentor registration and settings forms to fetch the expertise suggestions via the new hook so mentors can click to add
+  existing areas of wisdom while still creating bespoke entries when needed.
+
 - Added an admin-only Journaler navigation entry that links to the new `/journalers` route where the entire journaler management
   experience now lives. The mentorship view for admins focuses solely on mentor stewardship while the new page handles search,
   unlinking mentors, and deleting journaler accounts with the existing admin endpoints.

@@ -2,6 +2,27 @@ import { useMemo, useState } from "react";
 import { chipBaseClasses, inputClasses } from "../styles/ui";
 import { parseExpertise } from "../utils/expertise";
 
+function normaliseSuggestion(item) {
+  if (!item) {
+    return "";
+  }
+
+  if (typeof item === "string") {
+    return item;
+  }
+
+  if (typeof item === "object") {
+    if (typeof item.label === "string") {
+      return item.label;
+    }
+    if (typeof item.value === "string") {
+      return item.value;
+    }
+  }
+
+  return String(item);
+}
+
 function TagInput({
   value = [],
   onChange,
@@ -13,16 +34,51 @@ function TagInput({
 
   const tags = useMemo(() => parseExpertise(value), [value]);
 
-  const availableSuggestions = useMemo(() => {
+  const normalizedSuggestions = useMemo(() => {
     if (!Array.isArray(suggestions)) {
       return [];
     }
+
+    return parseExpertise(suggestions.map((item) => normaliseSuggestion(item)));
+  }, [suggestions]);
+
+  const availableSuggestions = useMemo(() => {
     const tagSet = new Set(tags.map((tag) => tag.toLowerCase()));
-    return suggestions
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .filter((item) => !tagSet.has(item.toLowerCase()));
-  }, [suggestions, tags]);
+    return normalizedSuggestions.filter(
+      (item) => !tagSet.has(item.toLowerCase())
+    );
+  }, [normalizedSuggestions, tags]);
+
+  const matchingSuggestions = useMemo(() => {
+    const query = inputValue.trim().toLowerCase();
+    if (!query) {
+      return [];
+    }
+
+    return availableSuggestions
+      .filter((item) => item.toLowerCase().includes(query))
+      .slice(0, 10);
+  }, [availableSuggestions, inputValue]);
+
+  const topSuggestions = useMemo(() => {
+    const matches = new Set(matchingSuggestions.map((item) => item.toLowerCase()));
+    const results = [];
+
+    for (const suggestion of availableSuggestions) {
+      const normalized = suggestion.toLowerCase();
+      if (inputValue.trim() && matches.has(normalized)) {
+        continue;
+      }
+
+      results.push(suggestion);
+
+      if (results.length >= 10) {
+        break;
+      }
+    }
+
+    return results;
+  }, [availableSuggestions, matchingSuggestions, inputValue]);
 
   const emitChange = (nextTags) => {
     if (typeof onChange === "function") {
@@ -36,12 +92,16 @@ function TagInput({
       return;
     }
     const normalized = trimmed.toLowerCase();
+    const suggestionMatch = availableSuggestions.find(
+      (item) => item.toLowerCase() === normalized
+    );
+    const finalTag = suggestionMatch || trimmed;
     const exists = tags.some((existing) => existing.toLowerCase() === normalized);
     if (exists) {
       setInputValue("");
       return;
     }
-    emitChange([...tags, trimmed]);
+    emitChange([...tags, finalTag]);
     setInputValue("");
   };
 
@@ -85,21 +145,42 @@ function TagInput({
           placeholder={placeholder}
         />
       </div>
-      {availableSuggestions.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-emerald-800/70">
-            Suggested:
-          </span>
-          {availableSuggestions.map((suggestion) => (
-            <button
-              key={suggestion}
-              type="button"
-              className={`${chipBaseClasses} transition hover:bg-emerald-100`}
-              onClick={() => addTag(suggestion)}
-            >
-              {suggestion}
-            </button>
-          ))}
+      {(matchingSuggestions.length > 0 || topSuggestions.length > 0) && (
+        <div className="space-y-2">
+          {matchingSuggestions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-emerald-800/70">
+                Matching expertise:
+              </span>
+              {matchingSuggestions.map((suggestion) => (
+                <button
+                  key={`match-${suggestion}`}
+                  type="button"
+                  className={`${chipBaseClasses} transition hover:bg-emerald-100`}
+                  onClick={() => addTag(suggestion)}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
+          {topSuggestions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-emerald-800/70">
+                Popular expertise:
+              </span>
+              {topSuggestions.map((suggestion) => (
+                <button
+                  key={`top-${suggestion}`}
+                  type="button"
+                  className={`${chipBaseClasses} transition hover:bg-emerald-100`}
+                  onClick={() => addTag(suggestion)}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

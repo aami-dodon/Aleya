@@ -82,6 +82,57 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function splitExpertiseTags(value) {
+  if (!value) {
+    return [];
+  }
+
+  const raw = String(value)
+    .split(/[,\n;]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  const seen = new Set();
+  const tags = [];
+
+  raw.forEach((item) => {
+    const normalized = item.toLowerCase();
+    if (seen.has(normalized)) {
+      return;
+    }
+    seen.add(normalized);
+    tags.push(item);
+  });
+
+  return tags;
+}
+
+function choosePreferredLabel(current, candidate) {
+  if (!current) {
+    return candidate;
+  }
+
+  if (!candidate) {
+    return current;
+  }
+
+  const currentHasCapital = /[A-Z]/.test(current);
+  const candidateHasCapital = /[A-Z]/.test(candidate);
+
+  if (!currentHasCapital && candidateHasCapital) {
+    return candidate;
+  }
+
+  if (
+    candidate.length > current.length &&
+    candidate.toLowerCase() === current.toLowerCase()
+  ) {
+    return candidate;
+  }
+
+  return current;
+}
+
 async function sendVerificationEmail(app, { email, name }, token) {
   const verificationUrl = buildVerificationLink(token);
 
@@ -693,5 +744,69 @@ router.get(
     }
   }
 );
+
+router.get("/expertise", async (req, res, next) => {
+  const search = (req.query.q || "").trim().toLowerCase();
+  const rawLimit = Number.parseInt(req.query.limit, 10);
+  let limit = Number.isNaN(rawLimit) ? 50 : rawLimit;
+  if (limit <= 0) {
+    limit = 50;
+  }
+  limit = Math.min(limit, 100);
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT expertise
+         FROM mentor_profiles
+        WHERE expertise IS NOT NULL AND TRIM(expertise) <> ''`
+    );
+
+    const counts = new Map();
+
+    rows.forEach(({ expertise }) => {
+      const tags = splitExpertiseTags(expertise);
+      tags.forEach((tag) => {
+        const normalized = tag.toLowerCase();
+        const existing = counts.get(normalized);
+        if (existing) {
+          existing.count += 1;
+          existing.label = choosePreferredLabel(existing.label, tag);
+        } else {
+          counts.set(normalized, {
+            label: tag,
+            count: 1,
+          });
+        }
+      });
+    });
+
+    let suggestions = Array.from(counts.values());
+
+    if (search) {
+      suggestions = suggestions.filter((item) =>
+        item.label.toLowerCase().includes(search)
+      );
+    }
+
+    suggestions.sort((a, b) => {
+      if (b.count !== a.count) {
+        return b.count - a.count;
+      }
+      return a.label.localeCompare(b.label);
+    });
+
+    const limited = suggestions.slice(0, limit);
+
+    return res.json({
+      expertise: limited.map((item) => ({
+        label: item.label,
+        value: item.label,
+        frequency: item.count,
+      })),
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
 
 module.exports = router;
