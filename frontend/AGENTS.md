@@ -17,3 +17,5 @@ tays balanced across breakpoints.
   screens.
 - Pair destructive or primary modal actions with a secondary "Cancel" control that uses `btn-secondary` so people always have
   a clear escape hatch.
+- Keep modal headers in a single flex container that houses both the title block and the close button so the markup stays
+  balanced and easier to maintain.

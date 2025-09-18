@@ -32,4 +32,5 @@
 # 2025-09-23
 - Removed the landing page administrator feature card and tightened the feature grid to two columns so only journalers and mentors are highlighted.
 - Extended `frontend/AGENTS.md` with a note about keeping the landing feature cards balanced across breakpoints.
+- Restored the SOS modal header structure in `frontend/src/components/PanicButton.js` so the close button sits inside the header flex row, preventing mismatched JSX tags, refreshed `frontend/src/styles/ui.js` with a `bodySmallMutedTextClasses` alias for the muted small text token, and updated `frontend/AGENTS.md` with the guidance to keep header content wrapped together.
 
