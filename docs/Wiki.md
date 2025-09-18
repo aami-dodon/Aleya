@@ -1,3 +1,8 @@
+# 2025-09-25
+- Restricted `/forms` creation to mentors, enriched the admin `/forms` listing with creator names and mentee associations, and
+  refreshed the Forms page so admins manage existing templates with filters, assignment removal, and delete controls instead of
+  crafting new forms.
+
 # 2025-09-24
 - Added an admin-only DELETE `/admin/forms/:id` route that blocks removal of default templates while allowing admins to prune
   mentee-created forms and automatically clear their assignments.

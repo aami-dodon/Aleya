@@ -6,3 +6,7 @@
 - Double-check route definitions end with their closing `);` pair so `node --check` passes before pushing changes.
 - When touching the admin form management endpoints, keep the default template protections intact so system templates are never
   deleted by mistake.
+- Admin `/forms` responses must continue returning `creatorName` metadata and the `mentees` association array so the frontend can
+  surface who built each form and which journalers are linked.
+- Leave the `/forms` creation route restricted to mentors; admins now manage forms without crafting new templates through that
+  endpoint.

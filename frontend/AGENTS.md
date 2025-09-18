@@ -21,3 +21,5 @@ tays balanced across breakpoints.
   balanced and easier to maintain.
 - Admins view a pared-down settings experience: hide mentor notification controls, the weekly summary toggle, profile submit
   actions, and the data export/deletion tools whenever `user.role === "admin"`.
+- In the Forms builder page, keep the admin view focused on stewardship: do not reintroduce the creation UI for admins, preserve
+  the filter controls, and ensure the mentee association list stays actionable with the existing remove affordance.

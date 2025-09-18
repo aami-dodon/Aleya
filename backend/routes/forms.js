@@ -41,6 +41,7 @@ async function fetchForms(whereClause = "", params = []) {
            f.is_default,
            f.created_by,
            f.created_at,
+           u.name AS creator_name,
            COALESCE(
              json_agg(
                json_build_object(
@@ -56,9 +57,10 @@ async function fetchForms(whereClause = "", params = []) {
              '[]'
            ) AS fields
     FROM journal_forms f
+    LEFT JOIN users u ON u.id = f.created_by
     LEFT JOIN journal_form_fields fld ON fld.form_id = f.id
     ${whereClause}
-    GROUP BY f.id
+    GROUP BY f.id, u.name
     ORDER BY f.is_default DESC, f.created_at DESC
   `;
 
@@ -66,6 +68,7 @@ async function fetchForms(whereClause = "", params = []) {
 
   return rows.map((row) => ({
     ...row,
+    creatorName: row.creator_name || null,
     fields: parseJsonColumn(row.fields, []),
   }));
 }
@@ -140,7 +143,45 @@ router.get("/", authenticate, async (req, res, next) => {
 
     if (role === "admin") {
       const forms = await fetchForms();
-      return res.json({ forms });
+
+      if (!forms.length) {
+        return res.json({ forms: [] });
+      }
+
+      const formIds = forms.map((form) => form.id);
+
+      const { rows: assignmentRows } = await pool.query(
+        `SELECT mfa.form_id,
+                mentee.id AS journaler_id,
+                mentee.name AS journaler_name
+         FROM mentor_form_assignments mfa
+         LEFT JOIN users mentee ON mentee.id = mfa.journaler_id
+         WHERE mfa.form_id = ANY($1::int[])
+         ORDER BY mentee.name ASC`,
+        [formIds]
+      );
+
+      const assignmentsByForm = assignmentRows.reduce((map, row) => {
+        if (!map.has(row.form_id)) {
+          map.set(row.form_id, []);
+        }
+
+        if (row.journaler_id) {
+          map.get(row.form_id).push({
+            id: row.journaler_id,
+            name: row.journaler_name,
+          });
+        }
+
+        return map;
+      }, new Map());
+
+      const enriched = forms.map((form) => ({
+        ...form,
+        mentees: assignmentsByForm.get(form.id) || [],
+      }));
+
+      return res.json({ forms: enriched });
     }
 
     return res.json({ forms: [] });
@@ -152,7 +193,7 @@ router.get("/", authenticate, async (req, res, next) => {
 router.post(
   "/",
   authenticate,
-  requireRole("mentor", "admin"),
+  requireRole("mentor"),
   fieldValidators,
   async (req, res, next) => {
     const errors = validationResult(req);
@@ -161,7 +202,7 @@ router.post(
     }
 
     const { title, description, fields } = req.body;
-    const visibility = req.user.role === "admin" ? "admin" : "mentor";
+    const visibility = "mentor";
     const client = await pool.connect();
 
     try {
