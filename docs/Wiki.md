@@ -2,6 +2,11 @@
 - Added an admin-only Journaler navigation entry that links to the new `/journalers` route where the entire journaler management
   experience now lives. The mentorship view for admins focuses solely on mentor stewardship while the new page handles search,
   unlinking mentors, and deleting journaler accounts with the existing admin endpoints.
+
+# 2025-09-27
+- Gave each journaler form card on `JournalHistoryPage` a poetic CTA that links to `/dashboard?formId=...` so mentees can open a
+  specific template directly, and taught `JournalerDashboard` to read and sync the `formId` query parameter while preserving the
+  primary button styling documented in `frontend/AGENTS.md`.
 - Renamed the admin forms catalogue header to "Form Management" on `frontend/src/pages/FormBuilderPage.js` and added accessible
   labels plus journaler-focused search copy to the admin-only filters so screen readers describe each control clearly.
 - Hid the journal reminder controls on the admin settings page so administrators no longer see the daily reflection or weekly

@@ -1,5 +1,6 @@
 import { format, isAfter, isEqual, parseISO, subMonths, subWeeks } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import apiClient from "../api/client";
 import JournalEntryForm from "../components/JournalEntryForm";
 import LoadingState from "../components/LoadingState";
@@ -26,6 +27,7 @@ function JournalerDashboard() {
   const [forms, setForms] = useState([]);
   const [entries, setEntries] = useState([]);
   const [selectedFormId, setSelectedFormId] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -33,6 +35,16 @@ function JournalerDashboard() {
   const [statusVariant, setStatusVariant] = useState("info");
   const [timeframe, setTimeframe] = useState("week");
   const [formResetKey, setFormResetKey] = useState(0);
+
+  const requestedFormId = searchParams.get("formId");
+  const requestedFormIdNumber = useMemo(() => {
+    if (!requestedFormId) {
+      return null;
+    }
+
+    const parsed = Number(requestedFormId);
+    return Number.isNaN(parsed) ? null : parsed;
+  }, [requestedFormId]);
 
   useEffect(() => {
     if (!token) return;
@@ -49,13 +61,25 @@ function JournalerDashboard() {
 
         if (!isMounted) return;
 
-        setForms(formsRes.forms || []);
+        const nextForms = formsRes.forms || [];
+        setForms(nextForms);
         setDashboard(dashRes);
         setEntries(entriesRes.entries || []);
         setError(null);
 
-        if (!selectedFormId && formsRes.forms?.length) {
-          setSelectedFormId(formsRes.forms[0].id);
+        const hasForms = nextForms.length > 0;
+        const requestedExists = requestedFormIdNumber
+          ? nextForms.some((form) => form.id === requestedFormIdNumber)
+          : false;
+
+        if (requestedExists && selectedFormId !== requestedFormIdNumber) {
+          setSelectedFormId(requestedFormIdNumber);
+        } else if (!selectedFormId && hasForms) {
+          setSelectedFormId(nextForms[0].id);
+        } else if (requestedFormId && !requestedExists) {
+          const next = new URLSearchParams(searchParams);
+          next.delete("formId");
+          setSearchParams(next, { replace: true });
         }
       } catch (err) {
         if (isMounted) {
@@ -72,7 +96,14 @@ function JournalerDashboard() {
     return () => {
       isMounted = false;
     };
-  }, [token, selectedFormId]);
+  }, [
+    token,
+    selectedFormId,
+    requestedFormId,
+    requestedFormIdNumber,
+    searchParams,
+    setSearchParams,
+  ]);
 
   useEffect(() => {
     if (statusVariant !== "success" || !statusMessage) {
@@ -87,6 +118,27 @@ function JournalerDashboard() {
     () => forms.find((form) => form.id === Number(selectedFormId)),
     [forms, selectedFormId]
   );
+
+  useEffect(() => {
+    if (!selectedFormId) {
+      if (!requestedFormId) {
+        return;
+      }
+
+      const next = new URLSearchParams(searchParams);
+      next.delete("formId");
+      setSearchParams(next, { replace: true });
+      return;
+    }
+
+    if (requestedFormId === String(selectedFormId)) {
+      return;
+    }
+
+    const next = new URLSearchParams(searchParams);
+    next.set("formId", selectedFormId);
+    setSearchParams(next, { replace: true });
+  }, [requestedFormId, searchParams, selectedFormId, setSearchParams]);
 
   const timeframeCutoff = useMemo(() => {
     const now = new Date();
