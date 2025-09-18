@@ -92,7 +92,7 @@ Aleya is a journaling and mentorship platform that pairs reflective journaling t
 
 ### Frontend styling system
 
-The React client uses Tailwind CSS with a small design system exposed in `frontend/src/index.css`. Buttons, form controls, and typography tokens are wrapped in named classes (e.g. `btn-primary`, `form-input`, `text-display`) and re-exported from `frontend/src/styles/ui.js` for ergonomic use inside React components.
+The React client uses Tailwind CSS with a small design system exposed in `frontend/src/index.css`. Buttons, form controls, and typography tokens are wrapped in named classes (e.g. `btn-primary`, `form-input`, `text-display`) and re-exported from `frontend/src/styles/ui.js` for ergonomic use inside React components. A static showcase of the tokens lives in [`docs/theme.html`](docs/theme.html) for quick visual verification outside the React build.
 
 ## Prerequisites
 
@@ -246,7 +246,7 @@ All endpoints are served from the `/api` prefix and return JSON. Supply an `Auth
 
 - `GET /api/forms/default` – Fetch the default "Daily Roots Check-In" journaling form. *(Public)*
 - `GET /api/forms` – Return forms visible to the current user (defaults, assigned mentor forms, or the full catalogue for admins). *(Authenticated)*
-- `POST /api/forms` – Create a reusable journaling form; mentors create `mentor`-visible templates, admins may publish `admin` forms. *(Mentor or admin)*
+- `POST /api/forms` – Create a reusable journaling form; mentors craft templates that automatically save with `mentor` visibility. *(Mentor)*
 - `POST /api/forms/:formId/assign` – Assign a form to a journaler; mentors must already be linked to the journaler. *(Mentor or admin)*
 - `DELETE /api/forms/:formId/assign/:journalerId` – Remove a form assignment from a journaler. *(Mentor or admin)*
 

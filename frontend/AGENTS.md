@@ -1,6 +1,7 @@
 # Frontend contributor notes
 
 - Use the Tailwind utility wrappers defined in `src/index.css` (and re-exported via `src/styles/ui.js`) for all shared UI patterns.
+- When tweaking or adding tokens, cross-check the static showcase in `docs/theme.html` so updates stay in sync with the documented examples.
 - Buttons: `btn-primary`, `btn-secondary`, `btn-subtle`, `btn-danger`.
   - Form controls: `form-input`, `form-select`, `form-textarea`, `form-checkbox`, plus their compact variants.
 - Typography tokens: `text-display`, `text-heading-*`, `text-body`, `text-body-sm`, `text-body-sm-strong`, `text-eyebrow`,

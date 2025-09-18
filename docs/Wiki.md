@@ -1,3 +1,8 @@
+# 2025-10-12
+
+- Retired the legacy mentor approval backend by deleting the unused routes plus the `mentor_approvals` table from the bootstrap helper and schema so registrations remain instant after verification.
+- Added `docs/theme.html` as a standalone token showcase, updated the README and AGENT notes to reference it, and confirmed the frontend still leans on the shared Tailwind wrappers.
+
 # 2025-10-11
 
 - Retired the README reference to email reminders now that the cadence controls remain out of scope, and removed the dormant

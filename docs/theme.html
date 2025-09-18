@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Aleya Theme Showcase</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --emerald-50: #ecfdf5;
+        --emerald-100: #d1fae5;
+        --emerald-200: #a7f3d0;
+        --emerald-500: #10b981;
+        --emerald-600: #059669;
+        --emerald-700: #047857;
+        --emerald-900: #064e3b;
+        --emerald-950: #022c22;
+        --rose-50: #fff1f2;
+        --rose-100: #ffe4e6;
+        --rose-500: #f43f5e;
+        --rose-600: #e11d48;
+        --sky-100: #dbeafe;
+        --sky-700: #0369a1;
+        --amber-100: #fef3c7;
+        --amber-600: #d97706;
+        --white: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Poppins", "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.15), transparent 55%),
+          linear-gradient(135deg, var(--emerald-50), #ffffff 35%, #e0f2f1 100%);
+        color: rgba(2, 44, 34, 0.95);
+        padding: 4rem 1.5rem;
+      }
+
+      main {
+        margin: 0 auto;
+        width: min(960px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+      }
+
+      section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      h1 {
+        font-size: clamp(2.75rem, 5vw, 3.5rem);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+
+      p {
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      .swatch-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .swatch-grid.columns-2 {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .swatch-grid.columns-3 {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+
+      .token-card {
+        border-radius: 1.5rem;
+        border: 1px solid rgba(4, 120, 87, 0.12);
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 20px 45px -20px rgba(6, 78, 59, 0.3);
+        backdrop-filter: blur(12px);
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .token-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(4, 120, 87, 0.65);
+      }
+
+      .token-description {
+        color: rgba(2, 44, 34, 0.7);
+        font-size: 0.95rem;
+      }
+
+      .button-row,
+      .form-row,
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .btn-primary,
+      .btn-secondary,
+      .btn-subtle,
+      .btn-danger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 0.875rem 1.5rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease,
+          color 0.2s ease;
+        text-decoration: none;
+      }
+
+      .btn-primary {
+        color: var(--white);
+        background: var(--emerald-600);
+        box-shadow: 0 12px 24px -12px rgba(4, 120, 87, 0.55),
+          0 8px 16px -8px rgba(4, 120, 87, 0.25);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        background: var(--emerald-500);
+      }
+
+      .btn-secondary {
+        color: var(--emerald-700);
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid rgba(4, 120, 87, 0.18);
+        box-shadow: 0 8px 18px -14px rgba(6, 78, 59, 0.45);
+      }
+
+      .btn-secondary:hover {
+        transform: translateY(-2px);
+        border-color: rgba(4, 120, 87, 0.3);
+        background: rgba(255, 255, 255, 0.92);
+      }
+
+      .btn-subtle {
+        color: var(--emerald-700);
+        background: transparent;
+        border: 1px solid transparent;
+        padding: 0.75rem 1.125rem;
+      }
+
+      .btn-subtle:hover {
+        transform: translateY(-2px);
+        color: var(--emerald-600);
+      }
+
+      .btn-danger {
+        color: var(--white);
+        background: var(--rose-600);
+        box-shadow: 0 12px 24px -12px rgba(225, 29, 72, 0.45);
+      }
+
+      .btn-danger:hover {
+        transform: translateY(-2px);
+        background: var(--rose-500);
+      }
+
+      .btn-primary:disabled,
+      .btn-secondary:disabled,
+      .btn-subtle:disabled,
+      .btn-danger:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      label.form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: rgba(6, 78, 59, 0.78);
+      }
+
+      .form-input,
+      .form-select,
+      .form-textarea {
+        margin-top: 0.5rem;
+        width: 100%;
+        border-radius: 1rem;
+        border: 1px solid rgba(4, 120, 87, 0.16);
+        background: rgba(255, 255, 255, 0.88);
+        color: rgba(6, 78, 59, 0.92);
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        box-shadow: 0 6px 18px -12px rgba(6, 78, 59, 0.35);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .form-input:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: rgba(16, 185, 129, 0.65);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+      }
+
+      .chip-base,
+      .badge-base {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 9999px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .chip-base {
+        background: rgba(236, 253, 245, 0.9);
+        color: var(--emerald-700);
+      }
+
+      .badge-base {
+        background: rgba(219, 234, 254, 0.8);
+        color: var(--sky-700);
+      }
+
+      .table-header {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+        gap: 1rem;
+        padding: 0 1.25rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: rgba(6, 78, 59, 0.65);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .table-row {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+        gap: 1rem;
+        border: 1px solid rgba(4, 120, 87, 0.12);
+        border-radius: 1.25rem;
+        padding: 1rem 1.25rem;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 16px 32px -24px rgba(6, 78, 59, 0.45);
+      }
+
+      .empty-state {
+        padding: 1rem 1.25rem;
+        border-radius: 1.25rem;
+        border: 1px dashed rgba(6, 78, 59, 0.2);
+        background: rgba(255, 255, 255, 0.65);
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: rgba(6, 78, 59, 0.7);
+        text-align: center;
+      }
+
+      .text-muted {
+        font-size: 0.9rem;
+        color: rgba(6, 78, 59, 0.62);
+      }
+
+      .text-info {
+        font-size: 0.9rem;
+        color: rgba(4, 120, 87, 0.75);
+      }
+
+      .text-display {
+        font-size: clamp(2.5rem, 4vw, 3rem);
+        font-weight: 700;
+        letter-spacing: -0.015em;
+      }
+
+      .text-heading-lg {
+        font-size: 2rem;
+        font-weight: 600;
+      }
+
+      .text-body {
+        font-size: 1rem;
+      }
+
+      .text-body-sm {
+        font-size: 0.85rem;
+      }
+
+      .text-eyebrow {
+        font-size: 0.75rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: rgba(4, 120, 87, 0.7);
+      }
+
+      .text-caption {
+        font-size: 0.7rem;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: rgba(2, 44, 34, 0.55);
+      }
+
+      .card-container {
+        border: 1px solid rgba(4, 120, 87, 0.12);
+        border-radius: 1.75rem;
+        background: rgba(255, 255, 255, 0.78);
+        padding: 2rem;
+        box-shadow: 0 24px 48px -28px rgba(2, 44, 34, 0.45);
+        backdrop-filter: blur(10px);
+      }
+
+      .showcase-table {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .badge-positive {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--emerald-700);
+      }
+
+      .badge-warning {
+        background: rgba(251, 191, 36, 0.2);
+        color: var(--amber-600);
+      }
+
+      .badge-risk {
+        background: rgba(248, 113, 113, 0.22);
+        color: var(--rose-600);
+      }
+
+      code {
+        font-family: "Fira Code", "Source Code Pro", Menlo, Monaco, Consolas, monospace;
+        font-size: 0.85rem;
+        background: rgba(255, 255, 255, 0.75);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(6, 78, 59, 0.15);
+        color: rgba(6, 78, 59, 0.85);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="text-eyebrow">Aleya design tokens</span>
+        <h1 class="text-display">Theme reference gallery</h1>
+        <p class="text-muted">
+          This static showcase mirrors the reusable classes defined in
+          <code>frontend/src/index.css</code>. Use it as a quick visual check when adjusting the
+          Tailwind-powered theme tokens that power the React experience.
+        </p>
+      </header>
+
+      <section>
+        <div class="token-card">
+          <span class="token-title">Typography</span>
+          <p class="text-body">
+            Aleya leans on a luminous, nature-forward voice. Pair the token classes below with
+            contextual colours from Tailwind utilities when composing new UI.
+          </p>
+          <div class="swatch-grid columns-2">
+            <div>
+              <p class="text-eyebrow">text-eyebrow</p>
+              <p class="text-muted">Uppercase whispers to introduce a section.</p>
+            </div>
+            <div>
+              <p class="text-caption">text-caption</p>
+              <p class="text-muted">Compact caption styling with gentle tracking.</p>
+            </div>
+            <div>
+              <p class="text-heading-lg">text-heading-lg</p>
+              <p class="text-muted">Section headings hold warm confidence.</p>
+            </div>
+            <div>
+              <p class="text-body">
+                text-body keeps reflections readable for longer copy blocks across the journal and
+                admin dashboards.
+              </p>
+            </div>
+            <div>
+              <p class="text-body-sm">text-body-sm softens helper descriptions and hint copy.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="token-card">
+          <span class="token-title">Buttons</span>
+          <p class="text-body">
+            Every call to action maps to one of four button tokens. Compose them via the exported
+            helpers in <code>src/styles/ui.js</code> instead of hard-coding utility strings.
+          </p>
+          <div class="button-row">
+            <button type="button" class="btn-primary">btn-primary</button>
+            <button type="button" class="btn-secondary">btn-secondary</button>
+            <button type="button" class="btn-subtle">btn-subtle</button>
+            <button type="button" class="btn-danger">btn-danger</button>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="token-card">
+          <span class="token-title">Form controls</span>
+          <p class="text-body">
+            Inputs, selects, and textareas share the same rounded, frosted styling. The classes keep
+            focus rings and spacing consistent across dashboards.
+          </p>
+          <div class="form-row">
+            <label class="form-label" style="flex: 1 1 240px">
+              Email
+              <input class="form-input" type="email" placeholder="mentor@aleya.grove" />
+            </label>
+            <label class="form-label" style="flex: 1 1 200px">
+              Sharing
+              <select class="form-select">
+                <option>Private sanctuary</option>
+                <option>Mood only</option>
+                <option>Full reflection</option>
+              </select>
+            </label>
+          </div>
+          <label class="form-label">
+            Reflection
+            <textarea class="form-textarea" placeholder="Describe today's canopy..."></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section>
+        <div class="token-card">
+          <span class="token-title">Chips & badges</span>
+          <p class="text-body">
+            Mood and sharing badges inherit their base styling from <code>chip-base</code> and
+            <code>badge-base</code>, with contextual hues applied in JavaScript helpers.
+          </p>
+          <div class="chip-row">
+            <span class="chip-base">chip-base</span>
+            <span class="badge-base">badge-base</span>
+            <span class="badge-base badge-positive">glowing</span>
+            <span class="badge-base badge-warning">tending</span>
+            <span class="badge-base badge-risk">urgent</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="token-card">
+          <span class="token-title">Cards & tables</span>
+          <p class="text-body">
+            Admin dashboards reuse <code>card-container</code> for frosted panels and the
+            <code>table-*</code> tokens for responsive resource lists.
+          </p>
+          <div class="card-container" style="margin: 0">
+            <p class="text-eyebrow">card-container</p>
+            <p class="text-heading-lg">Platform health</p>
+            <p class="text-info">Snapshot of forms, mentors, and journalers.</p>
+            <div class="showcase-table">
+              <div class="table-header">
+                <span>Resource</span>
+                <span>Status</span>
+                <span>Assignments</span>
+              </div>
+              <div class="table-row">
+                <div>
+                  <p class="text-body" style="font-weight: 600">Daily Roots Check-In</p>
+                  <p class="text-muted">Default template • universal</p>
+                </div>
+                <div><span class="chip-base">Default</span></div>
+                <div class="text-info">Available to every journaler</div>
+              </div>
+              <div class="table-row">
+                <div>
+                  <p class="text-body" style="font-weight: 600">Evening Gratitude Bloom</p>
+                  <p class="text-muted">Mentor-crafted reflection prompt</p>
+                </div>
+                <div><span class="chip-base">Mentor library</span></div>
+                <div class="text-info">Assigned to 4 journalers</div>
+              </div>
+              <p class="empty-state" style="margin: 0">empty-state</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
