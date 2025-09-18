@@ -10,6 +10,7 @@ const mentorRoutes = require("./routes/mentors");
 const journalRoutes = require("./routes/journal");
 const dashboardRoutes = require("./routes/dashboard");
 const adminRoutes = require("./routes/admin");
+const notificationRoutes = require("./routes/notifications");
 const { initializePlatform } = require("./utils/bootstrap");
 const { validateMailSettings } = require("./utils/email");
 
@@ -59,6 +60,7 @@ app.use("/api/mentors", mentorRoutes);
 app.use("/api/journal-entries", journalRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });

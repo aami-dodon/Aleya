@@ -4,7 +4,11 @@ const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
-const { sendMentorLinkEmails, sendMentorPanicEmail } = require("../utils/notifications");
+const {
+  notifyMentorLink,
+  notifyMentorPanic,
+  dispatchNotification,
+} = require("../utils/notifications");
 
 const router = express.Router();
 
@@ -215,7 +219,7 @@ router.post(
       );
 
       const { rows: participants } = await client.query(
-        `SELECT id, name, email
+        `SELECT id, name, email, notification_preferences
          FROM users
          WHERE id = ANY($1::int[])`,
         [[request.journaler_id, request.mentor_id]]
@@ -231,16 +235,18 @@ router.post(
       );
 
       if (mentor && journaler) {
-        await sendMentorLinkEmails(req.app, {
+        await notifyMentorLink(req.app, {
           mentor: {
             id: mentor.id,
             name: mentor.name,
             email: mentor.email,
+            notification_preferences: mentor.notification_preferences,
           },
           journaler: {
             id: journaler.id,
             name: journaler.name,
             email: journaler.email,
+            notification_preferences: journaler.notification_preferences,
           },
         });
       }
@@ -330,6 +336,15 @@ router.delete(
           return res.status(404).json({ error: "Mentor link not found" });
         }
 
+        const { rows: mentorRows } = await client.query(
+          `SELECT id, name, email, notification_preferences
+           FROM users
+           WHERE id = $1`,
+          [mentorId]
+        );
+
+        const mentor = mentorRows[0];
+
         await client.query(
           `DELETE FROM mentor_links WHERE journaler_id = $1 AND mentor_id = $2`,
           [req.user.id, mentorId]
@@ -349,15 +364,26 @@ router.delete(
         );
 
         await client.query(
-          `DELETE FROM mentor_notifications
-           WHERE mentor_id = $2
-             AND entry_id IN (
-               SELECT id FROM journal_entries WHERE journaler_id = $1
-             )`,
-          [req.user.id, mentorId]
+          `DELETE FROM user_notifications
+           WHERE user_id = $2
+             AND type = 'mentor_entry_shared'
+             AND metadata->>'journalerId' = $1`,
+          [String(req.user.id), mentorId]
         );
 
         await client.query("COMMIT");
+        if (mentor) {
+          await dispatchNotification(req.app, "mentorship_ended_mentor", {
+            recipient: mentor,
+            mentor,
+            journaler: {
+              id: req.user.id,
+              name: req.user.name,
+              email: req.user.email,
+            },
+          });
+        }
+
         return res.json({ success: true });
       } catch (error) {
         await client.query("ROLLBACK");
@@ -441,57 +467,6 @@ router.get(
   }
 );
 
-router.get(
-  "/notifications",
-  authenticate,
-  requireRole("mentor", "journaler", "admin"),
-  async (req, res, next) => {
-    try {
-      const { rows } = await pool.query(
-        `SELECT mn.id, mn.type, mn.entry_id, mn.visibility, mn.payload, mn.created_at, mn.read_at,
-                je.entry_date, je.mood, je.summary, je.shared_level,
-                j.id AS journaler_id, j.name AS journaler_name
-         FROM mentor_notifications mn
-         LEFT JOIN journal_entries je ON je.id = mn.entry_id
-         LEFT JOIN users j ON j.id = je.journaler_id
-         WHERE mn.mentor_id = $1
-         ORDER BY mn.created_at DESC
-         LIMIT 50`,
-        [req.user.id]
-      );
-
-      const notifications = rows.map((row) => ({
-        id: row.id,
-        type: row.type || "entry",
-        entryId: row.entry_id,
-        visibility: row.visibility,
-        createdAt: row.created_at,
-        readAt: row.read_at,
-        journaler: row.journaler_id
-          ? {
-              id: row.journaler_id,
-              name: row.journaler_name,
-            }
-          : null,
-        entry:
-          row.entry_id && row.entry_date
-            ? {
-                entryDate: row.entry_date,
-                mood: row.mood,
-                summary: row.summary,
-                sharedLevel: row.shared_level,
-              }
-            : null,
-        payload: row.payload || {},
-      }));
-
-      return res.json({ notifications });
-    } catch (error) {
-      return next(error);
-    }
-  }
-);
-
 router.post(
   "/panic-alerts",
   authenticate,
@@ -513,7 +488,7 @@ router.post(
 
     try {
       const { rows } = await pool.query(
-        `SELECT u.id, u.name, u.email
+        `SELECT u.id, u.name, u.email, u.notification_preferences
          FROM mentor_links ml
          JOIN users u ON u.id = ml.mentor_id
          WHERE ml.journaler_id = $1 AND ml.mentor_id = $2`,
@@ -525,21 +500,7 @@ router.post(
       }
 
       const targetMentor = rows[0];
-      const payload = {
-        senderId: req.user.id,
-        senderName: req.user.name,
-        senderEmail: req.user.email,
-        message,
-      };
-
-      const { rows: inserted } = await pool.query(
-        `INSERT INTO mentor_notifications (mentor_id, type, visibility, payload)
-         VALUES ($1, 'panic_alert', 'panic', $2::jsonb)
-         RETURNING id, created_at`,
-        [targetMentor.id, JSON.stringify(payload)]
-      );
-
-      await sendMentorPanicEmail(req.app, {
+      const record = await notifyMentorPanic(req.app, {
         mentor: targetMentor,
         sender: {
           id: req.user.id,
@@ -551,40 +512,12 @@ router.post(
 
       return res.status(201).json({
         success: true,
-        notification: {
-          id: inserted[0].id,
-          createdAt: inserted[0].created_at,
-        },
+        notification: record
+          ? { id: record.id, createdAt: record.created_at }
+          : null,
       });
     } catch (error) {
       return next(error);
     }
   }
-);
-
-router.post(
-  "/notifications/:id/read",
-  authenticate,
-  requireRole("mentor", "journaler", "admin"),
-  async (req, res, next) => {
-    try {
-      const result = await pool.query(
-        `UPDATE mentor_notifications
-         SET read_at = NOW()
-         WHERE id = $1 AND mentor_id = $2
-         RETURNING id`,
-        [req.params.id, req.user.id]
-      );
-
-      if (!result.rowCount) {
-        return res.status(404).json({ error: "Notification not found" });
-      }
-
-      return res.json({ success: true });
-    } catch (error) {
-      return next(error);
-    }
-  }
-);
-
 module.exports = router;
