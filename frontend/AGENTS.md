@@ -42,3 +42,5 @@ tays balanced across breakpoints.
   suggestions, pass them in popularity order so mentors always see the gentlest guidance first.
 
 
+- `GlobalErrorBoundary` wraps the authenticated shell and listens for unhandled promise rejections and window errors. When adjusting global error flows, reuse the boundary’s reset and reload affordances, keep the fallback copy within Aleya’s luminous tone, and prefer surfacing technical details behind the existing "technical whispers" toggle instead of introducing new disclosure patterns.
+
