@@ -1,5 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import JournalEntryForm from "../components/JournalEntryForm";
@@ -15,6 +16,7 @@ import {
   getMoodBadgeClasses,
   inputCompactClasses,
   mutedTextClasses,
+  primaryButtonClasses,
   selectCompactClasses,
   smallHeadingClasses,
   subtleButtonClasses,
@@ -549,6 +551,17 @@ function JournalHistoryPage() {
                         </dd>
                       </div>
                     </dl>
+                    <div className="flex flex-col gap-3 border-t border-emerald-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
+                        Let this form guide a fresh reflection beneath today’s canopy.
+                      </p>
+                      <Link
+                        to={`/dashboard?formId=${form.id}`}
+                        className={`${primaryButtonClasses} w-full text-center sm:w-auto`}
+                      >
+                        Begin this gentle check-in
+                      </Link>
+                    </div>
                   </li>
                 );
               })}
