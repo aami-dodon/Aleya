@@ -1,4 +1,10 @@
 
+# 2025-09-28
+- Let journalers open assigned forms inline on `JournalHistoryPage` by rendering `JournalEntryForm` when they press the "Bloom"
+  button instead of redirecting through the dashboard. This keeps the CTA styling with `primaryButtonClasses` and allows
+  reflections to begin without leaving the history view.
+- Updated `frontend/AGENTS.md` to capture the inline Bloom guidance so future contributors preserve the on-page experience.
+
 - Added an admin-only Journaler navigation entry that links to the new `/journalers` route where the entire journaler management
   experience now lives. The mentorship view for admins focuses solely on mentor stewardship while the new page handles search,
   unlinking mentors, and deleting journaler accounts with the existing admin endpoints.
