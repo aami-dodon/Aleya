@@ -163,13 +163,13 @@ const NOTIFICATION_TEMPLATES = {
         `<p>Rooted in care,<br/>The Aleya team</p>`,
     }),
   },
-  mentor_application_submitted_admin: {
+  mentor_registered_admin: {
     category: "account",
     emailTemplate: "mentor_application_submitted",
     buildInApp: ({ mentor }) => ({
-      title: `${mentor.name || mentor.email} applied to be a mentor`,
-      body: `${mentor.name || mentor.email} requested mentor access. Review their application to keep the directory current.`,
-      actionLabel: "Review mentor applications",
+      title: `${mentor.name || mentor.email} joined as a mentor`,
+      body: `${mentor.name || mentor.email} just registered as a mentor on Aleya. Welcome them aboard whenever you have a moment.`,
+      actionLabel: "Open dashboard",
       actionUrl: buildFrontendLink("/dashboard"),
       metadata: {
         email: mentor.email,
@@ -177,41 +177,40 @@ const NOTIFICATION_TEMPLATES = {
     }),
     buildEmail: ({ recipient, mentor }) => ({
       to: recipient.email,
-      subject: `Mentor application received: ${mentor.name || mentor.email}`,
+      subject: `New mentor registration: ${mentor.name || mentor.email}`,
       text: `Hi ${recipient.name || "there"},\n\n${
         mentor.name || mentor.email
-      } submitted a mentor application on Aleya.\n\nVisit ${buildFrontendLink(
+      } just registered as a mentor on Aleya.\n\nVisit ${buildFrontendLink(
         "/dashboard"
-      )} to review and respond.\n\nRooted in care,\nThe Aleya team`,
+      )} to share a welcome or ensure they have the resources they need.\n\nRooted in care,\nThe Aleya team`,
       html: `<p>Hi ${recipient.name || "there"},</p>` +
-        `<p><strong>${mentor.name || mentor.email}</strong> submitted a mentor application on Aleya.</p>` +
+        `<p><strong>${mentor.name || mentor.email}</strong> just registered as a mentor on Aleya.</p>` +
         `<p><a href="${buildFrontendLink(
           "/dashboard"
-        )}" style="display:inline-block;padding:12px 20px;background:#2f855a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Review mentor approvals</a></p>` +
+        )}" style="display:inline-block;padding:12px 20px;background:#2f855a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Open dashboard</a></p>` +
         `<p>Rooted in care,<br/>The Aleya team</p>`,
     }),
   },
-  mentor_application_submitted_mentor: {
+  mentor_registered_mentor: {
     category: "account",
     emailTemplate: "mentor_application_submitted",
     buildInApp: ({ mentor }) => ({
-      title: "We received your mentor application",
+      title: "Welcome to Aleya's mentor grove",
       body:
-        "Thank you for offering your guidance. Our admin team will review your details and email you once a decision is made.",
-      actionLabel: "Visit Aleya",
-      actionUrl: buildFrontendLink("/dashboard"),
+        "Thank you for sharing your wisdom. Verify your email to finish setting up your account, then sign in to start supporting journalers.",
+      actionLabel: "Verify your email",
+      actionUrl: buildFrontendLink("/login"),
       metadata: {
         mentorId: mentor.id,
-        status: "pending",
       },
     }),
     buildEmail: ({ mentor }) => ({
       to: mentor.email,
-      subject: "We received your mentor application",
-      text: `Hi ${mentor.name || "there"},\n\nThank you for offering to mentor on Aleya. An administrator will review your application shortly. We'll send another note as soon as a decision is ready.\n\nRooted in care,\nThe Aleya team`,
+      subject: "Welcome to Aleya as a mentor",
+      text: `Hi ${mentor.name || "there"},\n\nThank you for offering to mentor on Aleya. Please verify your email address so you can sign in and begin supporting journalers.\n\nRooted in care,\nThe Aleya team`,
       html: `<p>Hi ${mentor.name || "there"},</p>` +
-        `<p>Thank you for offering to mentor on Aleya. An administrator will review your application shortly.</p>` +
-        `<p>We'll send another note as soon as a decision is ready.</p>` +
+        `<p>Thank you for offering to mentor on Aleya.</p>` +
+        `<p>Please verify your email address so you can sign in and begin supporting journalers.</p>` +
         `<p>Rooted in care,<br/>The Aleya team</p>`,
     }),
   },

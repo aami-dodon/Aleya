@@ -16,6 +16,6 @@
   endpoint.
 - The public `/api/auth/expertise` route aggregates mentor profile keywords for registration suggestions—keep its splitting logic
   aligned with the frontend `parseExpertise` helper whenever you adjust how expertise data is stored.
-- Mentor registration now dispatches the `mentor_application_submitted_mentor` notification so mentors receive an acknowledgement
-  email while their application awaits admin review. Preserve this flow when changing the register route or notification
-  templates so both mentors and admins stay informed.
+- Mentor registration now mirrors the mentee flow: accounts are created immediately, mentors receive the usual verification
+  email, and the follow-up acknowledgement comes from the `mentor_registered_mentor` notification while admins get
+  `mentor_registered_admin`. Keep these notices aligned with the registration experience.
