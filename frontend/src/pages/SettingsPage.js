@@ -17,6 +17,7 @@ import { formatExpertise, parseExpertise } from "../utils/expertise";
 
 function SettingsPage() {
   const { user, token, updateProfile, deleteAccount } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -224,7 +225,16 @@ function SettingsPage() {
     <div className="flex w-full flex-1 flex-col gap-8">
       {message && <p className={infoTextClasses}>{message}</p>}
       <SectionCard title="Profile" subtitle="Tune your account details">
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form
+          className="space-y-5"
+          onSubmit={isAdmin ? (event) => event.preventDefault() : handleSubmit}
+        >
+          {isAdmin && (
+            <p className={`${bodySmallTextClasses} text-emerald-900/70`}>
+              Admin settings are curated by the Aleya team. Reach out to the support
+              grove if you need a helping hand with account updates.
+            </p>
+          )}
           <label className="block text-sm font-semibold text-emerald-900/80">
             Name
             <input
@@ -285,16 +295,18 @@ function SettingsPage() {
               />
               Daily reflection reminders
             </label>
-            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
-              <input
-                type="checkbox"
-                name="remindersWeekly"
-                className={checkboxClasses}
-                checked={form.remindersWeekly}
-                onChange={handleChange}
-              />
-              Weekly summary updates
-            </label>
+            {!isAdmin && (
+              <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
+                <input
+                  type="checkbox"
+                  name="remindersWeekly"
+                  className={checkboxClasses}
+                  checked={form.remindersWeekly}
+                  onChange={handleChange}
+                />
+                Weekly summary updates
+              </label>
+            )}
           </fieldset>
 
           <fieldset className="space-y-3 rounded-2xl border border-emerald-100 bg-white/60 p-4">
@@ -385,19 +397,21 @@ function SettingsPage() {
             </label>
           </fieldset>
 
-          <label className="block text-sm font-semibold text-emerald-900/80">
-            Mentor notifications
-            <select
-              name="mentorNotifications"
-              className={selectClasses}
-              value={form.mentorNotifications}
-              onChange={handleChange}
-            >
-              <option value="mood">Mood only</option>
-              <option value="summary">Summary</option>
-              <option value="full">Full entry</option>
-            </select>
-          </label>
+          {!isAdmin && (
+            <label className="block text-sm font-semibold text-emerald-900/80">
+              Mentor notifications
+              <select
+                name="mentorNotifications"
+                className={selectClasses}
+                value={form.mentorNotifications}
+                onChange={handleChange}
+              >
+                <option value="mood">Mood only</option>
+                <option value="summary">Summary</option>
+                <option value="full">Full entry</option>
+              </select>
+            </label>
+          )}
 
           {user.role === "mentor" && (
             <div className="space-y-4 rounded-2xl border border-emerald-100 bg-white/60 p-5">
@@ -432,59 +446,62 @@ function SettingsPage() {
             </div>
           )}
 
-          <button type="submit" className={`${primaryButtonClasses} w-full md:w-auto`}>
-            Save changes
-          </button>
+          {!isAdmin && (
+            <button type="submit" className={`${primaryButtonClasses} w-full md:w-auto`}>
+              Save changes
+            </button>
+          )}
         </form>
       </SectionCard>
-
-      <SectionCard title="Data & privacy" subtitle="You can request an export anytime">
-        <div className="space-y-5">
-          <p className={`${bodySmallTextClasses} text-emerald-900/80`}>
-            Download your reflections before you close your account. Once you
-            request deletion, Aleya permanently removes your journals and we
-            will not be able to recover them.
-          </p>
-
-          <button
-            type="button"
-            className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
-            onClick={requestExport}
-          >
-            Request journal export
-          </button>
-
-          <form
-            className="space-y-4 rounded-2xl border border-emerald-100 bg-white/60 p-5"
-            onSubmit={handleDeleteAccount}
-          >
-            <p className={`${bodySmallTextClasses} text-rose-600`}>
-              Deleting your account is permanent. Enter your password to
-              confirm you understand Aleya will not retain any of your data.
+      {!isAdmin && (
+        <SectionCard title="Data & privacy" subtitle="You can request an export anytime">
+          <div className="space-y-5">
+            <p className={`${bodySmallTextClasses} text-emerald-900/80`}>
+              Download your reflections before you close your account. Once you
+              request deletion, Aleya permanently removes your journals and we
+              will not be able to recover them.
             </p>
 
-            <label className="block text-sm font-semibold text-emerald-900/80">
-              Account password
-              <input
-                type="password"
-                name="deletePassword"
-                className={inputClasses}
-                value={deletePassword}
-                onChange={handleDeletePasswordChange}
-                placeholder="Enter your password to continue"
-              />
-            </label>
-
             <button
-              type="submit"
-              className={`${secondaryButtonClasses} border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50`}
-              disabled={isDeleting}
+              type="button"
+              className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+              onClick={requestExport}
             >
-              {isDeleting ? "Deleting account..." : "Delete account"}
+              Request journal export
             </button>
-          </form>
-        </div>
-      </SectionCard>
+
+            <form
+              className="space-y-4 rounded-2xl border border-emerald-100 bg-white/60 p-5"
+              onSubmit={handleDeleteAccount}
+            >
+              <p className={`${bodySmallTextClasses} text-rose-600`}>
+                Deleting your account is permanent. Enter your password to
+                confirm you understand Aleya will not retain any of your data.
+              </p>
+
+              <label className="block text-sm font-semibold text-emerald-900/80">
+                Account password
+                <input
+                  type="password"
+                  name="deletePassword"
+                  className={inputClasses}
+                  value={deletePassword}
+                  onChange={handleDeletePasswordChange}
+                  placeholder="Enter your password to continue"
+                />
+              </label>
+
+              <button
+                type="submit"
+                className={`${secondaryButtonClasses} border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50`}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting account..." : "Delete account"}
+              </button>
+            </form>
+          </div>
+        </SectionCard>
+      )}
     </div>
   );
 }

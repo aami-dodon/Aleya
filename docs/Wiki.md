@@ -34,3 +34,7 @@
 - Extended `frontend/AGENTS.md` with a note about keeping the landing feature cards balanced across breakpoints.
 - Restored the SOS modal header structure in `frontend/src/components/PanicButton.js` so the close button sits inside the header flex row, preventing mismatched JSX tags, refreshed `frontend/src/styles/ui.js` with a `bodySmallMutedTextClasses` alias for the muted small text token, and updated `frontend/AGENTS.md` with the guidance to keep header content wrapped together.
 
+# 2025-09-24
+- Hid mentor notification controls, the weekly summary toggle, the save action, and the data export/delete options when `user.role === "admin"` inside `frontend/src/pages/SettingsPage.js` so administrators see only relevant settings.
+- Documented the pared-back admin settings experience in `frontend/AGENTS.md`.
+

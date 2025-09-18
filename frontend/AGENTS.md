@@ -19,3 +19,5 @@ tays balanced across breakpoints.
   a clear escape hatch.
 - Keep modal headers in a single flex container that houses both the title block and the close button so the markup stays
   balanced and easier to maintain.
+- Admins view a pared-down settings experience: hide mentor notification controls, the weekly summary toggle, profile submit
+  actions, and the data export/deletion tools whenever `user.role === "admin"`.
