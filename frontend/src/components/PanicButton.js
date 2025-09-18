@@ -144,94 +144,95 @@ function PanicButton() {
                     Choose a linked mentor and share why you need immediate care so they can arrive prepared.
                   </p>
                 </div>
-              <button
-                type="button"
-                className={`${secondaryButtonClasses} px-4 py-2 text-sm`}
-                onClick={closeDialog}
-              >
-                Close
-              </button>
-            </div>
+                <button
+                  type="button"
+                  className={`${secondaryButtonClasses} px-4 py-2 text-sm`}
+                  onClick={closeDialog}
+                >
+                  Close
+                </button>
+              </div>
 
-            <div className="mt-6 space-y-4">
-              {loading && (
-                <p className={bodySmallMutedTextClasses}>Calling your mentors…</p>
-              )}
+              <div className="mt-6 space-y-4">
+                {loading && (
+                  <p className={bodySmallMutedTextClasses}>Calling your mentors…</p>
+                )}
 
-              {!loading && !hasContacts && !error && (
-                <p className={bodySmallMutedTextClasses}>
-                  You are not yet linked with mentors. Invite one to activate this SOS lantern.
-                </p>
-              )}
+                {!loading && !hasContacts && !error && (
+                  <p className={bodySmallMutedTextClasses}>
+                    You are not yet linked with mentors. Invite one to activate this SOS lantern.
+                  </p>
+                )}
 
-              {hasContacts && (
-                <form className="space-y-5" onSubmit={handleSubmit}>
-                  <div className="space-y-2">
-                    <label className={bodySmallStrongTextClasses} htmlFor="sos-mentor">
-                      Reach out to
-                    </label>
-                    <select
-                      id="sos-mentor"
-                      className={selectCompactClasses}
-                      value={selectedMentor}
-                      onChange={(event) => setSelectedMentor(event.target.value)}
-                      disabled={sending}
-                    >
-                      <option value="">Select a mentor</option>
-                      {contacts.map((contact) => (
-                        <option key={contact.id} value={contact.id}>
-                          {contact.name || contact.email}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                {hasContacts && (
+                  <form className="space-y-5" onSubmit={handleSubmit}>
+                    <div className="space-y-2">
+                      <label className={bodySmallStrongTextClasses} htmlFor="sos-mentor">
+                        Reach out to
+                      </label>
+                      <select
+                        id="sos-mentor"
+                        className={selectCompactClasses}
+                        value={selectedMentor}
+                        onChange={(event) => setSelectedMentor(event.target.value)}
+                        disabled={sending}
+                      >
+                        <option value="">Select a mentor</option>
+                        {contacts.map((contact) => (
+                          <option key={contact.id} value={contact.id}>
+                            {contact.name || contact.email}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                  <div className="space-y-2">
-                    <label className={bodySmallStrongTextClasses} htmlFor="sos-message">
-                      What do they need to know?
-                    </label>
-                    <textarea
-                      id="sos-message"
-                      className={textareaClasses}
-                      rows={4}
-                      placeholder="Share context so they can meet you right away."
-                      value={message}
-                      onChange={(event) => setMessage(event.target.value)}
-                      disabled={sending}
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <label className={bodySmallStrongTextClasses} htmlFor="sos-message">
+                        What do they need to know?
+                      </label>
+                      <textarea
+                        id="sos-message"
+                        className={textareaClasses}
+                        rows={4}
+                        placeholder="Share context so they can meet you right away."
+                        value={message}
+                        onChange={(event) => setMessage(event.target.value)}
+                        disabled={sending}
+                      />
+                    </div>
 
-                  {error && (
-                    <p className="text-sm text-rose-600">{error}</p>
-                  )}
+                    {error && (
+                      <p className="text-sm text-rose-600">{error}</p>
+                    )}
 
-                  {success && (
-                    <p className="text-sm text-emerald-600">{success}</p>
-                  )}
+                    {success && (
+                      <p className="text-sm text-emerald-600">{success}</p>
+                    )}
 
-                  <div className="flex justify-end gap-3">
-                    <button
-                      type="button"
-                      className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
-                      onClick={closeDialog}
-                      disabled={sending}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className={`${dangerButtonClasses} px-5 py-2.5 text-sm`}
-                      disabled={sending}
-                    >
-                      {sending ? "Sending…" : "Send SOS lantern"}
-                    </button>
-                  </div>
-                </form>
-              )}
+                    <div className="flex justify-end gap-3">
+                      <button
+                        type="button"
+                        className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+                        onClick={closeDialog}
+                        disabled={sending}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className={`${dangerButtonClasses} px-5 py-2.5 text-sm`}
+                        disabled={sending}
+                      >
+                        {sending ? "Sending…" : "Send SOS lantern"}
+                      </button>
+                    </div>
+                  </form>
+                )}
 
-              {error && !hasContacts && (
-                <p className="text-sm text-rose-600">{error}</p>
-              )}
+                {error && !hasContacts && (
+                  <p className="text-sm text-rose-600">{error}</p>
+                )}
+              </div>
             </div>
           </div>
         </div>

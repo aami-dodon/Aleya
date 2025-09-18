@@ -33,6 +33,7 @@ export const leadTextClasses = "text-body-lg";
 export const bodyTextClasses = "text-body";
 export const bodySmallTextClasses = "text-body-sm";
 export const bodySmallStrongTextClasses = "text-body-sm-strong";
+export const bodySmallMutedTextClasses = "text-muted";
 export const eyebrowTextClasses = "text-eyebrow";
 export const captionTextClasses = "text-caption";
 export const formLabelClasses = "form-label";
