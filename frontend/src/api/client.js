@@ -18,28 +18,13 @@ async function request(path, { method = "GET", data, token, headers = {} } = {})
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, config);
-  const contentType = response.headers.get("content-type") || "";
   const text = await response.text();
-  let payload = {};
+  let payload;
 
-  const isJson = contentType.includes("application/json");
-
-  if (isJson) {
-    try {
-      payload = text ? JSON.parse(text) : {};
-    } catch (error) {
-      payload = { message: "Received malformed JSON from the server.", raw: text };
-    }
-  } else if (text) {
-    const trimmedText = text.trim();
-    if (trimmedText.startsWith("<!DOCTYPE") || trimmedText.startsWith("<html")) {
-      payload = {
-        message: response.statusText || "The server is currently unavailable. Please try again later.",
-        raw: text,
-      };
-    } else {
-      payload = { message: trimmedText };
-    }
+  try {
+    payload = text ? JSON.parse(text) : {};
+  } catch (error) {
+    payload = { message: text };
   }
 
   if (!response.ok) {
