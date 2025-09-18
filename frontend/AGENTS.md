@@ -31,6 +31,9 @@ tays balanced across breakpoints.
 - Admins now see the form catalogue under the "Form Management" header; keep the copy aligned and pair the filter controls with
   accessible labels (use `sr-only` utilities) so screen readers announce each option clearly.
 
+- `RegisterPage` keeps the password confirmation helper (`syncPasswordMismatchError`) to disable submission and surface the inline
+  reminder until both entries match—preserve this flow when adjusting the form.
+
 - Journalers see their assigned forms within `JournalHistoryPage`; keep the poetic CTA that links to `/dashboard?formId=...` using
   the shared `primaryButtonClasses` so each card offers the single-word "Bloom" invitation.
 - The shared `TagInput` now highlights matching expertise while listing the top 10 popular tags beneath the field. When supplying
