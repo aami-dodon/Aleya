@@ -1,4 +1,10 @@
 
+# 2025-10-05
+
+- Shifted the admin form catalogue on `FormBuilderPage` into the shared table layout so titles, visibilities, mentee chips, and
+  delete controls align with the Mentor Directory styling across breakpoints.
+- Captured the four-column table guidance in `frontend/AGENTS.md` to keep future tweaks anchored to the dashboard table pattern.
+
 # 2025-10-04
 
 - Refined the admin dashboard form library into responsive cards that surface friendly visibility and assignment labels, and documented the `table-header`/`table-row` token pattern in `frontend/AGENTS.md` so future tables keep the stacked mobile layout.

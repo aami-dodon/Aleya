@@ -5,7 +5,6 @@ import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
 import {
   checkboxClasses,
-  chipBaseClasses,
   dangerButtonClasses,
   emptyStateClasses,
   infoTextClasses,
@@ -17,6 +16,9 @@ import {
   selectCompactClasses,
   subtleButtonClasses,
   textareaClasses,
+  chipBaseClasses,
+  tableHeaderClasses,
+  tableRowClasses,
 } from "../styles/ui";
 
 const FIELD_TYPES = [
@@ -460,83 +462,89 @@ function FormBuilderPage() {
         )}
 
         {filteredForms.length ? (
-          <ul className="grid gap-4">
+          <div className="space-y-3">
+            <div
+              className={`${tableHeaderClasses} md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.5fr)_auto] md:px-4`}
+            >
+              <span>Title</span>
+              <span>Visibility</span>
+              <span>Assignments</span>
+              <span className="md:text-right">Actions</span>
+            </div>
             {filteredForms.map((form) => {
               const mentees = Array.isArray(form.mentees)
                 ? form.mentees.filter((mentee) => mentee && mentee.id)
                 : [];
 
               return (
-                <li
+                <div
                   key={form.id}
-                  className="space-y-4 rounded-2xl border border-emerald-100 bg-white/70 p-5"
+                  className={`${tableRowClasses} md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.5fr)_auto]`}
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="space-y-2">
-                      <p className="text-base font-semibold text-emerald-900">
-                        {form.title}
+                  <div className="space-y-2">
+                    <p className="text-base font-semibold text-emerald-900">
+                      {form.title}
+                    </p>
+                    {form.description && (
+                      <p className="text-sm text-emerald-900/70">{form.description}</p>
+                    )}
+                    {isAdmin && (
+                      <p className={`${mutedTextClasses} text-sm`}>
+                        Created by {form.creatorName || "Unknown creator"}
                       </p>
-                      {form.description && (
-                        <p className="text-sm text-emerald-900/70">{form.description}</p>
-                      )}
-                      {isAdmin && (
-                        <p className={`${mutedTextClasses} text-sm`}>
-                          Created by {form.creatorName || "Unknown creator"}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className={chipBaseClasses}>{form.visibility}</span>
-                      {isAdmin && (
-                        <>
-                          <button
-                            type="button"
-                            className={`${dangerButtonClasses} px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60`}
-                            disabled={form.is_default}
-                            onClick={() => handleDeleteForm(form.id)}
-                          >
-                            Delete form
-                          </button>
-                          {form.is_default && (
-                            <p className={`${mutedTextClasses} text-xs text-right`}>
-                              Default forms cannot be removed.
-                            </p>
-                          )}
-                        </>
-                      )}
-                    </div>
+                    )}
                   </div>
-                  {isAdmin && (
-                    <div className="space-y-2 border-t border-emerald-100 pt-4">
-                      <p className="text-sm font-semibold text-emerald-900">
-                        Assigned mentees
+                  <div className="flex flex-wrap items-center gap-2 md:block">
+                    <span className={chipBaseClasses}>{form.visibility}</span>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-emerald-900 md:hidden">
+                      Assigned mentees
+                    </p>
+                    {mentees.length ? (
+                      <ul className="flex flex-wrap gap-2">
+                        {mentees.map((mentee) => (
+                          <li key={mentee.id} className="flex items-center gap-2">
+                            <span className={chipBaseClasses}>{mentee.name}</span>
+                            <button
+                              type="button"
+                              className={`${subtleButtonClasses} px-3 py-1 text-xs`}
+                              onClick={() => handleRemoveAssignment(form.id, mentee.id)}
+                            >
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className={`${mutedTextClasses} text-sm`}>
+                        No mentees linked yet.
                       </p>
-                      {mentees.length ? (
-                        <ul className="flex flex-wrap gap-2">
-                          {mentees.map((mentee) => (
-                            <li key={mentee.id} className="flex items-center gap-2">
-                              <span className={chipBaseClasses}>{mentee.name}</span>
-                              <button
-                                type="button"
-                                className={`${subtleButtonClasses} px-3 py-1 text-xs`}
-                                onClick={() => handleRemoveAssignment(form.id, mentee.id)}
-                              >
-                                Remove
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className={`${mutedTextClasses} text-sm`}>
-                          No mentees linked yet.
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </li>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2 md:items-end">
+                    {isAdmin && (
+                      <>
+                        <button
+                          type="button"
+                          className={`${dangerButtonClasses} w-full px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60 md:w-auto`}
+                          disabled={form.is_default}
+                          onClick={() => handleDeleteForm(form.id)}
+                        >
+                          Delete form
+                        </button>
+                        {form.is_default && (
+                          <p className={`${mutedTextClasses} text-xs md:text-right`}>
+                            Default forms cannot be removed.
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
               );
             })}
-          </ul>
+          </div>
         ) : (
           <p className={emptyStateClasses}>No forms available yet.</p>
         )}

@@ -32,6 +32,7 @@ tays balanced across breakpoints.
   accessible labels (use `sr-only` utilities) so screen readers announce each option clearly.
 - The shared `table-header` and `table-row` tokens power the responsive admin tables. They collapse into stacked cards on small
   screens and expand to the three-column grid on medium breakpoints—preserve that pattern when listing forms or similar resources.
+- `FormBuilderPage` now leans on the table tokens for admin form stewardship. Keep the four-column medium grid (`title`, `visibility`, `assignments`, `actions`) so delete controls and mentee chips stay aligned with the dashboard's other tables.
 
 - `RegisterPage` keeps the password confirmation helper (`syncPasswordMismatchError`) to disable submission and surface the inline
   reminder until both entries match—preserve this flow when adjusting the form.
