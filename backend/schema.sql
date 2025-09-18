@@ -14,17 +14,6 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS mentor_approvals (
-  id SERIAL PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  name TEXT,
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
-  application JSONB,
-  requested_at TIMESTAMPTZ DEFAULT NOW(),
-  decided_at TIMESTAMPTZ,
-  decided_by INTEGER REFERENCES users(id) ON DELETE SET NULL
-);
-
 CREATE TABLE IF NOT EXISTS mentor_profiles (
   user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   expertise TEXT,
@@ -105,4 +94,3 @@ CREATE TABLE IF NOT EXISTS entry_comments (
 CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date ON journal_entries (journaler_id, entry_date DESC);
 CREATE INDEX IF NOT EXISTS idx_mentor_assignments_journaler ON mentor_form_assignments (journaler_id);
 CREATE INDEX IF NOT EXISTS idx_mentor_links_journaler ON mentor_links (journaler_id);
-CREATE INDEX IF NOT EXISTS idx_mentor_approvals_status ON mentor_approvals (status);
