@@ -1,4 +1,9 @@
 # Repository Wiki
+## 2025-09-21
+- Removed unused typography utility classes (`text-body-strong`, `text-body-muted`, `text-body-sm-muted`) from the Tailwind
+  component layer and pruned their exports in `frontend/src/styles/ui.js` so the design tokens only track active usage.
+- Refreshed `frontend/AGENTS.md` to list the remaining typography helpers and to note that obsolete Tailwind wrappers should be
+  retired promptly.
 
 ## 2025-09-20
 - Centered the SOS modal in `frontend/src/components/PanicButton.js` and constrained its height so it no longer renders off the

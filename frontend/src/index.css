@@ -135,14 +135,6 @@
     @apply text-base leading-relaxed;
   }
 
-  .text-body-strong {
-    @apply text-base font-semibold;
-  }
-
-  .text-body-muted {
-    @apply text-base text-emerald-900/70;
-  }
-
   .text-body-sm {
     @apply text-sm;
   }
@@ -161,9 +153,5 @@
 
   .form-label {
     @apply text-sm font-semibold text-emerald-900/80;
-  }
-
-  .text-body-sm-muted {
-    @apply text-sm text-emerald-900/70;
   }
 }
