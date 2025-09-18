@@ -21,7 +21,7 @@ function PanicButton() {
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(null);
 
-  const canUsePanic = user?.role === "mentor" && Boolean(token);
+  const canUseSOS = user?.role === "journaler" && Boolean(token);
 
   const resetState = useCallback(() => {
     setSelectedMentor("");
@@ -31,7 +31,7 @@ function PanicButton() {
   }, []);
 
   const openDialog = () => {
-    if (!canUsePanic) {
+    if (!canUseSOS) {
       return;
     }
     setIsOpen(true);
@@ -43,7 +43,7 @@ function PanicButton() {
   };
 
   const loadContacts = useCallback(async () => {
-    if (!canUsePanic) {
+    if (!canUseSOS) {
       return;
     }
     setLoading(true);
@@ -57,7 +57,7 @@ function PanicButton() {
     } finally {
       setLoading(false);
     }
-  }, [canUsePanic, token]);
+  }, [canUseSOS, token]);
 
   useEffect(() => {
     if (isOpen && !contacts.length && !loading) {
@@ -92,12 +92,12 @@ function PanicButton() {
       );
       setSuccess(
         target?.name
-          ? `Alert sent to ${target.name}.`
-          : "Alert sent successfully."
+          ? `SOS alert sent to ${target.name}.`
+          : "SOS alert sent successfully."
       );
       setMessage("");
     } catch (err) {
-      setError(err.message || "Failed to send alert.");
+      setError(err.message || "Failed to send SOS alert.");
     } finally {
       setSending(false);
     }
@@ -105,7 +105,7 @@ function PanicButton() {
 
   const hasContacts = useMemo(() => contacts.length > 0, [contacts.length]);
 
-  if (!canUsePanic) {
+  if (!canUseSOS) {
     return null;
   }
 
@@ -116,7 +116,7 @@ function PanicButton() {
         className={`${dangerButtonClasses} px-4 py-2 text-sm`}
         onClick={openDialog}
       >
-        Panic
+        SOS
       </button>
 
       {isOpen && (
@@ -124,7 +124,7 @@ function PanicButton() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-emerald-950/40 px-4 py-10"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="panic-dialog-heading"
+          aria-labelledby="sos-dialog-heading"
           onClick={closeDialog}
         >
           <div
@@ -134,7 +134,7 @@ function PanicButton() {
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <h2
-                  id="panic-dialog-heading"
+                  id="sos-dialog-heading"
                   className="text-xl font-semibold text-emerald-900"
                 >
                   Request urgent support
@@ -159,18 +159,18 @@ function PanicButton() {
 
               {!loading && !hasContacts && !error && (
                 <p className={bodySmallMutedTextClasses}>
-                  You are not linked with any mentors yet. Invite a mentor to enable panic alerts.
+                  You are not linked with any mentors yet. Invite a mentor to enable SOS alerts.
                 </p>
               )}
 
               {hasContacts && (
                 <form className="space-y-5" onSubmit={handleSubmit}>
                   <div className="space-y-2">
-                    <label className={bodySmallStrongTextClasses} htmlFor="panic-mentor">
+                    <label className={bodySmallStrongTextClasses} htmlFor="sos-mentor">
                       Contact
                     </label>
                     <select
-                      id="panic-mentor"
+                      id="sos-mentor"
                       className={selectCompactClasses}
                       value={selectedMentor}
                       onChange={(event) => setSelectedMentor(event.target.value)}
@@ -186,11 +186,11 @@ function PanicButton() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className={bodySmallStrongTextClasses} htmlFor="panic-message">
+                    <label className={bodySmallStrongTextClasses} htmlFor="sos-message">
                       What do they need to know?
                     </label>
                     <textarea
-                      id="panic-message"
+                      id="sos-message"
                       className={textareaClasses}
                       rows={4}
                       placeholder="Share context so they know how to help right away."
@@ -214,7 +214,7 @@ function PanicButton() {
                       className={`${dangerButtonClasses} px-5 py-2.5 text-sm`}
                       disabled={sending}
                     >
-                      {sending ? "Sending…" : "Send alert"}
+                      {sending ? "Sending…" : "Send SOS alert"}
                     </button>
                   </div>
                 </form>
