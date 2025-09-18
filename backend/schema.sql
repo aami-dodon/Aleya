@@ -87,8 +87,10 @@ CREATE TABLE IF NOT EXISTS journal_entries (
 CREATE TABLE IF NOT EXISTS mentor_notifications (
   id SERIAL PRIMARY KEY,
   mentor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  entry_id INTEGER NOT NULL REFERENCES journal_entries(id) ON DELETE CASCADE,
-  visibility TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'entry',
+  entry_id INTEGER REFERENCES journal_entries(id) ON DELETE CASCADE,
+  visibility TEXT,
+  payload JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   read_at TIMESTAMPTZ
 );

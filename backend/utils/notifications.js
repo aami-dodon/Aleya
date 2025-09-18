@@ -191,7 +191,49 @@ async function sendMentorEntryEmail(app, { mentor, journaler, entry }) {
   );
 }
 
+async function sendMentorPanicEmail(app, { mentor, sender, message }) {
+  if (!mentor?.email || !sender?.email) {
+    return;
+  }
+
+  const subject = `[Aleya] Important support alert from ${
+    sender.name || "a mentor"
+  }`;
+  const dashboardUrl = buildFrontendLink("/dashboard");
+  const safeMessage = message || "Mentor requested urgent support.";
+
+  const text = `Hi ${mentor.name || "there"},\n\n${
+    sender.name || "A mentor"
+  } triggered the panic button and asked for urgent support.\n\nMessage:\n${safeMessage}\n\nYou can coordinate next steps from the mentor dashboard: ${dashboardUrl}\n\nRooted in care,\nThe Aleya team`;
+
+  const html = `<p>Hi ${mentor.name || "there"},</p>` +
+    `<p><strong>${sender.name || "A mentor"}</strong> triggered the panic button and asked for urgent support.</p>` +
+    `<blockquote style="border-left:4px solid #f87171;margin:16px 0;padding-left:12px;color:#4a5568;">${safeMessage.replace(
+      /\n/g,
+      "<br/>"
+    )}</blockquote>` +
+    `<p><a href="${dashboardUrl}" style="display:inline-block;padding:12px 20px;background:#2f855a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Open mentor dashboard</a></p>` +
+    `<p>Rooted in care,<br/>The Aleya team</p>`;
+
+  await safeSend(
+    app,
+    {
+      to: mentor.email,
+      cc: sender.email,
+      subject,
+      text,
+      html,
+    },
+    {
+      type: "mentor-panic-alert",
+      mentorId: mentor.id,
+      senderId: sender.id,
+    }
+  );
+}
+
 module.exports = {
   sendMentorLinkEmails,
   sendMentorEntryEmail,
+  sendMentorPanicEmail,
 };
