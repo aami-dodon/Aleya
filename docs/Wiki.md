@@ -1,3 +1,7 @@
+# 2025-09-27
+- Renamed the admin forms catalogue header to "Form Management" on `frontend/src/pages/FormBuilderPage.js` and added accessible
+  labels plus journaler-focused search copy to the admin-only filters so screen readers describe each control clearly.
+
 # 2025-09-26
 - Extended the admin mentorship hub with a new Journaler management panel that lets admins search by name/email, review linked
   mentors, unlink relationships, and delete journaler accounts. Backed the UI with enriched `/admin/journalers` data and a new

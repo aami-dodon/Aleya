@@ -27,3 +27,5 @@ tays balanced across breakpoints.
   and use the shared button tokens for unlinking mentors and deleting journaler accounts when an admin needs to retire access.
 - In the Forms builder page, keep the admin view focused on stewardship: do not reintroduce the creation UI for admins, preserve
   the filter controls, and ensure the mentee association list stays actionable with the existing remove affordance.
+- Admins now see the form catalogue under the "Form Management" header; keep the copy aligned and pair the filter controls with
+  accessible labels (use `sr-only` utilities) so screen readers announce each option clearly.
