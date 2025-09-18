@@ -1,3 +1,8 @@
+# 2025-10-09
+
+- Documented the implemented and missing README features in `docs/features.md`, noting reminder and mentor notification gaps plus the broken panic alert flow.
+- Added `docs/AGENTS.md` to guide future documentation updates within the knowledge base.
+
 
 # 2025-10-08
 
