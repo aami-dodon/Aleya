@@ -215,9 +215,69 @@ router.post(
       requestedRole && REGISTER_ROLES.includes(requestedRole)
       ? requestedRole
       : "journaler";
+    const trimmedName = typeof name === "string" ? name.trim() : "";
+    const resolvedTimezone = timezone || "UTC";
 
     try {
       await client.query("BEGIN");
+
+      let mentorApproval;
+      if (role === "mentor") {
+        const applicationDetails = {
+          name: trimmedName || name || "",
+          timezone: resolvedTimezone,
+          mentorProfile: mentorProfile || {},
+        };
+
+        const { rows: approvals } = await client.query(
+          `SELECT * FROM mentor_approvals WHERE email = $1 FOR UPDATE`,
+          [normalizedEmail]
+        );
+
+        if (!approvals.length) {
+          const { rows: insertedApproval } = await client.query(
+            `INSERT INTO mentor_approvals (email, name, application)
+             VALUES ($1, $2, $3)
+             RETURNING *`,
+            [normalizedEmail, trimmedName || name || null, JSON.stringify(applicationDetails)]
+          );
+          mentorApproval = insertedApproval[0];
+        } else {
+          mentorApproval = approvals[0];
+
+          if (mentorApproval.status !== "approved") {
+            const { rows: updatedApproval } = await client.query(
+              `UPDATE mentor_approvals
+               SET name = $2,
+                   application = $3,
+                   status = 'pending',
+                   requested_at = NOW(),
+                   decided_at = NULL,
+                   decided_by = NULL
+               WHERE id = $1 AND status <> 'approved'
+               RETURNING *`,
+              [
+                mentorApproval.id,
+                trimmedName || name || null,
+                JSON.stringify(applicationDetails),
+              ]
+            );
+
+            if (updatedApproval.length) {
+              mentorApproval = updatedApproval[0];
+            }
+          }
+        }
+
+        if (!mentorApproval || mentorApproval.status !== "approved") {
+          await client.query("ROLLBACK");
+          return res.status(403).json({
+            error:
+              "Thanks for your interest in mentoring. An administrator must approve your application before you can register.",
+            code: "mentor_approval_required",
+          });
+        }
+      }
 
       const existing = await client.query(
         "SELECT id FROM users WHERE email = $1",
@@ -258,7 +318,7 @@ router.post(
           passwordHash,
           name,
           role,
-          timezone || "UTC",
+          resolvedTimezone,
           JSON.stringify(DEFAULT_NOTIFICATION_PREFS),
           verificationTokenHash,
           verificationExpiresAt,

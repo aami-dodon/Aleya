@@ -30,6 +30,9 @@ function RegisterPage() {
   const [submittedEmail, setSubmittedEmail] = useState("");
   const [verificationDetails, setVerificationDetails] = useState(null);
   const [localError, setLocalError] = useState(null);
+  const [mentorApplicationSubmitted, setMentorApplicationSubmitted] =
+    useState(false);
+  const [mentorApprovalMessage, setMentorApprovalMessage] = useState("");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -75,6 +78,8 @@ function RegisterPage() {
       return;
     }
 
+    setMentorApplicationSubmitted(false);
+    setMentorApprovalMessage("");
     setLoading(true);
     try {
       const payload = {
@@ -99,6 +104,17 @@ function RegisterPage() {
       setSubmitted(true);
     } catch (err) {
       console.error(err);
+      if (err?.details?.code === "mentor_approval_required") {
+        setSubmittedEmail((form.email || "").trim());
+        setMentorApprovalMessage(
+          err?.message ||
+            "Thanks for your interest in mentoring. We'll email you once an administrator approves your application."
+        );
+        setMentorApplicationSubmitted(true);
+        setLocalError(null);
+        return;
+      }
+
       if (err?.details?.errors?.length) {
         setLocalError(err.details.errors[0].msg || err.message);
       } else if (err?.message) {
@@ -108,6 +124,39 @@ function RegisterPage() {
       setLoading(false);
     }
   };
+
+  if (mentorApplicationSubmitted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100 px-6 py-16">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-emerald-100 bg-white/80 p-10 text-center shadow-2xl shadow-emerald-900/10 backdrop-blur">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+            <span className="text-3xl">🌿</span>
+          </div>
+          <h1 className={`${displayTextClasses} text-emerald-900`}>
+            Mentor application received
+          </h1>
+          <p className={`mt-4 ${leadTextClasses} text-emerald-900/80`}>
+            {mentorApprovalMessage}
+          </p>
+          {submittedEmail && (
+            <p className={`mt-3 ${bodySmallMutedTextClasses} text-emerald-900/70`}>
+              We'll reach out at <span className="font-semibold">{submittedEmail}</span> once a decision has been made.
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setMentorApplicationSubmitted(false);
+              setMentorApprovalMessage("");
+            }}
+            className={`mt-8 inline-flex items-center justify-center gap-2 ${primaryButtonClasses}`}
+          >
+            Return to registration
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (submitted) {
     const expiresHours = verificationDetails?.verificationExpiresInHours;
@@ -263,6 +312,14 @@ function RegisterPage() {
                 ))}
               </select>
             </label>
+            {form.role === "mentor" && (
+              <p
+                className={`-mt-2 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3 ${bodySmallMutedTextClasses} text-emerald-900/70`}
+              >
+                Mentor accounts require administrator approval. Submit your
+                application below and we'll notify you when it's accepted.
+              </p>
+            )}
             <label className={`block ${formLabelClasses}`}>
               Timezone
               <select
