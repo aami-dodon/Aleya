@@ -15,10 +15,10 @@ import {
 
 const DEFAULT_SHARING = "private";
 const SHARING_OPTIONS = [
-  { value: "private", label: "Keep private" },
+  { value: "private", label: "Keep in my private sanctuary" },
   { value: "mood", label: "Share mood only" },
   { value: "summary", label: "Share summary" },
-  { value: "full", label: "Share full entry" },
+  { value: "full", label: "Share the full reflection" },
 ];
 
 function JournalEntryForm({
@@ -70,7 +70,7 @@ function JournalEntryForm({
   }, [form, values]);
 
   if (!form) {
-    return <p className={emptyStateClasses}>Select a form to start journaling.</p>;
+    return <p className={emptyStateClasses}>Select a form to begin today’s reflection.</p>;
   }
 
   const handleChange = (field, value) => {
@@ -80,7 +80,7 @@ function JournalEntryForm({
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!canSubmit) {
-      setError("Please complete all required fields.");
+      setError("Please complete each required prompt.");
       return;
     }
 
@@ -143,7 +143,7 @@ function JournalEntryForm({
           ))}
         </select>
         <p className={`${bodySmallMutedTextClasses} text-emerald-900/60`}>
-          Control what mentors can see when you submit entries.
+          Decide how much of this entry your mentors can see.
         </p>
       </div>
       {error && (

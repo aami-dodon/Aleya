@@ -113,10 +113,10 @@ function Layout({ children }) {
     return (
       <div className={containerClasses}>
         <NavLink to="/login" className={signInClasses} onClick={handleNavigate}>
-          Sign in
+          Step inside
         </NavLink>
         <NavLink to="/register" className={joinClasses} onClick={handleNavigate}>
-          Join Aleya
+          Join the Aleya canopy
         </NavLink>
       </div>
     );
@@ -237,7 +237,7 @@ function Layout({ children }) {
         <div
           className={`mx-auto w-full max-w-6xl px-6 py-6 text-center ${bodySmallMutedTextClasses} text-emerald-900/70`}
         >
-          Root your days in care, grow with guidance, and share the harvest.
+          Tend your breath, follow the light, and share the harvest of your days.
         </div>
       </footer>
     </div>

@@ -15,7 +15,7 @@ function MentorRequestList({
 }) {
   if (!requests.length) {
     return (
-      <p className={emptyStateClasses}>No mentorship requests at the moment.</p>
+      <p className={emptyStateClasses}>No mentorship invitations right now—the sky is briefly clear.</p>
     );
   }
 
@@ -97,15 +97,15 @@ function MentorRequestList({
 function formatStatus(status) {
   switch (status) {
     case "pending":
-      return "Awaiting response";
+      return "Awaiting your welcome";
     case "mentor_accepted":
-      return "Mentor accepted";
+      return "Mentor has accepted";
     case "confirmed":
-      return "Linked";
+      return "Bond confirmed";
     case "declined":
       return "Declined";
     case "ended":
-      return "Mentorship ended";
+      return "Mentorship closed";
     default:
       return status;
   }

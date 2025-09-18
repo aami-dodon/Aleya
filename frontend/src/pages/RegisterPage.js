@@ -108,7 +108,7 @@ function RegisterPage() {
         setSubmittedEmail((form.email || "").trim());
         setMentorApprovalMessage(
           err?.message ||
-            "Thanks for your interest in mentoring. We'll email you once an administrator approves your application."
+            "Thank you for offering your guidance. We'll email you as soon as an administrator lights the green lantern of approval."
         );
         setMentorApplicationSubmitted(true);
         setLocalError(null);
@@ -133,14 +133,14 @@ function RegisterPage() {
             <span className="text-3xl">🌿</span>
           </div>
           <h1 className={`${displayTextClasses} text-emerald-900`}>
-            Mentor application received
+            Your mentor lantern is on its way
           </h1>
           <p className={`mt-4 ${leadTextClasses} text-emerald-900/80`}>
             {mentorApprovalMessage}
           </p>
           {submittedEmail && (
             <p className={`mt-3 ${bodySmallMutedTextClasses} text-emerald-900/70`}>
-              We'll reach out at <span className="font-semibold">{submittedEmail}</span> once a decision has been made.
+              We'll reach out at <span className="font-semibold">{submittedEmail}</span> as soon as an administrator completes the welcome.
             </p>
           )}
           <button
@@ -151,7 +151,7 @@ function RegisterPage() {
             }}
             className={`mt-8 inline-flex items-center justify-center gap-2 ${primaryButtonClasses}`}
           >
-            Return to registration
+            Return to the form
           </button>
         </div>
       </div>
@@ -173,10 +173,12 @@ function RegisterPage() {
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
             <span className="text-3xl">✉️</span>
           </div>
-          <h1 className={`${displayTextClasses} text-emerald-900`}>Check your inbox</h1>
+          <h1 className={`${displayTextClasses} text-emerald-900`}>
+            Watch for the Aleya lantern
+          </h1>
           <p className={`mt-4 ${leadTextClasses} text-emerald-900/80`}>
-            We've sent a verification link to {submittedEmail || "your email"}.
-            Follow the link to activate your account.
+            We've sent a verification link to {submittedEmail || "your email"} so
+            you can kindle your new account. Follow the glow to finish arriving.
           </p>
           {verificationDetails?.message && (
             <p
@@ -187,8 +189,8 @@ function RegisterPage() {
           )}
           {expiresCopy && (
             <p className={`mt-3 ${bodySmallMutedTextClasses} text-emerald-900/70`}>
-              The link will expire {expiresCopy}. If it doesn't arrive within a
-              few minutes, check your spam or junk folder.
+              The link will fade {expiresCopy}. If it doesn't appear soon, peek in
+              your spam or junk folders.
             </p>
           )}
           <Link
@@ -209,14 +211,15 @@ function RegisterPage() {
           <span
             className={`inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-2 shadow-sm shadow-emerald-900/5 ${bodySmallStrongTextClasses} text-emerald-700`}
           >
-            🌱 New to Aleya
+            🌱 Arriving at Aleya
           </span>
           <h1 className={`${displayTextClasses} text-emerald-950`}>
-            Join Aleya
+            Begin your luminous account
           </h1>
           <p className={`${leadTextClasses} text-emerald-900/80`}>
-            Create an account to start journaling, mentor others, or steward the
-            platform. Your journey toward mindful growth begins here.
+            Plant your name in Aleya to journal with intention, offer your wisdom,
+            or steward the sanctuary for others. This is the first ring of your new
+            practice.
           </p>
           <div className="grid gap-4 rounded-3xl border border-emerald-100 bg-white/70 p-6 shadow-inner shadow-emerald-900/5 sm:grid-cols-2">
             <div className="space-y-1">
@@ -224,7 +227,8 @@ function RegisterPage() {
                 Journalers
               </p>
               <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
-                Reflect with guided prompts and track meaningful insights.
+                Reflect with guided prompts and gather the insights that shimmer
+                through your days.
               </p>
             </div>
             <div className="space-y-1">
@@ -232,7 +236,8 @@ function RegisterPage() {
                 Mentors
               </p>
               <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
-                Share your wisdom, set your availability, and support others.
+                Share your wisdom, set gentle rhythms, and support others as they
+                unfurl.
               </p>
             </div>
           </div>
@@ -240,10 +245,11 @@ function RegisterPage() {
         <div className="rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-2xl shadow-emerald-900/10 backdrop-blur md:p-10">
           <div className="mb-8 space-y-2 text-center">
             <p className={`${eyebrowTextClasses} text-emerald-600`}>
-              Create your account
+              Shape your presence
             </p>
             <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
-              Fill in the details to unlock journaling and mentoring tools.
+              Share a few details to unlock Aleya’s journals, mentorship, and
+              stewardship tools.
             </p>
           </div>
           <form className="space-y-5" onSubmit={handleSubmit}>
@@ -316,8 +322,8 @@ function RegisterPage() {
               <p
                 className={`-mt-2 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3 ${bodySmallMutedTextClasses} text-emerald-900/70`}
               >
-                Mentor accounts require administrator approval. Submit your
-                application below and we'll notify you when it's accepted.
+                Mentor accounts require an administrator’s blessing. Submit your
+                application below and we’ll send word when the invitation is lit.
               </p>
             )}
             <label className={`block ${formLabelClasses}`}>
@@ -358,7 +364,7 @@ function RegisterPage() {
                     value={form.mentorProfile.availability}
                     onChange={handleMentorChange}
                     className={inputClasses}
-                    placeholder="Share your availability"
+                    placeholder="Share when you can hold space"
                   />
                 </label>
                 <label className={`block ${formLabelClasses}`}>
@@ -370,9 +376,9 @@ function RegisterPage() {
                     onChange={handleMentorChange}
                     className={`${textareaClasses} resize-none`}
                     placeholder="Introduce yourself to potential journalers"
-                  />
-                </label>
-              </div>
+                />
+              </label>
+            </div>
             )}
 
             {(localError || error) && (
@@ -385,16 +391,16 @@ function RegisterPage() {
               className={`${primaryButtonClasses} w-full`}
               disabled={loading}
             >
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? "Rooting your account..." : "Create luminous account"}
             </button>
           </form>
           <p className={`mt-6 text-center ${bodySmallMutedTextClasses} text-emerald-900/70`}>
-            Already have an account?{" "}
+            Already tending a space?{" "}
             <Link
               to="/login"
               className="font-semibold text-emerald-700 transition hover:text-emerald-600"
             >
-              Sign in
+              Step inside
             </Link>
           </p>
         </div>
