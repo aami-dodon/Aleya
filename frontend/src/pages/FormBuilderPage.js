@@ -45,6 +45,8 @@ function FormBuilderPage() {
   const [creatorFilter, setCreatorFilter] = useState("all");
   const isAdmin = user.role === "admin";
   const isMentor = user.role === "mentor";
+  const adminTableGridTemplate =
+    "minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.5fr) auto";
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -464,7 +466,8 @@ function FormBuilderPage() {
         {filteredForms.length ? (
           <div className="space-y-3">
             <div
-              className={`${tableHeaderClasses} md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.5fr)_auto] md:px-4`}
+              className={`${tableHeaderClasses} md:px-4`}
+              style={{ "--table-grid": adminTableGridTemplate }}
             >
               <span>Title</span>
               <span>Visibility</span>
@@ -479,7 +482,8 @@ function FormBuilderPage() {
               return (
                 <div
                   key={form.id}
-                  className={`${tableRowClasses} md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.5fr)_auto]`}
+                  className={tableRowClasses}
+                  style={{ "--table-grid": adminTableGridTemplate }}
                 >
                   <div className="space-y-2">
                     <p className="text-base font-semibold text-emerald-900">

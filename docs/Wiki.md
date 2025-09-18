@@ -1,4 +1,11 @@
 
+# 2025-10-06
+
+- Reworked the admin form library table to drive its column layout through a shared `--table-grid` CSS variable so headers and
+  rows stay aligned with the mentor directory pattern.
+- Updated `frontend/src/index.css` to read the column template from the custom property and documented the override flow in
+  `frontend/AGENTS.md` for future dashboard table tweaks.
+
 # 2025-10-05
 
 - Shifted the admin form catalogue on `FormBuilderPage` into the shared table layout so titles, visibilities, mentee chips, and
