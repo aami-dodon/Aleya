@@ -15,6 +15,7 @@ import {
   primaryButtonClasses,
   secondaryButtonClasses,
 } from "../styles/ui";
+import { parseExpertise } from "../utils/expertise";
 
 const ACTIVE_MENTOR_STATUSES = new Set(["pending", "mentor_accepted", "confirmed"]);
 
@@ -166,30 +167,43 @@ function MentorConnectionsPage() {
             >
               {mentors.length ? (
                 <ul className="grid gap-4">
-                  {mentors.map((mentor) => (
-                    <li
-                      key={mentor.id}
-                      className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-5"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setSelectedMentor(mentor)}
-                        className="group flex-1 space-y-1 text-left"
+                  {mentors.map((mentor) => {
+                    const expertiseTags = parseExpertise(mentor.expertise);
+                    return (
+                      <li
+                        key={mentor.id}
+                        className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-5"
                       >
-                        <p className="text-base font-semibold text-emerald-900 group-hover:text-emerald-700">
-                          {mentor.name}
-                        </p>
-                        <p className={infoTextClasses}>{mentor.expertise || "Mentor"}</p>
-                      </button>
-                      <button
-                        type="button"
-                        className={`${primaryButtonClasses} px-5 py-2.5 text-sm`}
-                        onClick={() => sendRequest(mentor)}
-                      >
-                        Request mentorship
-                      </button>
-                    </li>
-                  ))}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedMentor(mentor)}
+                          className="group flex-1 space-y-1 text-left"
+                        >
+                          <p className="text-base font-semibold text-emerald-900 group-hover:text-emerald-700">
+                            {mentor.name}
+                          </p>
+                          {expertiseTags.length ? (
+                            <div className="flex flex-wrap gap-2">
+                              {expertiseTags.map((tag) => (
+                                <span key={tag} className={chipBaseClasses}>
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className={infoTextClasses}>Mentor</p>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          className={`${primaryButtonClasses} px-5 py-2.5 text-sm`}
+                          onClick={() => sendRequest(mentor)}
+                        >
+                          Request mentorship
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
                 <p className={emptyStateClasses}>No mentors match that search yet.</p>
