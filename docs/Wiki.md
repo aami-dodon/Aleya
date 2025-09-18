@@ -1,4 +1,14 @@
 
+# 2025-09-30
+
+- Let mentor registrations follow the mentee workflow by removing the `mentor_approvals`
+  gate in `backend/routes/auth.js`, allowing accounts to be created immediately and email
+  verification links to be dispatched without waiting for admin review.
+- Replaced the mentor application notifications with the new
+  `mentor_registered_admin` and `mentor_registered_mentor` messages so admins still receive
+  a heads-up while mentors get a welcome focused on verifying their email rather than
+  awaiting approval.
+
 # 2025-09-29
 
 - Wrapped the authenticated shell with a new `GlobalErrorBoundary` component that renders a gentle fallback, offers retry and reload affordances, and records window errors plus unhandled promise rejections so runtime exceptions no longer splash raw traces across the UI.
