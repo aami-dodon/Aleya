@@ -8,6 +8,7 @@ const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 const { logger } = require("../utils/logger");
 const { sendEmail } = require("../utils/mailer");
+const { createVerificationEmail } = require("../utils/emailTemplates");
 
 const router = express.Router();
 
@@ -68,15 +69,6 @@ function buildVerificationLink(token) {
   }
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 function splitExpertiseTags(value) {
   if (!value) {
     return [];
@@ -131,30 +123,24 @@ function choosePreferredLabel(current, candidate) {
 async function sendVerificationEmail(app, { email, name }, token) {
   const verificationUrl = buildVerificationLink(token);
 
-  const displayName = name ? name.trim() : "there";
-  const safeName = escapeHtml(displayName || "there");
   const expiresText =
     VERIFICATION_TOKEN_TTL_HOURS === 1
       ? "1 hour"
       : `${VERIFICATION_TOKEN_TTL_HOURS} hours`;
 
+  const { subject, text, html } = createVerificationEmail({
+    recipientName: name,
+    verificationUrl,
+    expiresText,
+  });
+
   await sendEmail(
     app,
     {
       to: email,
-      subject: "Verify your Aleya email address",
-      text: `Hi ${displayName || "there"},\n\n` +
-        "Thanks for joining Aleya. Please confirm your email address by visiting the link below:\n" +
-        `${verificationUrl}\n\n` +
-        `The link expires in ${expiresText}. If you didn't create an account, you can safely ignore this message.\n\n` +
-        "Rooted in care,\nThe Aleya team",
-      html: `<p>Hi ${safeName},</p>` +
-        `<p>Thanks for joining Aleya. Please confirm your email address by clicking the button below.</p>` +
-        `<p><a href="${verificationUrl}" style="display:inline-block;padding:12px 20px;background:#2f855a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Verify email</a></p>` +
-        `<p>This link expires in ${escapeHtml(
-          expiresText
-        )}. If you didn't create an account you can safely ignore this email.</p>` +
-        `<p>Rooted in care,<br/>The Aleya team</p>`,
+      subject,
+      text,
+      html,
     },
     { type: "verification", email }
   );
