@@ -14,3 +14,5 @@
   surface who built each form and which journalers are linked.
 - Leave the `/forms` creation route restricted to mentors; admins now manage forms without crafting new templates through that
   endpoint.
+- The public `/api/auth/expertise` route aggregates mentor profile keywords for registration suggestions—keep its splitting logic
+  aligned with the frontend `parseExpertise` helper whenever you adjust how expertise data is stored.

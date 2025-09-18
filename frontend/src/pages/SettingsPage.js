@@ -13,6 +13,7 @@ import {
   textareaClasses,
 } from "../styles/ui";
 import TIMEZONE_OPTIONS from "../utils/timezones";
+import { useExpertiseSuggestions } from "../hooks/useExpertiseSuggestions";
 import { formatExpertise, parseExpertise } from "../utils/expertise";
 
 function SettingsPage() {
@@ -42,6 +43,7 @@ function SettingsPage() {
   const [message, setMessage] = useState(null);
   const [deletePassword, setDeletePassword] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const { suggestions: expertiseSuggestions } = useExpertiseSuggestions({ limit: 40 });
 
   useEffect(() => {
     if (!user) return;
@@ -421,6 +423,7 @@ function SettingsPage() {
                 <TagInput
                   value={form.mentorProfile.expertise}
                   onChange={handleExpertiseChange}
+                  suggestions={expertiseSuggestions}
                 />
               </label>
               <label className="block text-sm font-semibold text-emerald-900/80">
