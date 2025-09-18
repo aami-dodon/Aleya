@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import NotificationBell from "./NotificationBell";
+import PanicButton from "./PanicButton";
 import {
   bodySmallMutedTextClasses,
   bodySmallStrongTextClasses,
@@ -153,10 +154,12 @@ function Layout({ children }) {
               ))}
             </nav>
             <div className="hidden items-center gap-3 md:flex">
+              <PanicButton />
               <NotificationBell />
               <AuthControls />
             </div>
             <div className="ml-auto flex items-center gap-3 md:hidden">
+              <PanicButton />
               <NotificationBell />
               <button
                 type="button"

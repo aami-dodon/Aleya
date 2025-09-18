@@ -1,4 +1,5 @@
 export const primaryButtonClasses = "btn-primary";
+export const dangerButtonClasses = "btn-danger";
 export const secondaryButtonClasses = "btn-secondary";
 export const subtleButtonClasses = "btn-subtle";
 export const iconButtonClasses = "icon-button";

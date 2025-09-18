@@ -29,6 +29,7 @@ Aleya is a journaling and mentorship platform that pairs reflective journaling t
 - **Mentor linking:** Journalers can invite or select mentors, forming a mentorship connection only after mutual consent.
 - **Reminders:** Daily or weekly reminders delivered via email.
 - **Mentor notifications:** Email summaries of mentee entries with privacy controls to respect journaler choices.
+- **Panic support alerts:** A persistent panic button lets mentors escalate concerns to their own linked mentors with an urgent note, triggering both an in-app notification and an "important" email.
 - **Dashboards:** Role-specific dashboards showing streaks, average mood, trendlines, progress overviews, mentee highlights, and low-mood alerts.
 
 ### User flows
@@ -203,6 +204,7 @@ Aleya pairs in-app notifications with transactional emails so mentors never miss
 - **Global bell:** Mentors see a bell icon in the navigation bar. Clicking it opens a panel with the five most recent mentee updates and a shortcut back to the dashboard. The same feed appears on the mentor dashboard and mentorship pages so updates are always within reach.
 - **Respect sharing choices:** Notification payloads only include the information a journaler agreed to share (mood, summary, or full form responses). Mentor notification preferences further limit the detail that appears in email digests.
 - **Email triggers:** The backend sends emails for account verification, when a mentorship link is confirmed, and whenever a journaler submits either the default check-in or an assigned form. Emails go to the linked mentor(s) and reuse the same privacy filtering logic as the in-app feed.
+- **Panic alerts:** When a mentor clicks the panic button they can choose one of their mentors, send a short note, and dispatch an email marked important; the recipient mentor receives the message and the requester is cc’d for awareness.
 - **Configuration:** Set the SMTP variables described in [Configure environment variables](#1-configure-environment-variables). The server validates the credentials on boot, so you'll see a descriptive error if anything is missing.
 - **Testing locally:** With SMTP credentials in place, submit a journal entry that is shared beyond "Private" to generate both the in-app badge and mentor email. Marking a notification as read immediately updates the unread badge count across the interface.
 

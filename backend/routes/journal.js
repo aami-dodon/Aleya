@@ -209,8 +209,8 @@ router.post(
         await Promise.all(
           mentors.map((mentor) =>
             pool.query(
-              `INSERT INTO mentor_notifications (mentor_id, entry_id, visibility)
-               VALUES ($1, $2, $3)` ,
+              `INSERT INTO mentor_notifications (mentor_id, type, entry_id, visibility)
+               VALUES ($1, 'entry', $2, $3)` ,
               [mentor.id, entry.id, visibility]
             )
           )
@@ -336,8 +336,8 @@ router.patch(
           await Promise.all(
             mentors.map((mentor) =>
               pool.query(
-                `INSERT INTO mentor_notifications (mentor_id, entry_id, visibility)
-                 VALUES ($1, $2, $3)` ,
+                `INSERT INTO mentor_notifications (mentor_id, type, entry_id, visibility)
+                 VALUES ($1, 'entry', $2, $3)` ,
                 [mentor.mentor_id, entryId, visibility]
               )
             )
