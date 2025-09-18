@@ -30,7 +30,4 @@ tays balanced across breakpoints.
   the filter controls, and ensure the mentee association list stays actionable with the existing remove affordance.
 - Admins now see the form catalogue under the "Form Management" header; keep the copy aligned and pair the filter controls with
   accessible labels (use `sr-only` utilities) so screen readers announce each option clearly.
-- Journalers see their assigned forms within `JournalHistoryPage`; the "Bloom" button now opens the form inline on that page.
-  Use the shared `primaryButtonClasses` for the CTA and surface the reflection form with `JournalEntryForm` so journalers never
-  need to detour through the dashboard when starting a new entry.
 
