@@ -1,3 +1,8 @@
+# 2025-09-27
+- Added an admin-only Journaler navigation entry that links to the new `/journalers` route where the entire journaler management
+  experience now lives. The mentorship view for admins focuses solely on mentor stewardship while the new page handles search,
+  unlinking mentors, and deleting journaler accounts with the existing admin endpoints.
+
 # 2025-09-26
 - Extended the admin mentorship hub with a new Journaler management panel that lets admins search by name/email, review linked
   mentors, unlink relationships, and delete journaler accounts. Backed the UI with enriched `/admin/journalers` data and a new
