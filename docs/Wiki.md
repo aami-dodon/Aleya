@@ -1,4 +1,7 @@
 # 2025-09-27
+
+- Renamed the admin forms catalogue header to "Form Management" on `frontend/src/pages/FormBuilderPage.js` and added accessible
+  labels plus journaler-focused search copy to the admin-only filters so screen readers describe each control clearly.
 - Hid the journal reminder controls on the admin settings page so administrators no longer see the daily reflection or weekly
   summary toggles.
 
