@@ -1,5 +1,6 @@
 
 # 2025-09-28
+
 - Introduced a public `/api/auth/expertise` endpoint that aggregates mentor profile keywords, returning the most common tags in
   popularity order so registration flows can suggest existing expertise. The splitter mirrors `parseExpertise` to keep frontend
   and backend normalization aligned.
@@ -7,6 +8,15 @@
   field, preventing duplicates and preferring the canonical casing when mentors add items.
 - Wired mentor registration and settings forms to fetch the expertise suggestions via the new hook so mentors can click to add
   existing areas of wisdom while still creating bespoke entries when needed.
+
+- Let journalers open assigned forms inline on `JournalHistoryPage` by rendering `JournalEntryForm` when they press the "Bloom"
+  button instead of redirecting through the dashboard. This keeps the CTA styling with `primaryButtonClasses` and allows
+  reflections to begin without leaving the history view.
+- Updated `frontend/AGENTS.md` to capture the inline Bloom guidance so future contributors preserve the on-page experience.
+- Added a live password confirmation check on `RegisterPage` so the retype field highlights mismatches, shares a gentle reminder,
+  and keeps the submit action disabled until both entries match. Noted the guidance in `frontend/AGENTS.md` for future frontend
+  contributors.
+
 
 - Added an admin-only Journaler navigation entry that links to the new `/journalers` route where the entire journaler management
   experience now lives. The mentorship view for admins focuses solely on mentor stewardship while the new page handles search,

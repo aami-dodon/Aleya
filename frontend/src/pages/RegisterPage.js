@@ -52,8 +52,17 @@ function RegisterPage() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setLocalError(null);
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      const nextForm = { ...prev, [name]: value };
+
+      if (name === "password" || name === "confirmPassword") {
+        syncPasswordMismatchError(nextForm);
+      } else {
+        setLocalError(null);
+      }
+
+      return nextForm;
+    });
   };
 
   const handleMentorChange = (event) => {
@@ -76,7 +85,7 @@ function RegisterPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (form.password !== form.confirmPassword) {
+    if (passwordsMismatch) {
       setLocalError("Passwords must match");
       return;
     }
@@ -302,9 +311,25 @@ function RegisterPage() {
                 onChange={handleChange}
                 required
                 minLength={8}
-                className={inputClasses}
+                className={`${inputClasses} ${
+                  passwordsMismatch
+                    ? "border-rose-300 focus:border-rose-400 focus:ring-rose-100"
+                    : ""
+                }`}
                 placeholder="Confirm your password"
+                aria-invalid={passwordsMismatch}
+                aria-describedby={
+                  passwordsMismatch ? "confirm-password-error" : undefined
+                }
               />
+              {passwordsMismatch && (
+                <p
+                  id="confirm-password-error"
+                  className={`mt-2 ${bodySmallStrongTextClasses} text-rose-600`}
+                >
+                  Passwords must match before you can continue.
+                </p>
+              )}
             </label>
             <label className={`block ${formLabelClasses}`}>
               Role
@@ -393,7 +418,7 @@ function RegisterPage() {
             <button
               type="submit"
               className={`${primaryButtonClasses} w-full`}
-              disabled={loading}
+              disabled={loading || passwordsMismatch}
             >
               {loading ? "Rooting your account..." : "Create luminous account"}
             </button>
