@@ -1,3 +1,10 @@
+# 2025-10-10
+
+- Reintroduced share-aware mentor email notifications that trigger after journal entry creation by wiring `dispatchEntryNotifications`
+  through the new `backend/services/mentorNotifications.js` helper.
+- Added the mentor digest email job (`backend/jobs/sendMentorDigest.js`), refreshed the email templates to cover single-entry and
+  digest layouts, and documented the feature and guardrails in `backend/AGENTS.md` and `docs/features.md`.
+
 # 2025-10-09
 
 - Documented the implemented and missing README features in `docs/features.md`, noting reminder and mentor notification gaps plus the broken panic alert flow.

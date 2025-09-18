@@ -1,5 +1,23 @@
 const SUBJECT_PREFIX = "[Aleya]";
 
+const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
+
+const SHARE_LEVEL_LABELS = {
+  mood: "Mood",
+  summary: "Summary",
+  full: "Full",
+};
+
+const SHARE_LEVEL_DESCRIPTIONS = {
+  mood: "They opened their mood so you can sense how they're arriving today.",
+  summary: "They offered a gentle summary of what surfaced in their reflection.",
+  full: "They opened their full reflection for your care and insight.",
+};
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -200,6 +218,288 @@ function renderEmailLayout({
 </html>`;
 }
 
+function normalizeName(value, fallback) {
+  if (typeof value === "string" && value.trim().length) {
+    return value.trim();
+  }
+
+  return fallback;
+}
+
+function formatDateLabel(value) {
+  if (!value) {
+    return null;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return DATE_FORMATTER.format(date);
+}
+
+function buildEntryDetails({ sharedLevel, mood, summary, responses }) {
+  const htmlParts = [];
+  const textLines = [];
+
+  if (sharedLevel !== "private" && mood) {
+    const safeMood = escapeHtml(String(mood));
+    htmlParts.push(
+      `<p class="paragraph"><strong>Mood:</strong> ${safeMood}</p>`
+    );
+    textLines.push(`Mood: ${mood}`);
+  }
+
+  if ((sharedLevel === "summary" || sharedLevel === "full") && summary) {
+    const safeSummary = escapeHtml(String(summary));
+    htmlParts.push(
+      `<p class="paragraph"><strong>Summary:</strong> ${safeSummary}</p>`
+    );
+    textLines.push(`Summary: ${summary}`);
+  }
+
+  if (sharedLevel === "full" && Array.isArray(responses)) {
+    const responseItems = responses
+      .filter((item) => item && item.value !== null && item.value !== "")
+      .map((item) => ({
+        label: String(item.label || ""),
+        value: String(item.value),
+      }));
+
+    if (responseItems.length) {
+      htmlParts.push(
+        '<p class="paragraph"><strong>Reflection details</strong></p>'
+      );
+      const listItems = responseItems
+        .map(
+          (item) =>
+            `<li><strong>${escapeHtml(item.label)}:</strong> ${escapeHtml(
+              item.value
+            )}</li>`
+        )
+        .join("");
+      htmlParts.push(`<ul class="paragraph">${listItems}</ul>`);
+
+      textLines.push("Reflection details:");
+      responseItems.forEach((item) => {
+        textLines.push(`- ${item.label}: ${item.value}`);
+      });
+    }
+  }
+
+  return {
+    html: htmlParts.join(""),
+    text: textLines.join("\n"),
+  };
+}
+
+function createMentorEntryNotificationEmail({
+  mentorName,
+  journalerName,
+  entryDate,
+  formTitle,
+  shareLevel,
+  mood,
+  summary,
+  responses,
+}) {
+  const recipientName = normalizeName(mentorName, "there");
+  const menteeName = normalizeName(journalerName, "your mentee");
+  const safeRecipient = escapeHtml(recipientName);
+  const safeMentee = escapeHtml(menteeName);
+
+  const levelLabel = SHARE_LEVEL_LABELS[shareLevel] || "Mood";
+  const levelDescription =
+    SHARE_LEVEL_DESCRIPTIONS[shareLevel] ||
+    "They shared a new glimmer from their practice.";
+
+  const whenLabel = formatDateLabel(entryDate);
+  const safeFormTitle = formTitle ? escapeHtml(formTitle) : "reflection";
+  const whenHtml = whenLabel ? ` on ${escapeHtml(whenLabel)}` : "";
+
+  const details = buildEntryDetails({
+    sharedLevel,
+    mood,
+    summary,
+    responses,
+  });
+
+  const contentHtml = `
+    <p class="paragraph">Hi ${safeRecipient},</p>
+    <p class="paragraph">
+      ${safeMentee} just completed the ${safeFormTitle}${whenHtml} and chose
+      the ${escapeHtml(levelLabel)} sharing level.
+      ${escapeHtml(levelDescription)}
+    </p>
+    ${details.html || ""}
+    <p class="paragraph">
+      Sign in to Aleya to explore the reflection further and share a gentle
+      reply.
+    </p>
+  `;
+
+  const textLines = [
+    `Hi ${recipientName},`,
+    `${menteeName} just completed the ${formTitle || "reflection"}` +
+      (whenLabel ? ` on ${whenLabel}` : "") +
+      ` and chose the ${levelLabel} sharing level. ${levelDescription}`,
+  ];
+
+  if (details.text) {
+    textLines.push("", details.text);
+  }
+
+  textLines.push(
+    "",
+    "Sign in to Aleya to explore the reflection further and share a gentle reply.",
+    "",
+    "Rooted in care,",
+    "The Aleya team"
+  );
+
+  const text = textLines.join("\n");
+
+  const html = renderEmailLayout({
+    title: `${levelLabel} update from ${menteeName}`,
+    previewText: `${menteeName} just shared a ${levelLabel.toLowerCase()} update.`,
+    contentHtml,
+  });
+
+  const subject = `${SUBJECT_PREFIX} New reflection from ${menteeName}`;
+
+  return {
+    subject,
+    text,
+    html,
+  };
+}
+
+function createMentorDigestEmail({
+  mentorName,
+  periodLabel,
+  entryCount,
+  mentees,
+}) {
+  const recipientName = normalizeName(mentorName, "there");
+  const safeRecipient = escapeHtml(recipientName);
+  const safePeriod = escapeHtml(periodLabel || "the recent period");
+  const count = Number.isFinite(entryCount) ? entryCount : 0;
+  const entryWord = count === 1 ? "reflection" : "reflections";
+
+  const menteeSections = (mentees || [])
+    .filter((mentee) => mentee && Array.isArray(mentee.entries))
+    .map((mentee) => {
+      const name = normalizeName(mentee.journalerName, "Your mentee");
+      const safeName = escapeHtml(name);
+
+      const entryBlocks = mentee.entries
+        .map((entry) => {
+          const levelLabel =
+            SHARE_LEVEL_LABELS[entry.sharedLevel] || "Mood";
+          const whenLabel = formatDateLabel(entry.entryDate || entry.createdAt);
+          const safeFormTitle = entry.formTitle
+            ? escapeHtml(entry.formTitle)
+            : null;
+
+          const details = buildEntryDetails(entry);
+
+          const headerParts = [escapeHtml(levelLabel)];
+          if (whenLabel) {
+            headerParts.push(escapeHtml(whenLabel));
+          }
+          if (safeFormTitle) {
+            headerParts.push(safeFormTitle);
+          }
+
+          const header = headerParts.join(" · ");
+
+          const htmlBlock = `
+            <div class="paragraph"><strong>${header}</strong></div>
+            ${details.html || ""}
+          `;
+
+          const textLines = [header];
+          if (details.text) {
+            textLines.push(details.text);
+          }
+
+          return { html: htmlBlock, text: textLines.join("\n") };
+        })
+        .filter((block) => block); // Remove undefined blocks
+
+      const html = [
+        `<p class="paragraph"><strong>${safeName}</strong></p>`,
+        entryBlocks.map((block) => block.html).join(""),
+      ].join("");
+
+      const textLines = [name];
+      entryBlocks.forEach((block) => {
+        textLines.push("", block.text);
+      });
+
+      return {
+        html,
+        text: textLines.join("\n"),
+      };
+    });
+
+  const sectionsHtml = menteeSections
+    .map((section) => section.html)
+    .join("<hr style=\"border:none;border-top:1px solid #e2e8f0;margin:24px 0\"/>");
+
+  const sectionsText = menteeSections
+    .map((section) => section.text)
+    .join("\n\n---\n\n");
+
+  const contentHtml = `
+    <p class="paragraph">Hi ${safeRecipient},</p>
+    <p class="paragraph">
+      Here's a gentle digest of ${count} ${entryWord} shared between ${safePeriod}.
+    </p>
+    ${sectionsHtml || '<p class="paragraph">No shared reflections in this window.</p>'}
+    <p class="paragraph">
+      Sign in to Aleya to continue supporting your mentees and respond with
+      encouragement.
+    </p>
+  `;
+
+  const textLines = [
+    `Hi ${recipientName},`,
+    `Here's a gentle digest of ${count} ${entryWord} shared between ${periodLabel || "the recent period"}.`,
+  ];
+
+  if (sectionsText) {
+    textLines.push("", sectionsText);
+  } else {
+    textLines.push("", "No shared reflections in this window.");
+  }
+
+  textLines.push(
+    "",
+    "Sign in to Aleya to continue supporting your mentees and respond with encouragement.",
+    "",
+    "Rooted in care,",
+    "The Aleya team"
+  );
+
+  const text = textLines.join("\n");
+
+  const html = renderEmailLayout({
+    title: "Mentee reflection digest",
+    previewText: `${count} ${entryWord} shared between ${periodLabel || "the recent period"}.`,
+    contentHtml,
+  });
+
+  const subject = `${SUBJECT_PREFIX} ${count} ${entryWord} from your mentees`;
+
+  return {
+    subject,
+    text,
+    html,
+  };
+}
+
 function createVerificationEmail({
   recipientName,
   verificationUrl,
@@ -258,4 +558,6 @@ module.exports = {
   escapeHtml,
   renderEmailLayout,
   createVerificationEmail,
+  createMentorEntryNotificationEmail,
+  createMentorDigestEmail,
 };

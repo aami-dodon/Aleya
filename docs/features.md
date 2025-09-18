@@ -33,10 +33,12 @@ Tasks:
 
 ## Mentor notifications
 Feature Name: Mentor notifications
-Present: No
-Tasks:
-- Task 1: Add notification dispatch when journal entries are created respecting share levels (Complexity: High).
-- Task 2: Create digest templates and delivery jobs for mentor summaries (Complexity: Medium).【F:README.md†L34-L36】【8a8581†L1-L7】
+Present: Yes
+Implemented: Fully
+Code Quality: Good
+Notes:
+- Journal entry creation now emails linked mentors using share-level aware templates while the scheduled digest job summarises
+  recent reflections through the shared notification service, keeping copy within the Aleya email theme.【F:backend/routes/journal.js†L1-L220】【F:backend/services/mentorNotifications.js†L1-L230】【F:backend/jobs/sendMentorDigest.js†L1-L104】【F:backend/utils/emailTemplates.js†L1-L360】
 
 ## Panic support alerts
 Feature Name: Panic support alerts

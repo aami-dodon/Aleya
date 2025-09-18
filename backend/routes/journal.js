@@ -6,6 +6,9 @@ const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 const { normalizeMood } = require("../utils/mood");
 const { shapeEntryForMentor } = require("../utils/entries");
+const {
+  dispatchEntryNotifications,
+} = require("../services/mentorNotifications");
 const router = express.Router();
 
 const SHARING_LEVELS = ["private", "mood", "summary", "full"];
@@ -193,6 +196,11 @@ router.post(
         ...rows[0],
         form_title: form.title,
         responses: JSON.stringify(cleaned),
+      });
+
+      await dispatchEntryNotifications(req.app, {
+        entry,
+        journaler: { id: req.user.id, name: req.user.name },
       });
 
       return res.status(201).json({ entry });
