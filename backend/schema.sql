@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('journaler','mentor','admin')),
   timezone TEXT DEFAULT 'UTC',
-  notification_preferences JSONB DEFAULT '{"reminders":{"daily":true,"weekly":true},"mentorNotifications":"summary"}',
+  notification_preferences JSONB DEFAULT '{"reminders":{"daily":true,"weekly":true},"mentorNotifications":"summary","channels":{"email":true,"inApp":true},"categories":{"account":true,"mentorship":true,"forms":true,"exports":true,"alerts":true}}',
   is_verified BOOLEAN DEFAULT FALSE,
   verification_token_hash TEXT,
   verification_token_expires_at TIMESTAMPTZ,
@@ -95,13 +95,17 @@ CREATE TABLE IF NOT EXISTS journal_entries (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS mentor_notifications (
+CREATE TABLE IF NOT EXISTS user_notifications (
   id SERIAL PRIMARY KEY,
-  mentor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  type TEXT NOT NULL DEFAULT 'entry',
-  entry_id INTEGER REFERENCES journal_entries(id) ON DELETE CASCADE,
-  visibility TEXT,
-  payload JSONB DEFAULT '{}'::jsonb,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL,
+  category TEXT NOT NULL,
+  title TEXT NOT NULL,
+  body TEXT,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  action_url TEXT,
+  action_label TEXT,
+  email_template TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   read_at TIMESTAMPTZ
 );
@@ -115,7 +119,7 @@ CREATE TABLE IF NOT EXISTS entry_comments (
 );
 
 CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date ON journal_entries (journaler_id, entry_date DESC);
-CREATE INDEX IF NOT EXISTS idx_mentor_notifications_mentor ON mentor_notifications (mentor_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_notifications_user ON user_notifications (user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_mentor_assignments_journaler ON mentor_form_assignments (journaler_id);
 CREATE INDEX IF NOT EXISTS idx_mentor_links_journaler ON mentor_links (journaler_id);
 CREATE INDEX IF NOT EXISTS idx_mentor_approvals_status ON mentor_approvals (status);
