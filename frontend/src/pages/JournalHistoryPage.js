@@ -92,6 +92,8 @@ function JournalHistoryPage() {
   const [activeFormStatusMessage, setActiveFormStatusMessage] = useState(null);
   const [activeFormStatusVariant, setActiveFormStatusVariant] = useState("info");
   const [activeFormResetKey, setActiveFormResetKey] = useState(0);
+  const activeFormSectionRef = useRef(null);
+  const activeFormHeadingRef = useRef(null);
 
   const loadEntries = useCallback(async () => {
     if (!token) return;
@@ -235,7 +237,9 @@ function JournalHistoryPage() {
   const handleOpenForm = useCallback((formId) => {
     setActiveFormId(formId);
     setActiveFormStatusVariant("info");
-    setActiveFormStatusMessage(null);
+    setActiveFormStatusMessage(
+      "Your chosen form now blossoms just below this list."
+    );
     setActiveFormResetKey((prev) => prev + 1);
   }, []);
 
@@ -280,13 +284,35 @@ function JournalHistoryPage() {
   );
 
   useEffect(() => {
-    if (activeFormStatusVariant !== "success" || !activeFormStatusMessage) {
+    if (!activeFormStatusMessage) {
       return undefined;
     }
 
-    const timeout = setTimeout(() => setActiveFormStatusMessage(null), 4000);
+    const timeout = setTimeout(
+      () => setActiveFormStatusMessage(null),
+      activeFormStatusVariant === "success" ? 4000 : 6000
+    );
     return () => clearTimeout(timeout);
   }, [activeFormStatusMessage, activeFormStatusVariant]);
+
+  useEffect(() => {
+    if (!activeForm || !activeFormSectionRef.current) {
+      return;
+    }
+
+    activeFormSectionRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+
+    if (activeFormHeadingRef.current) {
+      try {
+        activeFormHeadingRef.current.focus({ preventScroll: true });
+      } catch (err) {
+        activeFormHeadingRef.current.focus();
+      }
+    }
+  }, [activeForm]);
 
   const sortedForms = useMemo(() => {
     if (!Array.isArray(forms)) {
@@ -643,6 +669,9 @@ function JournalHistoryPage() {
       )}
       {user.role === "journaler" && activeForm && (
         <SectionCard
+          sectionRef={activeFormSectionRef}
+          titleRef={activeFormHeadingRef}
+          titleProps={{ tabIndex: -1 }}
           title="Today’s reflection"
           subtitle="Offer your thoughts to the chosen canopy without leaving your history"
         >

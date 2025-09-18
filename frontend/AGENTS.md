@@ -36,6 +36,8 @@ tays balanced across breakpoints.
 
 - Journalers see their assigned forms within `JournalHistoryPage`; keep the poetic CTA that links to `/dashboard?formId=...` using
   the shared `primaryButtonClasses` so each card offers the single-word "Bloom" invitation.
+- `SectionCard` now supports optional `sectionRef`, `titleRef`, and `titleProps` arguments so freshly revealed sections can be
+  scrolled into view or focused for accessibility. Use them when a flow needs to direct attention to inline content.
 - The shared `TagInput` now highlights matching expertise while listing the top 10 popular tags beneath the field. When supplying
   suggestions, pass them in popularity order so mentors always see the gentlest guidance first.
 

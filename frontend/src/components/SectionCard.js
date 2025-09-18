@@ -4,12 +4,25 @@ import {
   sectionTitleClasses,
 } from "../styles/ui";
 
-function SectionCard({ title, subtitle, action, children, icon }) {
+function SectionCard({
+  title,
+  subtitle,
+  action,
+  children,
+  icon,
+  sectionRef,
+  titleRef,
+  titleProps = {},
+}) {
   const showHeaderText = Boolean(title || subtitle || icon);
   const showHeader = showHeaderText || Boolean(action);
+  const { className: titleClassName = "", ...restTitleProps } = titleProps;
+  const headingClassName = [sectionTitleClasses, titleClassName]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <section className={`${cardContainerClasses} w-full`}>
+    <section ref={sectionRef} className={`${cardContainerClasses} w-full`}>
       {showHeader && (
         <div
           className={`flex flex-wrap items-center gap-4 ${
@@ -18,7 +31,7 @@ function SectionCard({ title, subtitle, action, children, icon }) {
         >
           {showHeaderText && (
             <div className="space-y-1">
-              <h2 className={sectionTitleClasses}>
+              <h2 ref={titleRef} className={headingClassName} {...restTitleProps}>
                 {icon && (
                   <span className="mr-2 inline-flex items-center">{icon}</span>
                 )}
