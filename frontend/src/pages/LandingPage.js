@@ -72,7 +72,7 @@ function LandingPage() {
         </div>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-3">
+      <section className="grid gap-6 md:grid-cols-2">
         <FeatureCard
           title="Journalers"
           description="Craft a ritual of arrival, trace your moods like constellations, and celebrate the rings of practice you grow."
@@ -80,10 +80,6 @@ function LandingPage() {
         <FeatureCard
           title="Mentors"
           description="Receive gentle digests when mentees share, offer bespoke prompts, and notice when their light softens."
-        />
-        <FeatureCard
-          title="Administrators"
-          description="Shape guided journeys, tend the form library, and protect the sanctuary where every reflection is held."
         />
       </section>
 

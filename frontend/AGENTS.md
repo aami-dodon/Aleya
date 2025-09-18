@@ -10,6 +10,8 @@
 - When composing new components, import the relevant constants from `src/styles/ui.js` instead of hard-coding class strings. This keeps the font stack and sizing consistent across the app.
 - Update this document if you introduce new design tokens so future changes remain consistent.
 - When updating copy, honor Aleya’s luminous grove tone: poetic, gentle, and nature-infused while keeping guidance clear.
+- Landing page role highlights currently center Journalers and Mentors; retire or add feature cards thoughtfully so the grid s
+tays balanced across breakpoints.
 - For modal overlays, center panels with `fixed inset-0 flex min-h-screen items-center justify-center` and wrap the panel
   content in a scrollable container (e.g. `max-h-[min(85vh,40rem)] overflow-y-auto`) so longer forms remain visible on smaller
   screens.
