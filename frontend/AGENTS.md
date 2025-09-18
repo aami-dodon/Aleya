@@ -19,8 +19,8 @@ tays balanced across breakpoints.
   a clear escape hatch.
 - Keep modal headers in a single flex container that houses both the title block and the close button so the markup stays
   balanced and easier to maintain.
-- Admins view a pared-down settings experience: hide mentor notification controls, the weekly summary toggle, profile submit
-  actions, and the data export/deletion tools whenever `user.role === "admin"`.
+- Admins view a pared-down settings experience: hide the email reminder fieldset, mentor notification controls, the weekly
+  summary toggle, profile submit actions, and the data export/deletion tools whenever `user.role === "admin"`.
 - Admin mentor management lives on `/mentorship`: show mentor cards with linked mentees, allow linking by email, and surface a
   `Delete mentor` control using the shared button tokens so admins can curate relationships gracefully.
 - Admin journaler management now has its own `/journalers` route: surface a journaler list with linked mentors, include a search
@@ -28,3 +28,5 @@ tays balanced across breakpoints.
   access.
 - In the Forms builder page, keep the admin view focused on stewardship: do not reintroduce the creation UI for admins, preserve
   the filter controls, and ensure the mentee association list stays actionable with the existing remove affordance.
+- Admins now see the form catalogue under the "Form Management" header; keep the copy aligned and pair the filter controls with
+  accessible labels (use `sr-only` utilities) so screen readers announce each option clearly.

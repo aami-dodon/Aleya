@@ -207,6 +207,11 @@ function FormBuilderPage() {
     }
   };
 
+  const sectionCardTitle = isAdmin ? "Form Management" : "Available forms";
+  const sectionCardSubtitle = isAdmin
+    ? "Steward templates, visibilities, and journaler links"
+    : "See what journalers can access";
+
   if (loading) {
     return <LoadingState label="Preparing forms" />;
   }
@@ -399,17 +404,25 @@ function FormBuilderPage() {
         </SectionCard>
       )}
 
-      <SectionCard title="Available forms" subtitle="See what journalers can access">
+      <SectionCard title={sectionCardTitle} subtitle={sectionCardSubtitle}>
         {isAdmin && (
           <div className="flex flex-wrap items-center gap-3 pb-4">
+            <label className="sr-only" htmlFor="form-search">
+              Search forms or journalers
+            </label>
             <input
+              id="form-search"
               type="search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search forms or mentees"
+              placeholder="Search forms or journalers"
               className={`${inputCompactClasses} w-full sm:w-64`}
             />
+            <label className="sr-only" htmlFor="form-visibility-filter">
+              Filter forms by visibility
+            </label>
             <select
+              id="form-visibility-filter"
               className={`${selectCompactClasses} w-full sm:w-44`}
               value={visibilityFilter}
               onChange={(event) => setVisibilityFilter(event.target.value)}
@@ -419,7 +432,11 @@ function FormBuilderPage() {
               <option value="mentor">Mentor</option>
               <option value="admin">Admin</option>
             </select>
+            <label className="sr-only" htmlFor="form-creator-filter">
+              Filter forms by creator
+            </label>
             <select
+              id="form-creator-filter"
               className={`${selectCompactClasses} w-full sm:w-44`}
               value={creatorFilter}
               onChange={(event) => setCreatorFilter(event.target.value)}

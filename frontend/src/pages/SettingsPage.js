@@ -283,19 +283,19 @@ function SettingsPage() {
             />
           </label>
 
-          <fieldset className="space-y-3 rounded-2xl border border-emerald-100 bg-white/60 p-4">
-            <legend className="text-sm font-semibold text-emerald-900">Email reminders</legend>
-            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
-              <input
-                type="checkbox"
-                name="remindersDaily"
-                className={checkboxClasses}
-                checked={form.remindersDaily}
-                onChange={handleChange}
-              />
-              Daily reflection reminders
-            </label>
-            {!isAdmin && (
+          {!isAdmin && (
+            <fieldset className="space-y-3 rounded-2xl border border-emerald-100 bg-white/60 p-4">
+              <legend className="text-sm font-semibold text-emerald-900">Email reminders</legend>
+              <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
+                <input
+                  type="checkbox"
+                  name="remindersDaily"
+                  className={checkboxClasses}
+                  checked={form.remindersDaily}
+                  onChange={handleChange}
+                />
+                Daily reflection reminders
+              </label>
               <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
                 <input
                   type="checkbox"
@@ -306,8 +306,8 @@ function SettingsPage() {
                 />
                 Weekly summary updates
               </label>
-            )}
-          </fieldset>
+            </fieldset>
+          )}
 
           <fieldset className="space-y-3 rounded-2xl border border-emerald-100 bg-white/60 p-4">
             <legend className="text-sm font-semibold text-emerald-900">
