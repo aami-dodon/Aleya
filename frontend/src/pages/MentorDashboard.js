@@ -4,11 +4,9 @@ import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import MetricCard from "../components/MetricCard";
 import MentorRequestList from "../components/MentorRequestList";
-import NotificationList from "../components/NotificationList";
 import MoodTrendChart from "../components/MoodTrendChart";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
-import { useNotifications } from "../context/NotificationContext";
 import {
   emptyStateClasses,
   getShareChipClasses,
@@ -20,11 +18,6 @@ function MentorDashboard() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const {
-    notifications,
-    loading: notificationsLoading,
-    markAsRead,
-  } = useNotifications();
 
   const loadAll = useCallback(async () => {
     if (!token) return;
@@ -63,11 +56,6 @@ function MentorDashboard() {
     loadAll();
   };
 
-  const markNotification = async (notification) => {
-    await markAsRead(notification.id);
-    loadAll();
-  };
-
   if (loading && !dashboard) {
     return <LoadingState label="Illuminating your mentor canopy" />;
   }
@@ -94,11 +82,6 @@ function MentorDashboard() {
               title="Pending invitations"
               value={dashboard.overview?.pendingRequests || 0}
               description="People waiting for your welcome."
-            />
-            <MetricCard
-              title="Unread updates"
-              value={dashboard.overview?.unreadNotifications || 0}
-              description="Shared reflections ready for your care."
             />
           </div>
         ) : (
@@ -189,21 +172,6 @@ function MentorDashboard() {
         )}
       </SectionCard>
 
-      <SectionCard
-        title="Notifications"
-        subtitle="Entries shared with you according to each mentee’s privacy"
-      >
-        <NotificationList
-          notifications={notifications}
-          onMarkRead={(id) => {
-            const target = notifications.find((item) => item.id === id);
-            if (target) {
-              markNotification(target);
-            }
-          }}
-          loading={notificationsLoading}
-        />
-      </SectionCard>
     </div>
   );
 }

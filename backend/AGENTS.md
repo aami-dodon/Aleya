@@ -16,6 +16,6 @@
   endpoint.
 - The public `/api/auth/expertise` route aggregates mentor profile keywords for registration suggestions—keep its splitting logic
   aligned with the frontend `parseExpertise` helper whenever you adjust how expertise data is stored.
-- Mentor registration now mirrors the mentee flow: accounts are created immediately, mentors receive the usual verification
-  email, and the follow-up acknowledgement comes from the `mentor_registered_mentor` notification while admins get
-  `mentor_registered_admin`. Keep these notices aligned with the registration experience.
+- The in-app notification system (tables, routes, and dispatch helpers) has been removed. Avoid reintroducing `/api/notifications`
+  endpoints or `dispatchNotification` flows—new mentor or journaler events should be handled without user notification records.
+- User rows no longer store `notification_preferences`; derive any future messaging features from explicit requirements instead of reviving the retired column.

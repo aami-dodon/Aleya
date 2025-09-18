@@ -3,8 +3,6 @@ const { body, validationResult } = require("express-validator");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
-const { dispatchNotification, notifyMentorLink } = require("../utils/notifications");
-
 const router = express.Router();
 
 const APPROVAL_STATUSES = ["pending", "approved", "rejected"];
@@ -242,22 +240,7 @@ router.post(
 
       const approvalRecord = hydrated[0];
 
-      if (approvalRecord?.status && approvalRecord.status !== "pending") {
-        const { rows: mentorUsers } = await pool.query(
-          `SELECT id, name, email, notification_preferences
-           FROM users
-           WHERE email = $1`,
-          [approvalRecord.email.toLowerCase()]
-        );
-
-        if (mentorUsers.length) {
-          await dispatchNotification(req.app, "mentor_application_decision", {
-            recipient: mentorUsers[0],
-            mentor: mentorUsers[0],
-            status: approvalRecord.status,
-          });
-        }
-      }
+      // Notifications removed; decision updates no longer dispatch alerts.
 
       const statusCode = existing.rows.length ? 200 : 201;
       return res.status(statusCode).json({ approval: approvalRecord });
@@ -391,22 +374,7 @@ router.patch(
 
       const approvalRecord = hydrated[0];
 
-      if (approvalRecord?.status && approvalRecord.status !== "pending") {
-        const { rows: mentorUsers } = await pool.query(
-          `SELECT id, name, email, notification_preferences
-           FROM users
-           WHERE email = $1`,
-          [approvalRecord.email.toLowerCase()]
-        );
-
-        if (mentorUsers.length) {
-          await dispatchNotification(req.app, "mentor_application_decision", {
-            recipient: mentorUsers[0],
-            mentor: mentorUsers[0],
-            status: approvalRecord.status,
-          });
-        }
-      }
+      // Notifications removed; decision updates no longer dispatch alerts.
 
       return res.json({ approval: approvalRecord });
     } catch (error) {
@@ -681,7 +649,7 @@ router.post(
       await client.query("BEGIN");
 
       const { rows: mentorRows } = await client.query(
-        `SELECT id, name, email, notification_preferences
+        `SELECT id, name, email
          FROM users
          WHERE id = $1 AND role = 'mentor'
          FOR UPDATE`,
@@ -697,7 +665,7 @@ router.post(
 
       if (journalerId) {
         const { rows } = await client.query(
-          `SELECT id, name, email, notification_preferences
+          `SELECT id, name, email
            FROM users
            WHERE id = $1 AND role = 'journaler'
            FOR UPDATE`,
@@ -712,7 +680,7 @@ router.post(
         journalerRow = rows[0];
       } else {
         const { rows } = await client.query(
-          `SELECT id, name, email, notification_preferences
+          `SELECT id, name, email
            FROM users
            WHERE LOWER(email) = $1 AND role = 'journaler'
            FOR UPDATE`,
@@ -755,11 +723,6 @@ router.post(
       );
 
       await client.query("COMMIT");
-
-      await notifyMentorLink(req.app, {
-        mentor: mentorRows[0],
-        journaler: journalerRow,
-      });
 
       return res
         .status(201)

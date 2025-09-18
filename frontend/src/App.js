@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { NotificationProvider } from "./context/NotificationContext";
 import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
@@ -54,9 +53,8 @@ function AppRoutes() {
 
   return (
     <GlobalErrorBoundary>
-      <NotificationProvider>
-        <Layout>
-          <Routes>
+      <Layout>
+        <Routes>
             <Route
               path="/"
               element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />}
@@ -121,7 +119,6 @@ function AppRoutes() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
-      </NotificationProvider>
     </GlobalErrorBoundary>
   );
 }

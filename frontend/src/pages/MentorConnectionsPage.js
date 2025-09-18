@@ -3,10 +3,8 @@ import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import MentorRequestList from "../components/MentorRequestList";
 import MentorProfileDialog from "../components/MentorProfileDialog";
-import NotificationList from "../components/NotificationList";
 import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
-import { useNotifications } from "../context/NotificationContext";
 import {
   captionTextClasses,
   chipBaseClasses,
@@ -32,12 +30,6 @@ function MentorConnectionsPage() {
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [linkEmails, setLinkEmails] = useState({});
   const [linkErrors, setLinkErrors] = useState({});
-  const {
-    notifications,
-    loading: notificationsLoading,
-    markAsRead,
-    isEnabled: notificationsEnabled,
-  } = useNotifications();
   const isAdmin = user.role === "admin";
 
   const load = useCallback(async () => {
@@ -190,14 +182,6 @@ function MentorConnectionsPage() {
     } catch (error) {
       setMessage(error.message);
     }
-  };
-
-  const handleNotificationRead = async (notificationId) => {
-    if (!notificationsEnabled) {
-      return;
-    }
-
-    await markAsRead(notificationId);
   };
 
   if (loading) {
@@ -429,19 +413,6 @@ function MentorConnectionsPage() {
             </SectionCard>
           )}
         </>
-      )}
-
-      {user.role === "mentor" && notificationsEnabled && (
-        <SectionCard
-          title="Mentor notifications"
-          subtitle="Recent reflections shared by your mentees"
-        >
-          <NotificationList
-            notifications={notifications}
-            loading={notificationsLoading}
-            onMarkRead={handleNotificationRead}
-          />
-        </SectionCard>
       )}
 
       <SectionCard

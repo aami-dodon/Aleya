@@ -4,11 +4,6 @@ const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 
-const {
-  notifyAdmins,
-  dispatchNotification,
-} = require("../utils/notifications");
-
 const router = express.Router();
 
 const fieldValidators = [
@@ -240,17 +235,6 @@ router.post(
 
       const [form] = await fetchForms("WHERE f.id = $1", [formId]);
 
-      if (req.user.role === "mentor" && form) {
-        await notifyAdmins(req.app, "form_review_required", () => ({
-          form,
-          creator: {
-            id: req.user.id,
-            name: req.user.name,
-            email: req.user.email,
-          },
-        }));
-      }
-
       return res.status(201).json({ form });
     } catch (error) {
       await client.query("ROLLBACK");
@@ -315,27 +299,6 @@ router.post(
          DO UPDATE SET mentor_id = EXCLUDED.mentor_id, assigned_at = NOW()` ,
         [req.user.id, journalerId, formId]
       );
-
-      const { rows: journalerRows } = await pool.query(
-        `SELECT id, name, email, notification_preferences FROM users WHERE id = $1`,
-        [journalerId]
-      );
-
-      const [fullForm] = await fetchForms("WHERE f.id = $1", [formId]);
-
-      if (journalerRows.length && fullForm) {
-        await dispatchNotification(req.app, "form_assignment_journaler", {
-          recipient: journalerRows[0],
-          mentor: {
-            id: req.user.id,
-            name: req.user.name,
-            email: req.user.email,
-            notification_preferences: req.user.notification_preferences,
-          },
-          journaler: journalerRows[0],
-          form: fullForm,
-        });
-      }
 
       return res.json({ success: true });
     } catch (error) {

@@ -1,4 +1,17 @@
 
+# 2025-10-02
+
+- Dropped the `notification_preferences` column from `users`, removed the default constant in `backend/utils/bootstrap.js`, and pruned all backend references so the notification system is fully retired end-to-end.
+- Updated the README to mark the notification system as retired and clarified that mentors now rely on dashboards plus transactional emails for updates.
+
+# 2025-10-01
+
+- Retired the in-app notification system entirely by deleting the bell UI, NotificationContext, and mentor notification cards so
+  the frontend no longer references `/api/notifications`.
+- Removed all backend notification routes, helpers, and database tables, simplifying mentor/admin flows to operate without
+  dispatching `user_notifications` records or bell alerts.
+- Trimmed Settings to profile essentials across every role by removing the reminder and notification preference controls.
+
 # 2025-09-30
 
 - Let mentor registrations follow the mentee workflow by removing the `mentor_approvals`

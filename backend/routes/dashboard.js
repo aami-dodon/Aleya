@@ -209,14 +209,6 @@ router.get(
         [req.user.id]
       );
 
-      const { rows: unreadNotifications } = await pool.query(
-        `SELECT COUNT(*)
-         FROM user_notifications
-         WHERE user_id = $1
-           AND read_at IS NULL`,
-        [req.user.id]
-      );
-
       const recentEntries = entryRows.slice(0, 8).map((entry) => ({
         id: entry.id,
         journalerId: entry.journaler_id,
@@ -231,7 +223,6 @@ router.get(
         overview: {
           menteeCount: mentees.length,
           pendingRequests: Number(pendingRequests[0]?.count || 0),
-          unreadNotifications: Number(unreadNotifications[0]?.count || 0),
         },
         mentees,
         recentEntries,
