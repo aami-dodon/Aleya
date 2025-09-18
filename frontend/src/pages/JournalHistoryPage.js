@@ -8,11 +8,13 @@ import { useAuth } from "../context/AuthContext";
 import {
   bodySmallMutedTextClasses,
   bodySmallStrongTextClasses,
+  bodySmallTextClasses,
   chipBaseClasses,
   emptyStateClasses,
   formLabelClasses,
   getMoodBadgeClasses,
   inputCompactClasses,
+  mutedTextClasses,
   selectCompactClasses,
   smallHeadingClasses,
   subtleButtonClasses,
@@ -20,6 +22,19 @@ import {
 
 const SLEEP_FIELD_MATCHERS = ["sleep quality"];
 const ENERGY_FIELD_MATCHERS = ["energy level"];
+
+function formatDateLabel(value) {
+  if (!value) {
+    return null;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return format(date, "MMMM d, yyyy");
+}
 
 function findResponseValue(entry, matchers = []) {
   if (!entry || !Array.isArray(entry.responses)) {
@@ -67,6 +82,10 @@ function JournalHistoryPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const editingEntryRef = useRef(null);
+  const [formActionMessage, setFormActionMessage] = useState(null);
+  const [formActionVariant, setFormActionVariant] = useState("success");
+  const [unlinkingId, setUnlinkingId] = useState(null);
+  const [formsError, setFormsError] = useState(null);
 
   const loadEntries = useCallback(async () => {
     if (!token) return;
@@ -106,10 +125,12 @@ function JournalHistoryPage() {
         const response = await apiClient.get("/forms", token);
         if (isActive) {
           setForms(response.forms || []);
+          setFormsError(null);
         }
       } catch (err) {
         if (isActive) {
           setForms([]);
+          setFormsError(err.message);
         }
       }
     };
@@ -128,6 +149,15 @@ function JournalHistoryPage() {
     const timeout = setTimeout(() => setActionMessage(null), 4000);
     return () => clearTimeout(timeout);
   }, [actionMessage]);
+
+  useEffect(() => {
+    if (!formActionMessage) {
+      return undefined;
+    }
+
+    const timeout = setTimeout(() => setFormActionMessage(null), 4000);
+    return () => clearTimeout(timeout);
+  }, [formActionMessage]);
 
   const editingForm = useMemo(() => {
     if (!editingEntry) {
@@ -164,6 +194,43 @@ function JournalHistoryPage() {
   const handleCancelEdit = useCallback(() => {
     setEditingEntry(null);
   }, []);
+
+  const handleUnlinkForm = useCallback(
+    async (formId) => {
+      if (!formId) {
+        return;
+      }
+
+      try {
+        setUnlinkingId(formId);
+        setFormActionMessage(null);
+        setFormActionVariant("success");
+        await apiClient.del(`/forms/${formId}/assignment`, token);
+        setForms((prev) => prev.filter((form) => form.id !== formId));
+        setFormActionVariant("success");
+        setFormActionMessage("Form unlinked.");
+      } catch (err) {
+        setFormActionVariant("error");
+        setFormActionMessage(err.message);
+      } finally {
+        setUnlinkingId(null);
+      }
+    },
+    [token]
+  );
+
+  const sortedForms = useMemo(() => {
+    if (!Array.isArray(forms)) {
+      return [];
+    }
+
+    return [...forms].sort((a, b) => {
+      if (a.is_default === b.is_default) {
+        return 0;
+      }
+      return a.is_default ? -1 : 1;
+    });
+  }, [forms]);
 
   useEffect(() => {
     if (!editingEntry || !editingEntryRef.current) {
@@ -367,6 +434,132 @@ function JournalHistoryPage() {
 
   return (
     <div className="flex w-full flex-1 flex-col gap-8">
+      {user.role === "journaler" && (
+        <SectionCard
+          title="Your check-in forms"
+          subtitle="See the prompts you've chosen to reflect with"
+        >
+          {formsError && (
+            <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
+              {formsError}
+            </p>
+          )}
+          {formActionMessage && (
+            <p
+              className={`rounded-2xl px-4 py-3 ${bodySmallStrongTextClasses} ${
+                formActionVariant === "success"
+                  ? "border border-emerald-100 bg-emerald-50/80 text-emerald-700"
+                  : "border border-rose-100 bg-rose-50/80 text-rose-600"
+              }`}
+            >
+              {formActionMessage}
+            </p>
+          )}
+          {sortedForms.length ? (
+            <ul className="grid gap-4 md:grid-cols-2">
+              {sortedForms.map((form) => {
+                const fieldCount = Array.isArray(form.fields)
+                  ? form.fields.length
+                  : 0;
+                const mentorName = form.assignment?.mentorName || "—";
+                const assignedDate = formatDateLabel(
+                  form.assignment?.assignedAt
+                );
+                const createdDate = formatDateLabel(form.created_at);
+                const timingLabel = form.is_default
+                  ? createdDate
+                  : assignedDate || createdDate;
+                const visibilityLabel = form.is_default
+                  ? "Default"
+                  : form.visibility
+                  ? `${form.visibility.charAt(0).toUpperCase()}${form.visibility
+                      .slice(1)
+                      .toLowerCase()}`
+                  : "—";
+
+                return (
+                  <li
+                    key={form.id}
+                    className="space-y-4 rounded-2xl border border-emerald-100 bg-white/70 p-5 shadow-inner shadow-emerald-900/5"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <h3 className={`${smallHeadingClasses} text-emerald-900`}>
+                          {form.title}
+                        </h3>
+                        {form.description ? (
+                          <p
+                            className={`${bodySmallMutedTextClasses} text-emerald-900/70`}
+                          >
+                            {form.description}
+                          </p>
+                        ) : (
+                          <p className={`${mutedTextClasses} text-sm`}>
+                            No description provided.
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span
+                          className={`${chipBaseClasses} ${
+                            form.is_default
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-sky-100 text-sky-700"
+                          }`}
+                        >
+                          {form.is_default ? "Default form" : "Assigned form"}
+                        </span>
+                        {!form.is_default && (
+                          <button
+                            type="button"
+                            className={`${subtleButtonClasses} text-sm text-rose-600 hover:text-rose-500`}
+                            onClick={() => handleUnlinkForm(form.id)}
+                            disabled={unlinkingId === form.id}
+                          >
+                            {unlinkingId === form.id ? "Unlinking..." : "Unlink"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <dl className="grid gap-3 text-sm text-emerald-900/70 sm:grid-cols-2">
+                      <div className="space-y-0.5">
+                        <dt className={`${bodySmallStrongTextClasses} text-emerald-900`}>
+                          Prompts
+                        </dt>
+                        <dd className={bodySmallTextClasses}>{fieldCount}</dd>
+                      </div>
+                      <div className="space-y-0.5">
+                        <dt className={`${bodySmallStrongTextClasses} text-emerald-900`}>
+                          Visibility
+                        </dt>
+                        <dd className={bodySmallTextClasses}>{visibilityLabel}</dd>
+                      </div>
+                      <div className="space-y-0.5">
+                        <dt className={`${bodySmallStrongTextClasses} text-emerald-900`}>
+                          Mentor
+                        </dt>
+                        <dd className={bodySmallTextClasses}>{mentorName}</dd>
+                      </div>
+                      <div className="space-y-0.5">
+                        <dt className={`${bodySmallStrongTextClasses} text-emerald-900`}>
+                          {form.is_default ? "Available since" : "Assigned on"}
+                        </dt>
+                        <dd className={bodySmallTextClasses}>
+                          {timingLabel || "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className={emptyStateClasses}>
+              No forms are linked yet. Ask your mentor to share one with you.
+            </p>
+          )}
+        </SectionCard>
+      )}
       <SectionCard
         title="Journal history"
         subtitle="Browse past reflections and notice patterns"
