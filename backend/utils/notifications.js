@@ -191,6 +191,30 @@ const NOTIFICATION_TEMPLATES = {
         `<p>Rooted in care,<br/>The Aleya team</p>`,
     }),
   },
+  mentor_application_submitted_mentor: {
+    category: "account",
+    emailTemplate: "mentor_application_submitted",
+    buildInApp: ({ mentor }) => ({
+      title: "We received your mentor application",
+      body:
+        "Thank you for offering your guidance. Our admin team will review your details and email you once a decision is made.",
+      actionLabel: "Visit Aleya",
+      actionUrl: buildFrontendLink("/dashboard"),
+      metadata: {
+        mentorId: mentor.id,
+        status: "pending",
+      },
+    }),
+    buildEmail: ({ mentor }) => ({
+      to: mentor.email,
+      subject: "We received your mentor application",
+      text: `Hi ${mentor.name || "there"},\n\nThank you for offering to mentor on Aleya. An administrator will review your application shortly. We'll send another note as soon as a decision is ready.\n\nRooted in care,\nThe Aleya team`,
+      html: `<p>Hi ${mentor.name || "there"},</p>` +
+        `<p>Thank you for offering to mentor on Aleya. An administrator will review your application shortly.</p>` +
+        `<p>We'll send another note as soon as a decision is ready.</p>` +
+        `<p>Rooted in care,<br/>The Aleya team</p>`,
+    }),
+  },
   mentor_application_decision: {
     category: "account",
     emailTemplate: "mentor_application_decision",

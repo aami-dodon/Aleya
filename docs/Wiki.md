@@ -1,6 +1,14 @@
 
 # 2025-09-28
 
+- Ensured mentor registrations send acknowledgement emails by introducing the
+  `mentor_application_submitted_mentor` notification so new mentors know their
+  application is awaiting admin review while admins still receive their bell
+  alert and email summary.
+- Updated the registration flow to capture the inserted user's notification
+  preferences and dispatch the mentor acknowledgement alongside the existing
+  admin email so both sides stay informed during approval.
+
 - Introduced a public `/api/auth/expertise` endpoint that aggregates mentor profile keywords, returning the most common tags in
   popularity order so registration flows can suggest existing expertise. The splitter mirrors `parseExpertise` to keep frontend
   and backend normalization aligned.
