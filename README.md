@@ -272,8 +272,8 @@ All endpoints are served from the `/api` prefix and return JSON. Supply an `Auth
 - `POST /api/mentors/requests/:id/confirm` – Journalers confirm an accepted request, establishing a mentor link. *(Journaler)*
 - `POST /api/mentors/requests/:id/decline` – Decline a request as the involved mentor or journaler. *(Authenticated)*
 - `GET /api/mentors/mentees` – Display linked journalers with their latest shared reflections. *(Mentor)*
-- `GET /api/mentors/notifications` – Retrieve the 50 most recent entry notifications shared by mentees. *(Mentor)*
-- `POST /api/mentors/notifications/:id/read` – Mark a notification as reviewed. *(Mentor)*
+- `GET /api/mentors/notifications` – Retrieve the 50 most recent entry notifications shared by mentees. *(Authenticated)*
+- `POST /api/mentors/notifications/:id/read` – Mark a notification as reviewed. *(Authenticated)*
 
 ### Dashboards & analytics
 

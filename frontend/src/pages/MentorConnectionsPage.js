@@ -230,7 +230,7 @@ function MentorConnectionsPage() {
         </>
       )}
 
-      {notificationsEnabled && (
+      {user.role === "mentor" && notificationsEnabled && (
         <SectionCard
           title="Mentor notifications"
           subtitle="Recent reflections shared by your mentees"

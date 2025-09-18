@@ -105,7 +105,7 @@ function NotificationList({
             <div className="space-y-2">
               <div className="space-y-1">
                 <p className="text-base font-semibold text-emerald-900">
-                  {notification.journaler?.name || "Mentee update"}
+                  {notification.journaler?.name || "Shared update"}
                 </p>
                 <p className={infoTextClasses}>
                   {entryDate ? `${entryDate} · ` : ""}

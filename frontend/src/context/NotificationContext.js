@@ -18,7 +18,7 @@ export function NotificationProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const isEnabled = Boolean(token && user && user.role === "mentor");
+  const isEnabled = Boolean(token && user);
 
   const fetchNotifications = useCallback(async () => {
     if (!isEnabled) {
