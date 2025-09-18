@@ -133,6 +133,8 @@ SMTP_USER=your-smtp-username
 SMTP_PASSWORD=your-smtp-password
 SMTP_FROM="Aleya <no-reply@example.com>"
 SMTP_SECURE=false
+# Optional: adjust mentor digest lookback (hours)
+MENTOR_DIGEST_WINDOW_HOURS=24
 ```
 
 - `DATABASE_URL` is required so the API can connect to PostgreSQL. The backend tests the connection on boot and will fail if it cannot reach the database.
@@ -219,6 +221,7 @@ docker compose up --build
 |------------|--------------------|---------|
 | `backend`  | `npm run dev`       | Start API in watch mode using Nodemon. |
 | `backend`  | `npm start`         | Start API without file watching (production style). |
+| `backend`  | `npm run mentor-digest` | Send mentor digest emails for the configured lookback window. |
 | `frontend` | `npm start`         | Run the React development server with hot reload. |
 | `frontend` | `npm run build`     | Build the production-ready static assets. |
 | `frontend` | `npm test`          | Launch the Jest/React Testing Library runner. |

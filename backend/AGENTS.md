@@ -5,6 +5,10 @@
 - Document all backend changes in `docs/Wiki.md` so future contributors understand the context behind updates.
 - Transactional emails must be composed through `utils/emailTemplates.js` so the Aleya theme, preheader copy, and `[Aleya]` subject
   prefix stay consistent across messages. Extend that helper when introducing new mail types instead of crafting ad-hoc HTML.
+- Mentor email notifications now flow through `services/mentorNotifications.js`; adjust the share-level shaping there when
+  tweaking journal visibility rules and update the paired templates in `utils/emailTemplates.js`. The mentor digest job reads the
+  same helpers—when changing time windows, honour the `MENTOR_DIGEST_WINDOW_HOURS` env and keep the job script
+  (`jobs/sendMentorDigest.js`) aligned.
 - Double-check route definitions end with their closing `);` pair so `node --check` passes before pushing changes.
 - When touching the admin form management endpoints, keep the default template protections intact so system templates are never
   deleted by mistake.
