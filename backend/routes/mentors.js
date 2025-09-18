@@ -496,14 +496,12 @@ router.post(
   "/panic-alerts",
   authenticate,
   requireRole("mentor"),
-  [
-    body("mentorId").isInt({ gt: 0 }).withMessage("mentorId is required"),
-    body("message")
-      .isString()
-      .trim()
-      .isLength({ min: 1, max: 500 })
-      .withMessage("A short message is required"),
-  ],
+  body("mentorId").isInt({ gt: 0 }).withMessage("mentorId is required"),
+  body("message")
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 500 })
+    .withMessage("A short message is required"),
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
