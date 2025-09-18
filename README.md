@@ -90,9 +90,40 @@ Aleya is a journaling and mentorship platform that pairs reflective journaling t
 └── README.md
 ```
 
+## Packages & tooling
+
+### Frontend
+
+- **React 19** for composing the journaling and mentorship experience.
+- **React Router 6** to orchestrate authenticated and role-specific navigation.
+- **date-fns** utilities for streak, trend, and digest date calculations.
+- **Tailwind CSS 3** layered through PostCSS and Autoprefixer to power the shared design tokens documented in `frontend/src/index.css` and [`docs/theme.html`](docs/theme.html).
+- **React Testing Library** (`@testing-library/*`) and Jest DOM helpers that exercise dashboards, flows, and components.
+- **Create React App tooling** (`react-scripts`) to bundle, lint, and test the client.
+
+### Backend
+
+- **Express 5** for routing, middleware, and admin dashboards.
+- **pg** as the PostgreSQL driver paired with connection bootstrap helpers.
+- **bcryptjs** to hash account credentials.
+- **jsonwebtoken** for issuing and verifying session tokens.
+- **express-validator** to guard inputs across registration, mentorship, and admin endpoints.
+- **cors** middleware for frontend-to-backend communication.
+- **dotenv** to hydrate environment variables in local development.
+- **nodemailer** and **winston** for transactional email delivery and structured logging.
+- **nodemon** (dev dependency) to reload the API during iterative development.
+
 ### Frontend styling system
 
 The React client uses Tailwind CSS with a small design system exposed in `frontend/src/index.css`. Buttons, form controls, and typography tokens are wrapped in named classes (e.g. `btn-primary`, `form-input`, `text-display`) and re-exported from `frontend/src/styles/ui.js` for ergonomic use inside React components. A static showcase of the tokens lives in [`docs/theme.html`](docs/theme.html) for quick visual verification outside the React build.
+
+## Custom functionality highlights
+
+- **Inline Bloom journaling** keeps journalers within their history view when mentors assign new forms, gently scrolling the revealed card into focus while preserving the poetic CTA styling.
+- **Mentor digest and real-time notifications** dispatch transactional emails—verification, panic alerts, entry summaries, and scheduled digests—through the shared templating helpers.
+- **Admin stewardship suite** spans mentor, journaler, form, and journal entry directories with synchronized filters, deep-linkable query parameters, and responsive table tokens.
+- **Expertise discovery** aggregates mentor profile keywords via a public `/api/auth/expertise` endpoint so registration flows can suggest popular guidance areas.
+- **Global error boundary** wraps the authenticated shell, offering luminous fallback copy, retry controls, and soft telemetry capture when runtime issues surface.
 
 ## Prerequisites
 
