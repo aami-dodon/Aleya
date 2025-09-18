@@ -14,11 +14,11 @@ import {
 
 function LandingPage() {
   return (
-    <div className="flex w-full flex-1 flex-col gap-14 text-emerald-900">
-      <section className="grid gap-10 rounded-[2rem] bg-white/90 p-6 shadow-lg shadow-emerald-900/10 backdrop-blur sm:p-8 md:grid-cols-[1.05fr_1fr] md:gap-12 md:border md:border-emerald-100 md:bg-white/80 md:p-12 md:shadow-xl">
-        <div className="space-y-6 sm:space-y-8">
+    <div className="flex w-full flex-1 flex-col gap-12 text-emerald-900">
+      <section className="grid gap-10 rounded-3xl border border-emerald-100 bg-white/80 p-10 shadow-xl shadow-emerald-900/10 backdrop-blur md:grid-cols-[1.1fr_1fr]">
+        <div className="space-y-6">
           <div
-            className={`inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-white/80 px-4 py-2 shadow-sm shadow-emerald-900/5 ${bodySmallStrongTextClasses} text-emerald-700`}
+            className={`inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-2 shadow-sm shadow-emerald-900/5 ${bodySmallStrongTextClasses} text-emerald-700`}
           >
             🌿 Grow whole
           </div>
@@ -27,18 +27,18 @@ function LandingPage() {
           </h1>
           <p className={`${leadTextClasses} text-emerald-900/80`}>
             Aleya weaves journaling, mentorship, and gentle accountability so you can
-            notice your emotions, nurture your habits, and share progress with the guides
-            who support you.
+            notice your emotions, nurture your habits, and share progress with the
+            guides who support you.
           </p>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+          <div className="flex flex-wrap gap-4">
             <Link
-              className={`${primaryButtonClasses} w-full justify-center px-6 py-3 text-base sm:w-auto`}
+              className={`${primaryButtonClasses} px-6 py-3 text-base`}
               to="/register"
             >
               Start journaling
             </Link>
             <Link
-              className={`${secondaryButtonClasses} w-full justify-center px-6 py-3 text-base sm:w-auto`}
+              className={`${secondaryButtonClasses} px-6 py-3 text-base`}
               to="/login"
             >
               I already have an account
@@ -46,7 +46,7 @@ function LandingPage() {
           </div>
         </div>
         <div className="space-y-4">
-          <div className="overflow-hidden rounded-[1.75rem] shadow-lg shadow-emerald-900/10 md:border md:border-emerald-200">
+          <div className="overflow-hidden rounded-3xl border border-emerald-200 text-white shadow-lg shadow-emerald-900/10">
             <div className="grid text-left">
               <TreeLayer
                 title="Roots · Self-care"
@@ -73,7 +73,7 @@ function LandingPage() {
         </div>
       </section>
 
-      <section className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
+      <section className="grid gap-6 md:grid-cols-3">
         <FeatureCard
           title="Journalers"
           description="Build a meaningful check-in ritual, track your mood, and celebrate streaks with visual dashboards."
@@ -88,11 +88,11 @@ function LandingPage() {
         />
       </section>
 
-      <section className="rounded-[2rem] bg-emerald-600 p-6 text-white shadow-xl shadow-emerald-900/20 sm:p-8 md:p-12">
+      <section className="rounded-3xl bg-emerald-600 px-8 py-10 text-white shadow-xl shadow-emerald-900/20">
         <h2 className={`${largeHeadingClasses} tracking-tight`}>
           Your day is a living ecosystem.
         </h2>
-        <p className={`mt-4 ${leadTextClasses} text-white/90`}>
+        <p className={`mt-4 ${leadTextClasses} text-white/80`}>
           Aleya keeps the ecosystem connected—so when you tend to sleep, learning,
           relationships, and creative sparks, you can see the whole tree flourish.
         </p>
@@ -103,18 +103,20 @@ function LandingPage() {
 
 function FeatureCard({ title, description }) {
   return (
-    <article className="flex flex-col gap-3 rounded-2xl bg-white/80 p-5 shadow-sm shadow-emerald-900/10 backdrop-blur sm:gap-4 sm:rounded-3xl sm:p-6 md:border md:border-emerald-100 md:shadow-inner">
+    <article className="rounded-3xl border border-emerald-100 bg-white/70 p-6 shadow-inner shadow-emerald-900/5">
       <h2 className={`${smallHeadingClasses} text-emerald-900`}>{title}</h2>
-      <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>{description}</p>
+      <p className={`mt-3 ${bodySmallMutedTextClasses} text-emerald-900/70`}>{description}</p>
     </article>
   );
 }
 
 function TreeLayer({ title, description, className }) {
   return (
-    <div className={`space-y-2 px-5 py-5 sm:px-6 sm:py-6 ${className}`}>
-      <span className={`${captionTextClasses} text-white/80`}>{title}</span>
-      <p className={`${bodySmallTextClasses} text-white/90`}>{description}</p>
+    <div className={`space-y-2 px-6 py-5 ${className}`}>
+      <span className={`${captionTextClasses} text-white/80`}>
+        {title}
+      </span>
+      <p className={`${bodySmallTextClasses} leading-relaxed text-white/80`}>{description}</p>
     </div>
   );
 }

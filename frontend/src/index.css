@@ -108,47 +108,47 @@
   }
 
   .text-display {
-    @apply text-[2.5rem] font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl;
+    @apply text-4xl font-bold tracking-tight sm:text-5xl;
   }
 
   .text-heading-lg {
-    @apply text-[2rem] font-semibold leading-snug md:text-3xl;
+    @apply text-3xl font-semibold;
   }
 
   .text-heading-md {
-    @apply text-[1.625rem] font-semibold leading-snug md:text-2xl;
+    @apply text-2xl font-semibold;
   }
 
   .text-heading-sm {
-    @apply text-[1.35rem] font-semibold leading-snug md:text-xl;
+    @apply text-xl font-semibold;
   }
 
   .text-heading-xs {
-    @apply text-lg font-semibold leading-snug md:text-[1.125rem];
+    @apply text-lg font-semibold;
   }
 
   .text-body-lg {
-    @apply text-[1.15rem] leading-relaxed md:text-lg;
+    @apply text-lg leading-relaxed;
   }
 
   .text-body {
-    @apply text-[1.05rem] leading-relaxed md:text-base;
+    @apply text-base leading-relaxed;
   }
 
   .text-body-strong {
-    @apply text-[1.05rem] font-semibold leading-relaxed md:text-base;
+    @apply text-base font-semibold;
   }
 
   .text-body-muted {
-    @apply text-[1.05rem] leading-relaxed text-emerald-900/70 md:text-base;
+    @apply text-base text-emerald-900/70;
   }
 
   .text-body-sm {
-    @apply text-base leading-relaxed md:text-sm;
+    @apply text-sm;
   }
 
   .text-body-sm-strong {
-    @apply text-base font-semibold leading-relaxed md:text-sm;
+    @apply text-sm font-semibold;
   }
 
   .text-eyebrow {
@@ -156,7 +156,7 @@
   }
 
   .text-caption {
-    @apply text-[0.8rem] font-semibold uppercase tracking-wide md:text-xs;
+    @apply text-xs font-semibold uppercase tracking-wide;
   }
 
   .form-label {
@@ -164,6 +164,6 @@
   }
 
   .text-body-sm-muted {
-    @apply text-base leading-relaxed text-emerald-900/70 md:text-sm;
+    @apply text-sm text-emerald-900/70;
   }
 }

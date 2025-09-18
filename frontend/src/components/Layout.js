@@ -125,7 +125,7 @@ function Layout({ children }) {
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-emerald-50 via-white to-emerald-100 text-emerald-950">
       <header className="sticky top-0 z-30 border-b border-emerald-100 bg-white/80 backdrop-blur">
-        <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6">
+        <div className="mx-auto w-full max-w-6xl px-6 py-4">
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -230,12 +230,12 @@ function Layout({ children }) {
           )}
         </div>
       </header>
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-16 pt-10 sm:px-6 sm:py-12">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-12">
         {children}
       </main>
       <footer className="border-t border-emerald-100 bg-white/70">
         <div
-          className={`mx-auto w-full max-w-6xl px-4 py-6 text-center sm:px-6 ${bodySmallMutedTextClasses} text-emerald-900/70`}
+          className={`mx-auto w-full max-w-6xl px-6 py-6 text-center ${bodySmallMutedTextClasses} text-emerald-900/70`}
         >
           Root your days in care, grow with guidance, and share the harvest.
         </div>
