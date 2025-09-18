@@ -1,4 +1,8 @@
 
+# 2025-10-04
+
+- Refined the admin dashboard form library into responsive cards that surface friendly visibility and assignment labels, and documented the `table-header`/`table-row` token pattern in `frontend/AGENTS.md` so future tables keep the stacked mobile layout.
+
 # 2025-10-03
 
 - Introduced `backend/utils/emailTemplates.js` as the shared theme wrapper for transactional emails, ensuring subjects include the

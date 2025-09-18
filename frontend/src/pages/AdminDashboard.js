@@ -59,6 +59,41 @@ function AdminDashboard() {
     return <LoadingState label="Loading admin overview" />;
   }
 
+  const getVisibilityLabel = (form) => {
+    if (form.is_default) {
+      return "Default template";
+    }
+
+    switch (form.visibility) {
+      case "mentor":
+        return "Mentor library";
+      case "admin":
+        return "Admin only";
+      case "journaler":
+        return "Journaler library";
+      default:
+        return "Shared";
+    }
+  };
+
+  const getAssignmentLabel = (form) => {
+    if (form.is_default) {
+      return "Available to every journaler";
+    }
+
+    const total = Number(form.assignments) || 0;
+
+    if (total === 0) {
+      return "Not assigned yet";
+    }
+
+    if (total === 1) {
+      return "Assigned to 1 journaler";
+    }
+
+    return `Assigned to ${total} journalers`;
+  };
+
   return (
     <div className="flex w-full flex-1 flex-col gap-8">
       <SectionCard
@@ -104,18 +139,33 @@ function AdminDashboard() {
       >
         {forms.length ? (
           <div className="space-y-3">
-            <div className={tableHeaderClasses}>
+            <div className={`${tableHeaderClasses} md:px-4`}>
               <span>Title</span>
               <span>Visibility</span>
-              <span>Assignments</span>
+              <span className="md:text-right">Assignments</span>
             </div>
-            {forms.map((form) => (
-              <div className={tableRowClasses} key={form.id}>
-                <span className="font-semibold text-emerald-900">{form.title}</span>
-                <span className={`${chipBaseClasses} capitalize`}>{form.visibility}</span>
-                <span className="text-sm text-emerald-900/70">{form.assignments}</span>
-              </div>
-            ))}
+            {forms.map((form) => {
+              const visibilityLabel = getVisibilityLabel(form);
+              const assignmentLabel = getAssignmentLabel(form);
+
+              return (
+                <div className={tableRowClasses} key={form.id}>
+                  <div>
+                    <p className="font-semibold text-emerald-900">{form.title}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-emerald-900/70 md:hidden">
+                      <span className={chipBaseClasses}>{visibilityLabel}</span>
+                      <span>{assignmentLabel}</span>
+                    </div>
+                  </div>
+                  <div className="hidden md:block">
+                    <span className={chipBaseClasses}>{visibilityLabel}</span>
+                  </div>
+                  <div className="hidden text-sm text-emerald-900/80 md:block md:text-right">
+                    {assignmentLabel}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className={emptyStateClasses}>
