@@ -1,6 +1,5 @@
 import { format, parseISO } from "date-fns";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import JournalEntryForm from "../components/JournalEntryForm";
@@ -88,6 +87,13 @@ function JournalHistoryPage() {
   const [formActionVariant, setFormActionVariant] = useState("success");
   const [unlinkingId, setUnlinkingId] = useState(null);
   const [formsError, setFormsError] = useState(null);
+  const [activeFormId, setActiveFormId] = useState(null);
+  const [activeFormSubmitting, setActiveFormSubmitting] = useState(false);
+  const [activeFormStatusMessage, setActiveFormStatusMessage] = useState(null);
+  const [activeFormStatusVariant, setActiveFormStatusVariant] = useState("info");
+  const [activeFormResetKey, setActiveFormResetKey] = useState(0);
+  const activeFormSectionRef = useRef(null);
+  const [activeFormHighlighted, setActiveFormHighlighted] = useState(false);
 
   const loadEntries = useCallback(async () => {
     if (!token) return;
@@ -168,6 +174,13 @@ function JournalHistoryPage() {
     return forms.find((form) => form.id === editingEntry.formId) || null;
   }, [editingEntry, forms]);
 
+  const activeForm = useMemo(() => {
+    if (!activeFormId) {
+      return null;
+    }
+    return forms.find((form) => form.id === activeFormId) || null;
+  }, [activeFormId, forms]);
+
   const editingValues = useMemo(() => {
     if (!editingEntry || !editingForm) {
       return {};
@@ -220,6 +233,93 @@ function JournalHistoryPage() {
     },
     [token]
   );
+
+  const focusActiveFormSection = useCallback(() => {
+    if (!activeFormSectionRef.current) {
+      return;
+    }
+
+    activeFormSectionRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
+
+  const handleOpenForm = useCallback(
+    (formId) => {
+      setActiveFormId(formId);
+      setActiveFormStatusVariant("info");
+      setActiveFormStatusMessage(null);
+      setActiveFormResetKey((prev) => prev + 1);
+      setActiveFormHighlighted(true);
+    },
+    []
+  );
+
+  const handleCancelActiveForm = useCallback(() => {
+    setActiveFormId(null);
+    setActiveFormStatusMessage(null);
+    setActiveFormHighlighted(false);
+  }, []);
+
+  const handleSubmitActiveForm = useCallback(
+    async ({ formId, responses, sharedLevel }) => {
+      if (!formId) {
+        return;
+      }
+
+      setActiveFormSubmitting(true);
+      setActiveFormStatusVariant("info");
+      setActiveFormStatusMessage("Sending your reflection into the grove...");
+
+      try {
+        const { entry } = await apiClient.post(
+          "/journal-entries",
+          {
+            formId,
+            responses,
+            sharedLevel,
+          },
+          token
+        );
+
+        setEntries((prev) => [entry, ...prev]);
+        setActiveFormStatusVariant("success");
+        setActiveFormStatusMessage("Your reflection now sings within Aleya.");
+        setActiveFormResetKey((prev) => prev + 1);
+      } catch (err) {
+        setActiveFormStatusVariant("info");
+        setActiveFormStatusMessage(err.message);
+      } finally {
+        setActiveFormSubmitting(false);
+      }
+    },
+    [token]
+  );
+
+  useEffect(() => {
+    if (activeFormStatusVariant !== "success" || !activeFormStatusMessage) {
+      return undefined;
+    }
+
+    const timeout = setTimeout(() => setActiveFormStatusMessage(null), 4000);
+    return () => clearTimeout(timeout);
+  }, [activeFormStatusMessage, activeFormStatusVariant]);
+
+  useEffect(() => {
+    if (!activeForm) {
+      setActiveFormHighlighted(false);
+      return undefined;
+    }
+
+    focusActiveFormSection();
+
+    const timeout = setTimeout(() => {
+      setActiveFormHighlighted(false);
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, [activeForm, focusActiveFormSection]);
 
   const sortedForms = useMemo(() => {
     if (!Array.isArray(forms)) {
@@ -441,6 +541,25 @@ function JournalHistoryPage() {
           title="Your check-in forms"
           subtitle="See the prompts you've chosen to reflect with"
         >
+          {activeForm && (
+            <div className="flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <p className={`${bodySmallStrongTextClasses} text-emerald-900`}>
+                  “{activeForm.title}” is open just below.
+                </p>
+                <p className={`${bodySmallTextClasses} text-emerald-900/80`}>
+                  Follow the glow to share today’s reflection.
+                </p>
+              </div>
+              <button
+                type="button"
+                className={`${primaryButtonClasses} w-full text-center sm:w-auto`}
+                onClick={focusActiveFormSection}
+              >
+                Jump to form
+              </button>
+            </div>
+          )}
           {formsError && (
             <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
               {formsError}
@@ -555,12 +674,13 @@ function JournalHistoryPage() {
                       <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
                         Let this form guide a fresh reflection beneath today’s canopy.
                       </p>
-                      <Link
-                        to={`/dashboard?formId=${form.id}`}
+                      <button
+                        type="button"
                         className={`${primaryButtonClasses} w-full text-center sm:w-auto`}
+                        onClick={() => handleOpenForm(form.id)}
                       >
                         Bloom
-                      </Link>
+                      </button>
                     </div>
                   </li>
                 );
@@ -572,6 +692,29 @@ function JournalHistoryPage() {
             </p>
           )}
         </SectionCard>
+      )}
+      {user.role === "journaler" && activeForm && (
+        <div
+          ref={activeFormSectionRef}
+          className={`rounded-3xl transition duration-500 ${
+            activeFormHighlighted ? "ring-4 ring-emerald-200/80" : ""
+          }`}
+        >
+          <SectionCard
+            title="Today’s reflection"
+            subtitle="Offer your thoughts to the chosen canopy without leaving your history"
+          >
+            <JournalEntryForm
+              key={`${activeForm.id}-${activeFormResetKey}`}
+              form={activeForm}
+              onSubmit={handleSubmitActiveForm}
+              submitting={activeFormSubmitting}
+              statusMessage={activeFormStatusMessage}
+              statusVariant={activeFormStatusVariant}
+              onCancel={handleCancelActiveForm}
+            />
+          </SectionCard>
+        </div>
       )}
       <SectionCard
         title="Journal history"
