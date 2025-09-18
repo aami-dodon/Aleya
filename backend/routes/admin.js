@@ -3,7 +3,7 @@ const { body, validationResult } = require("express-validator");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
-const { dispatchNotification } = require("../utils/notifications");
+const { dispatchNotification, notifyMentorLink } = require("../utils/notifications");
 
 const router = express.Router();
 
@@ -556,10 +556,21 @@ router.get(
       const { rows } = await pool.query(
         `SELECT u.id, u.name, u.email,
                 mp.expertise, mp.availability, mp.bio,
+                COALESCE(
+                  JSON_AGG(
+                    DISTINCT JSONB_BUILD_OBJECT(
+                      'id', j.id,
+                      'name', j.name,
+                      'email', j.email
+                    )
+                  ) FILTER (WHERE j.id IS NOT NULL),
+                  '[]'
+                ) AS mentees,
                 COUNT(ml.*) AS mentee_count
          FROM users u
          LEFT JOIN mentor_profiles mp ON mp.user_id = u.id
          LEFT JOIN mentor_links ml ON ml.mentor_id = u.id
+         LEFT JOIN users j ON j.id = ml.journaler_id
          WHERE u.role = 'mentor'
          GROUP BY u.id, mp.expertise, mp.availability, mp.bio
          ORDER BY u.name`
@@ -568,6 +579,280 @@ router.get(
       return res.json({ mentors: rows });
     } catch (error) {
       return next(error);
+    }
+  }
+);
+
+router.get(
+  "/journalers",
+  authenticate,
+  requireRole("admin"),
+  async (req, res, next) => {
+    const search = (req.query.q || "").trim().toLowerCase();
+    const limit = Math.min(Number.parseInt(req.query.limit, 10) || 25, 100);
+
+    try {
+      const params = [limit];
+      let whereClause = "WHERE role = 'journaler'";
+
+      if (search) {
+        params.push(`%${search}%`);
+        whereClause +=
+          " AND (LOWER(name) LIKE $2 OR LOWER(email) LIKE $2)";
+      }
+
+      const { rows } = await pool.query(
+        `SELECT id, name, email
+         FROM users
+         ${whereClause}
+         ORDER BY name
+         LIMIT $1`,
+        params
+      );
+
+      return res.json({ journalers: rows });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+router.post(
+  "/mentor-links",
+  authenticate,
+  requireRole("admin"),
+  [
+    body("mentorId").isInt().withMessage("mentorId is required"),
+    body("journalerEmail")
+      .optional()
+      .isEmail()
+      .withMessage("A valid journalerEmail is required"),
+    body("journalerId").optional().isInt(),
+  ],
+  async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const mentorId = Number.parseInt(req.body.mentorId, 10);
+    const journalerId =
+      req.body.journalerId !== undefined
+        ? Number.parseInt(req.body.journalerId, 10)
+        : null;
+    const journalerEmail =
+      typeof req.body.journalerEmail === "string"
+        ? req.body.journalerEmail.toLowerCase()
+        : null;
+
+    if (!Number.isInteger(mentorId) || mentorId <= 0) {
+      return res.status(400).json({ error: "Invalid mentor id" });
+    }
+
+    if (!journalerId && !journalerEmail) {
+      return res
+        .status(400)
+        .json({ error: "journalerId or journalerEmail is required" });
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const { rows: mentorRows } = await client.query(
+        `SELECT id, name, email, notification_preferences
+         FROM users
+         WHERE id = $1 AND role = 'mentor'
+         FOR UPDATE`,
+        [mentorId]
+      );
+
+      if (!mentorRows.length) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "Mentor not found" });
+      }
+
+      let journalerRow;
+
+      if (journalerId) {
+        const { rows } = await client.query(
+          `SELECT id, name, email, notification_preferences
+           FROM users
+           WHERE id = $1 AND role = 'journaler'
+           FOR UPDATE`,
+          [journalerId]
+        );
+
+        if (!rows.length) {
+          await client.query("ROLLBACK");
+          return res.status(404).json({ error: "Journaler not found" });
+        }
+
+        journalerRow = rows[0];
+      } else {
+        const { rows } = await client.query(
+          `SELECT id, name, email, notification_preferences
+           FROM users
+           WHERE LOWER(email) = $1 AND role = 'journaler'
+           FOR UPDATE`,
+          [journalerEmail]
+        );
+
+        if (!rows.length) {
+          await client.query("ROLLBACK");
+          return res.status(404).json({ error: "Journaler not found" });
+        }
+
+        journalerRow = rows[0];
+      }
+
+      const existingLink = await client.query(
+        `SELECT id FROM mentor_links
+         WHERE mentor_id = $1 AND journaler_id = $2
+         FOR UPDATE`,
+        [mentorId, journalerRow.id]
+      );
+
+      if (existingLink.rows.length) {
+        await client.query("ROLLBACK");
+        return res
+          .status(400)
+          .json({ error: "Mentor and journaler are already linked" });
+      }
+
+      await client.query(
+        `INSERT INTO mentor_links (journaler_id, mentor_id)
+         VALUES ($1, $2)`,
+        [journalerRow.id, mentorId]
+      );
+
+      await client.query(
+        `UPDATE mentor_requests
+         SET status = 'confirmed', updated_at = NOW()
+         WHERE journaler_id = $1 AND mentor_id = $2 AND status <> 'confirmed'`,
+        [journalerRow.id, mentorId]
+      );
+
+      await client.query("COMMIT");
+
+      await notifyMentorLink(req.app, {
+        mentor: mentorRows[0],
+        journaler: journalerRow,
+      });
+
+      return res
+        .status(201)
+        .json({
+          success: true,
+          link: { mentorId, journalerId: journalerRow.id },
+        });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return next(error);
+    } finally {
+      client.release();
+    }
+  }
+);
+
+router.delete(
+  "/mentor-links/:mentorId/:journalerId",
+  authenticate,
+  requireRole("admin"),
+  async (req, res, next) => {
+    const mentorId = Number.parseInt(req.params.mentorId, 10);
+    const journalerId = Number.parseInt(req.params.journalerId, 10);
+
+    if (!Number.isInteger(mentorId) || mentorId <= 0) {
+      return res.status(400).json({ error: "Invalid mentor id" });
+    }
+
+    if (!Number.isInteger(journalerId) || journalerId <= 0) {
+      return res.status(400).json({ error: "Invalid journaler id" });
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const { rows } = await client.query(
+        `SELECT id FROM mentor_links
+         WHERE mentor_id = $1 AND journaler_id = $2
+         FOR UPDATE`,
+        [mentorId, journalerId]
+      );
+
+      if (!rows.length) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "Mentor link not found" });
+      }
+
+      await client.query(
+        `DELETE FROM mentor_links
+         WHERE mentor_id = $1 AND journaler_id = $2`,
+        [mentorId, journalerId]
+      );
+
+      await client.query(
+        `UPDATE mentor_requests
+         SET status = 'ended', updated_at = NOW()
+         WHERE mentor_id = $1 AND journaler_id = $2 AND status = 'confirmed'`,
+        [mentorId, journalerId]
+      );
+
+      await client.query("COMMIT");
+
+      return res.json({ success: true });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return next(error);
+    } finally {
+      client.release();
+    }
+  }
+);
+
+router.delete(
+  "/mentors/:id",
+  authenticate,
+  requireRole("admin"),
+  async (req, res, next) => {
+    const mentorId = Number.parseInt(req.params.id, 10);
+
+    if (!Number.isInteger(mentorId) || mentorId <= 0) {
+      return res.status(400).json({ error: "Invalid mentor id" });
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const { rows } = await client.query(
+        `SELECT id FROM users
+         WHERE id = $1 AND role = 'mentor'
+         FOR UPDATE`,
+        [mentorId]
+      );
+
+      if (!rows.length) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "Mentor not found" });
+      }
+
+      await client.query(`DELETE FROM users WHERE id = $1`, [mentorId]);
+
+      await client.query("COMMIT");
+
+      return res.json({ success: true });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return next(error);
+    } finally {
+      client.release();
     }
   }
 );

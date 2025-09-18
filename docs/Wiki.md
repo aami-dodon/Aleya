@@ -1,4 +1,10 @@
 # 2025-09-25
+- Added admin mentor management endpoints: `/admin/mentor-links` to link journalers, `/admin/mentor-links/:mentorId/:journalerId`
+  to sever connections, `/admin/journalers` for quick journaler lookups, and `/admin/mentors/:id` for removing mentor accounts
+  while returning `/admin/mentors` with detailed mentee listings.
+- Refreshed the admin mentorship page to focus on mentor stewardship by letting admins link mentees by email, review existing
+  relationships, and delete mentors directly from the cards.
+
 - Restricted `/forms` creation to mentors, enriched the admin `/forms` listing with creator names and mentee associations, and
   refreshed the Forms page so admins manage existing templates with filters, assignment removal, and delete controls instead of
   crafting new forms.

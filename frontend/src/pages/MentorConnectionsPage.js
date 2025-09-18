@@ -8,7 +8,9 @@ import SectionCard from "../components/SectionCard";
 import { useAuth } from "../context/AuthContext";
 import { useNotifications } from "../context/NotificationContext";
 import {
+  captionTextClasses,
   chipBaseClasses,
+  dangerButtonClasses,
   emptyStateClasses,
   infoTextClasses,
   inputCompactClasses,
@@ -28,44 +30,55 @@ function MentorConnectionsPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [selectedMentor, setSelectedMentor] = useState(null);
+  const [linkEmails, setLinkEmails] = useState({});
+  const [linkErrors, setLinkErrors] = useState({});
   const {
     notifications,
     loading: notificationsLoading,
     markAsRead,
     isEnabled: notificationsEnabled,
   } = useNotifications();
+  const isAdmin = user.role === "admin";
 
   const load = useCallback(async () => {
     if (!token) return;
     setLoading(true);
     try {
-      const requestsRes = await apiClient.get("/mentors/requests", token);
-      const pendingRequests = requestsRes.requests || [];
-      setRequests(pendingRequests);
-
-      if (user.role === "mentor") {
-        const menteesRes = await apiClient.get("/mentors/mentees", token);
-        setMentees(menteesRes.mentees || []);
+      if (isAdmin) {
+        const mentorsRes = await apiClient.get("/admin/mentors", token);
+        setMentors(mentorsRes.mentors || []);
+        setRequests([]);
+        setMentees([]);
+        setMessage(null);
       } else {
-        const hasActiveMentor = pendingRequests.some((request) =>
-          ACTIVE_MENTOR_STATUSES.has(request.status)
-        );
+        const requestsRes = await apiClient.get("/mentors/requests", token);
+        const pendingRequests = requestsRes.requests || [];
+        setRequests(pendingRequests);
 
-        if (hasActiveMentor) {
-          setMentors([]);
+        if (user.role === "mentor") {
+          const menteesRes = await apiClient.get("/mentors/mentees", token);
+          setMentees(menteesRes.mentees || []);
         } else {
-          const mentorsRes = await apiClient.get("/mentors", token);
-          setMentors(mentorsRes.mentors || []);
-        }
-      }
+          const hasActiveMentor = pendingRequests.some((request) =>
+            ACTIVE_MENTOR_STATUSES.has(request.status)
+          );
 
-      setMessage(null);
+          if (hasActiveMentor) {
+            setMentors([]);
+          } else {
+            const mentorsRes = await apiClient.get("/mentors", token);
+            setMentors(mentorsRes.mentors || []);
+          }
+        }
+
+        setMessage(null);
+      }
     } catch (err) {
       setMessage(err.message);
     } finally {
       setLoading(false);
     }
-  }, [token, user.role]);
+  }, [isAdmin, token, user.role]);
 
   useEffect(() => {
     load();
@@ -122,6 +135,63 @@ function MentorConnectionsPage() {
     setMessage(`You ended your mentorship with ${request.mentor.name}.`);
   };
 
+  const handleLinkEmailChange = (mentorId, value) => {
+    setLinkEmails((prev) => ({ ...prev, [mentorId]: value }));
+    setLinkErrors((prev) => ({ ...prev, [mentorId]: null }));
+  };
+
+  const linkMentee = async (mentor) => {
+    const email = (linkEmails[mentor.id] || "").trim();
+
+    if (!email) {
+      setLinkErrors((prev) => ({ ...prev, [mentor.id]: "Enter an email to link." }));
+      setMessage(null);
+      return;
+    }
+
+    try {
+      await apiClient.post(
+        "/admin/mentor-links",
+        { mentorId: mentor.id, journalerEmail: email },
+        token
+      );
+      setMessage(`Linked ${email} with ${mentor.name}.`);
+      setLinkEmails((prev) => ({ ...prev, [mentor.id]: "" }));
+      await load();
+    } catch (error) {
+      setMessage(null);
+      setLinkErrors((prev) => ({ ...prev, [mentor.id]: error.message }));
+    }
+  };
+
+  const unlinkMentee = async (mentorId, mentee) => {
+    try {
+      await apiClient.del(`/admin/mentor-links/${mentorId}/${mentee.id}`, token);
+      setMessage(`Unlinked ${mentee.name || mentee.email}.`);
+      await load();
+    } catch (error) {
+      setMessage(error.message);
+    }
+  };
+
+  const deleteMentor = async (mentor) => {
+    const confirmed = window.confirm(
+      `Remove ${mentor.name}? This will delete their mentor account and links.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await apiClient.del(`/admin/mentors/${mentor.id}`, token);
+      setMessage(`${mentor.name} has been removed.`);
+      await load();
+    } catch (error) {
+      setMessage(error.message);
+    }
+  };
+
   const handleNotificationRead = async (notificationId) => {
     if (!notificationsEnabled) {
       return;
@@ -132,6 +202,137 @@ function MentorConnectionsPage() {
 
   if (loading) {
     return <LoadingState label="Loading mentorship" />;
+  }
+
+  if (isAdmin) {
+    return (
+      <div className="flex w-full flex-1 flex-col gap-8">
+        {message && <p className={infoTextClasses}>{message}</p>}
+        <SectionCard
+          title="Mentor management"
+          subtitle="Curate guides, connect them with journalers, and prune links that no longer serve"
+        >
+          {mentors.length ? (
+            <ul className="space-y-6">
+              {mentors.map((mentor) => {
+                const expertiseTags = parseExpertise(mentor.expertise);
+                const menteeList = Array.isArray(mentor.mentees)
+                  ? mentor.mentees
+                  : [];
+                return (
+                  <li
+                    key={mentor.id}
+                    className="rounded-2xl border border-emerald-100 bg-white/70 p-5"
+                  >
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-base font-semibold text-emerald-900">
+                            {mentor.name}
+                          </p>
+                          <p className={infoTextClasses}>{mentor.email}</p>
+                        </div>
+                        {expertiseTags.length ? (
+                          <div className="flex flex-wrap gap-2">
+                            {expertiseTags.map((tag) => (
+                              <span key={tag} className={chipBaseClasses}>
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className={infoTextClasses}>Expertise not provided</p>
+                        )}
+                        {mentor.bio && (
+                          <p className="text-sm text-emerald-900/70">{mentor.bio}</p>
+                        )}
+                        {mentor.availability && (
+                          <p className={infoTextClasses}>
+                            Availability: {mentor.availability}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-3 lg:w-1/2">
+                        <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+                          <p className={`${infoTextClasses} mb-3 font-semibold text-emerald-900`}>
+                            Linked mentees
+                          </p>
+                          {menteeList.length ? (
+                            <ul className="space-y-2">
+                              {menteeList.map((mentee) => (
+                                <li
+                                  key={mentee.id}
+                                  className="flex items-center justify-between gap-3 rounded-lg bg-white/80 px-3 py-2"
+                                >
+                                  <div>
+                                    <p className="text-sm font-semibold text-emerald-900">
+                                      {mentee.name}
+                                    </p>
+                                    <p className={`${captionTextClasses} text-emerald-900/70`}>
+                                      {mentee.email}
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className={`${secondaryButtonClasses} px-3 py-1 text-xs`}
+                                    onClick={() => unlinkMentee(mentor.id, mentee)}
+                                  >
+                                    Remove
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className={infoTextClasses}>No mentees linked yet.</p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <label className={`${captionTextClasses} text-emerald-900/70`}>
+                            Link a journaler by email
+                          </label>
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                            <input
+                              type="email"
+                              value={linkEmails[mentor.id] || ""}
+                              onChange={(event) =>
+                                handleLinkEmailChange(mentor.id, event.target.value)
+                              }
+                              placeholder="journaler@example.com"
+                              className={`${inputCompactClasses} flex-1`}
+                            />
+                            <button
+                              type="button"
+                              className={`${primaryButtonClasses} px-5 py-2.5 text-sm`}
+                              onClick={() => linkMentee(mentor)}
+                            >
+                              Link journaler
+                            </button>
+                          </div>
+                          {linkErrors[mentor.id] && (
+                            <p className="text-sm font-semibold text-rose-600">
+                              {linkErrors[mentor.id]}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className={`${dangerButtonClasses} self-start px-4 py-2 text-sm`}
+                          onClick={() => deleteMentor(mentor)}
+                        >
+                          Delete mentor
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className={emptyStateClasses}>No mentors onboarded yet.</p>
+          )}
+        </SectionCard>
+      </div>
+    );
   }
 
   return (
