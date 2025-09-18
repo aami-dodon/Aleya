@@ -19,8 +19,8 @@ tays balanced across breakpoints.
   a clear escape hatch.
 - Keep modal headers in a single flex container that houses both the title block and the close button so the markup stays
   balanced and easier to maintain.
-- Admins view a pared-down settings experience: hide the email reminder fieldset, mentor notification controls, the weekly
-  summary toggle, profile submit actions, and the data export/deletion tools whenever `user.role === "admin"`.
+- Settings now focus on profile essentials: the email reminder fields and in-app notification preferences have been retired for
+  every role, so keep the layout lean and avoid reintroducing NotificationContext or bell-style components.
 - Admin mentor management lives on `/mentorship`: show mentor cards with linked mentees, allow linking by email, and surface a
   `Delete mentor` control using the shared button tokens so admins can curate relationships gracefully.
 - Admin journaler management now has its own `/journalers` route: surface a journaler list with linked mentors, include a search

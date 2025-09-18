@@ -4,12 +4,6 @@ const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
-const {
-  notifyMentorLink,
-  notifyMentorPanic,
-  dispatchNotification,
-} = require("../utils/notifications");
-
 const router = express.Router();
 
 function formatRequests(rows) {
@@ -218,38 +212,7 @@ router.post(
         [request.journaler_id, request.mentor_id]
       );
 
-      const { rows: participants } = await client.query(
-        `SELECT id, name, email, notification_preferences
-         FROM users
-         WHERE id = ANY($1::int[])`,
-        [[request.journaler_id, request.mentor_id]]
-      );
-
       await client.query("COMMIT");
-
-      const mentor = participants.find(
-        (user) => user.id === request.mentor_id
-      );
-      const journaler = participants.find(
-        (user) => user.id === request.journaler_id
-      );
-
-      if (mentor && journaler) {
-        await notifyMentorLink(req.app, {
-          mentor: {
-            id: mentor.id,
-            name: mentor.name,
-            email: mentor.email,
-            notification_preferences: mentor.notification_preferences,
-          },
-          journaler: {
-            id: journaler.id,
-            name: journaler.name,
-            email: journaler.email,
-            notification_preferences: journaler.notification_preferences,
-          },
-        });
-      }
 
       return res.json({ success: true });
     } catch (error) {
@@ -336,15 +299,6 @@ router.delete(
           return res.status(404).json({ error: "Mentor link not found" });
         }
 
-        const { rows: mentorRows } = await client.query(
-          `SELECT id, name, email, notification_preferences
-           FROM users
-           WHERE id = $1`,
-          [mentorId]
-        );
-
-        const mentor = mentorRows[0];
-
         await client.query(
           `DELETE FROM mentor_links WHERE journaler_id = $1 AND mentor_id = $2`,
           [req.user.id, mentorId]
@@ -363,26 +317,7 @@ router.delete(
           [req.user.id, mentorId]
         );
 
-        await client.query(
-          `DELETE FROM user_notifications
-           WHERE user_id = $2
-             AND type = 'mentor_entry_shared'
-             AND metadata->>'journalerId' = $1`,
-          [String(req.user.id), mentorId]
-        );
-
         await client.query("COMMIT");
-        if (mentor) {
-          await dispatchNotification(req.app, "mentorship_ended_mentor", {
-            recipient: mentor,
-            mentor,
-            journaler: {
-              id: req.user.id,
-              name: req.user.name,
-              email: req.user.email,
-            },
-          });
-        }
 
         return res.json({ success: true });
       } catch (error) {
@@ -488,7 +423,7 @@ router.post(
 
     try {
       const { rows } = await pool.query(
-        `SELECT u.id, u.name, u.email, u.notification_preferences
+        `SELECT u.id, u.name, u.email
          FROM mentor_links ml
          JOIN users u ON u.id = ml.mentor_id
          WHERE ml.journaler_id = $1 AND ml.mentor_id = $2`,
@@ -500,21 +435,9 @@ router.post(
       }
 
       const targetMentor = rows[0];
-      const record = await notifyMentorPanic(req.app, {
-        mentor: targetMentor,
-        sender: {
-          id: req.user.id,
-          name: req.user.name,
-          email: req.user.email,
-        },
-        message,
-      });
-
       return res.status(201).json({
         success: true,
-        notification: record
-          ? { id: record.id, createdAt: record.created_at }
-          : null,
+        notification: null,
       });
     } catch (error) {
       return next(error);

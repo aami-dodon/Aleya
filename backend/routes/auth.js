@@ -6,13 +6,8 @@ const { body, validationResult } = require("express-validator");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
-const { DEFAULT_NOTIFICATION_PREFS } = require("../utils/bootstrap");
 const { logger } = require("../utils/logger");
 const { sendEmail } = require("../utils/mailer");
-const {
-  notifyAdmins,
-  dispatchNotification,
-} = require("../utils/notifications");
 
 const router = express.Router();
 
@@ -169,7 +164,7 @@ async function sendVerificationEmail(app, { email, name }, token) {
 
 async function fetchUserById(id) {
   const { rows } = await pool.query(
-    `SELECT u.id, u.email, u.name, u.role, u.timezone, u.notification_preferences,
+    `SELECT u.id, u.email, u.name, u.role, u.timezone,
             u.is_verified,
             mp.expertise, mp.availability, mp.bio
      FROM users u
@@ -183,25 +178,6 @@ async function fetchUserById(id) {
   }
 
   const row = rows[0];
-  let notificationPreferences =
-    row.notification_preferences || DEFAULT_NOTIFICATION_PREFS;
-
-  if (typeof notificationPreferences === "string") {
-    try {
-      notificationPreferences = JSON.parse(notificationPreferences);
-    } catch (error) {
-      notificationPreferences = DEFAULT_NOTIFICATION_PREFS;
-    }
-  }
-
-  if (!notificationPreferences) {
-    notificationPreferences = DEFAULT_NOTIFICATION_PREFS;
-  }
-
-  notificationPreferences = JSON.parse(
-    JSON.stringify(notificationPreferences)
-  );
-
   const user = {
     id: row.id,
     email: row.email,
@@ -209,7 +185,6 @@ async function fetchUserById(id) {
     role: row.role,
     timezone: row.timezone,
     isVerified: row.is_verified,
-    notificationPreferences,
   };
 
   if (row.role === "mentor") {
@@ -303,20 +278,18 @@ router.post(
             name,
             role,
             timezone,
-            notification_preferences,
             is_verified,
             verification_token_hash,
             verification_token_expires_at
          )
-         VALUES ($1, $2, $3, $4, $5, $6, FALSE, $7, $8)
-         RETURNING id, name, email, notification_preferences`,
+         VALUES ($1, $2, $3, $4, $5, FALSE, $6, $7)
+         RETURNING id, name, email`,
         [
           normalizedEmail,
           passwordHash,
           name,
           role,
           resolvedTimezone,
-          JSON.stringify(DEFAULT_NOTIFICATION_PREFS),
           verificationTokenHash,
           verificationExpiresAt,
         ]
@@ -358,34 +331,6 @@ router.post(
         name: trimmedName || name,
         email: normalizedEmail,
       };
-
-      const mentorRecipient = {
-        id: userId,
-        name: insertedUser.name || newUser.name,
-        email: insertedUser.email || normalizedEmail,
-        notification_preferences:
-          insertedUser.notification_preferences || DEFAULT_NOTIFICATION_PREFS,
-      };
-
-      if (role === "journaler") {
-        await notifyAdmins(req.app, "mentee_registered_admin", () => ({
-          mentee: newUser,
-        }));
-      } else if (role === "mentor") {
-        await notifyAdmins(
-          req.app,
-          "mentor_registered_admin",
-          () => ({ mentor: newUser })
-        );
-        await dispatchNotification(
-          req.app,
-          "mentor_registered_mentor",
-          {
-            recipient: mentorRecipient,
-            mentor: newUser,
-          }
-        );
-      }
 
       return res.status(201).json({
         message:
@@ -570,8 +515,7 @@ router.get("/me", authenticate, async (req, res, next) => {
 });
 
 router.patch("/me", authenticate, async (req, res, next) => {
-  const { name, timezone, notificationPreferences, password, mentorProfile } =
-    req.body;
+  const { name, timezone, password, mentorProfile } = req.body;
 
   try {
     const updates = [];
@@ -587,12 +531,6 @@ router.patch("/me", authenticate, async (req, res, next) => {
     if (timezone) {
       updates.push(`timezone = $${index}`);
       values.push(timezone);
-      index += 1;
-    }
-
-    if (notificationPreferences) {
-      updates.push(`notification_preferences = $${index}`);
-      values.push(JSON.stringify(notificationPreferences));
       index += 1;
     }
 
@@ -668,14 +606,6 @@ router.delete("/me", authenticate, async (req, res, next) => {
     }
 
     await pool.query("DELETE FROM users WHERE id = $1", [req.user.id]);
-
-    await notifyAdmins(req.app, "account_deleted_admin", () => ({
-      user: {
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email,
-      },
-    }));
 
     return res.json({ message: "Account deleted" });
   } catch (error) {

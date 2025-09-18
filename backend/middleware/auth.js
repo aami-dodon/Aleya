@@ -17,7 +17,7 @@ module.exports = async function authenticate(req, res, next) {
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     const { rows } = await pool.query(
-      `SELECT id, email, name, role, timezone, notification_preferences
+      `SELECT id, email, name, role, timezone
        FROM users WHERE id = $1`,
       [payload.id]
     );
@@ -26,18 +26,7 @@ module.exports = async function authenticate(req, res, next) {
       return res.status(401).json({ error: "User not found" });
     }
 
-    const user = rows[0];
-    if (typeof user.notification_preferences === "string") {
-      try {
-        user.notification_preferences = JSON.parse(
-          user.notification_preferences
-        );
-      } catch (parseError) {
-        user.notification_preferences = {};
-      }
-    }
-
-    req.user = user;
+    req.user = rows[0];
     return next();
   } catch (error) {
     logger.warn(

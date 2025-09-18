@@ -17,7 +17,7 @@ Aleya is a journaling and mentorship platform that pairs reflective journaling t
   - Pain points: Consistency is difficult and accountability is limited without support.
 - **Mentor**
   - Goals: Support mentees, spot red flags quickly, and encourage consistent reflection.
-  - Needs: Simple dashboards, digestible entry summaries, and optional notifications.
+  - Needs: Simple dashboards, digestible entry summaries, and timely alerts when mentees reach out.
 - **Administrator**
   - Goals: Oversee the platform and keep user journeys running smoothly.
   - Responsibilities: Configure user journeys, manage journal forms, handle user data securely, monitor platform health, and onboard mentors.
@@ -29,7 +29,7 @@ Aleya is a journaling and mentorship platform that pairs reflective journaling t
 - **Mentor linking:** Journalers can invite or select mentors, forming a mentorship connection only after mutual consent.
 - **Reminders:** Daily or weekly reminders delivered via email.
 - **Mentor notifications:** Email summaries of mentee entries with privacy controls to respect journaler choices.
-- **Panic support alerts:** A persistent panic button lets mentors escalate concerns to their own linked mentors with an urgent note, triggering both an in-app notification and an "important" email.
+- **Panic support alerts:** A persistent panic button lets mentors escalate concerns to their own linked mentors with an urgent note, triggering an "important" email.
 - **Dashboards:** Role-specific dashboards showing streaks, average mood, trendlines, progress overviews, mentee highlights, and low-mood alerts.
 
 ### User flows
@@ -42,7 +42,7 @@ Aleya is a journaling and mentorship platform that pairs reflective journaling t
 4. **Mentor acceptance** – Mentor accepts the request; the journaler confirms, completing the mutual-consent handshake.
 5. **Form assignment** – Mentors can assign additional or custom forms once the link is confirmed.
 6. **Complete forms & submit entries** – Journalers complete default and assigned forms and submit entries.
-7. **Mentor notification flow** – Mentors are notified based on the journaler’s sharing preferences.
+7. **Mentor notification flow** – Mentors receive email updates based on the journaler’s sharing preferences.
 8. **Dashboard review** – Journalers view streaks, mood trends, and progress overviews.
 9. **Account & settings management** – Journalers manage profiles, reset passwords, and may delete the account.
 
@@ -73,7 +73,7 @@ Aleya is a journaling and mentorship platform that pairs reflective journaling t
 - **Admin oversight:** Administrators manage forms and journeys but cannot view private journal content.
 - **Security:** Data is stored securely using encryption and access control, with crisis keyword detection available for emergency escalation without exposing private details.
 - **Lifecycle management:** Journalers and mentors can deactivate or delete accounts; data is archived or erased accordingly.
-- **Notifications:** Supports email, push, or in-app notifications, following user preferences.
+- **Status updates:** Aleya now relies on dashboards and transactional emails (e.g. verification links); the legacy in-app notification system has been retired.
 
 ### Design principles
 
@@ -197,19 +197,9 @@ tail -f backend/logs/aleya.log
 
 If you customise `LOG_FILE` in `.env`, the logger will create the directory automatically. Log rotation is controlled by `LOG_MAX_SIZE` (bytes) and `LOG_MAX_FILES`.
 
-## Notification system
+## Notification system (retired)
 
-Aleya pairs in-app notifications with transactional emails so mentors never miss important activity.
-
-- **Global bell:** Mentors see a bell icon in the navigation bar. Clicking it opens a panel with the five most recent mentee updates and a shortcut back to the dashboard. The same feed appears on the mentor dashboard and mentorship pages so updates are always within reach.
-- **Respect sharing choices:** Notification payloads only include the information a journaler agreed to share (mood, summary, or full form responses). Mentor notification preferences further limit the detail that appears in email digests.
-- **Email triggers:** The backend sends emails for account verification, when a mentorship link is confirmed, and whenever a journaler submits either the default check-in or an assigned form. Emails go to the linked mentor(s) and reuse the same privacy filtering logic as the in-app feed.
-- **Panic alerts:** When a mentor clicks the panic button they can choose one of their mentors, send a short note, and dispatch an email marked important; the recipient mentor receives the message and the requester is cc’d for awareness.
-- **End-to-end coverage:** Admins are notified when mentors or mentees register, when mentor applications are approved or rejected, and when users download their data or delete their account. Mentors receive prompts for new mentorship links, assigned forms, panic alerts, and completion of all assigned forms. Journalers see assignments and mentorship confirmations.
-- **Customisable preferences:** Each user can toggle in-app vs. email delivery and opt in/out of specific categories (account, mentorship, forms, exports, urgent alerts) from the Settings page. Preferences are respected for both in-app feeds and email dispatches.
-- **Unified feed:** All notification types are stored in the `user_notifications` table so every role shares the same API (`GET /api/notifications`). Action buttons surface relevant destinations—reviewing a form, opening the dashboard, or visiting settings—directly from the notification tray.
-- **Configuration:** Set the SMTP variables described in [Configure environment variables](#1-configure-environment-variables). The server validates the credentials on boot, so you'll see a descriptive error if anything is missing.
-- **Testing locally:** With SMTP credentials in place, submit a journal entry that is shared beyond "Private" to generate both the in-app badge and mentor email. Marking a notification as read immediately updates the unread badge count across the interface.
+Earlier versions of Aleya offered an in-app notification feed and granular user preferences. That system has been removed in favour of a simpler experience centred on dashboards and essential emails (such as verification links and panic alerts). Environment variables related to the old notification APIs are no longer required.
 
 ## 5. Running with Docker (optional)
 
@@ -247,7 +237,7 @@ All endpoints are served from the `/api` prefix and return JSON. Supply an `Auth
 - `POST /api/auth/verify-email` – Confirm a pending account using the emailed token. *(Public)*
 - `POST /api/auth/login` – Exchange credentials for a JWT and hydrated profile. *(Public)*
 - `GET /api/auth/me` – Return the authenticated user profile, including mentor metadata when applicable. *(Authenticated)*
-- `PATCH /api/auth/me` – Update name, timezone, notification preferences, password, and mentor profile fields. *(Authenticated)*
+- `PATCH /api/auth/me` – Update name, timezone, password, and mentor profile fields. *(Authenticated)*
 - `GET /api/auth/mentor/profiles` – List mentor profiles for administrative review. *(Admin only)*
 
 ### Form library
@@ -275,8 +265,7 @@ All endpoints are served from the `/api` prefix and return JSON. Supply an `Auth
 - `POST /api/mentors/requests/:id/confirm` – Journalers confirm an accepted request, establishing a mentor link. *(Journaler)*
 - `POST /api/mentors/requests/:id/decline` – Decline a request as the involved mentor or journaler. *(Authenticated)*
 - `GET /api/mentors/mentees` – Display linked journalers with their latest shared reflections. *(Mentor)*
-- `GET /api/mentors/notifications` – Retrieve the 50 most recent entry notifications shared by mentees. *(Authenticated)*
-- `POST /api/mentors/notifications/:id/read` – Mark a notification as reviewed. *(Authenticated)*
+
 
 ### Dashboards & analytics
 
@@ -302,7 +291,7 @@ All endpoints are served from the `/api` prefix and return JSON. Supply an `Auth
 
 - **Authentication** uses JSON Web Tokens. Set `JWT_SECRET` to a strong value in production.
 - **CORS**: update `CORS_ORIGIN` (comma-separated list) if you host the frontend on another domain.
-- **Notifications & defaults**: new users receive default notification preferences defined in `DEFAULT_NOTIFICATION_PREFS`. Adjust in `backend/utils/bootstrap.js` if you need different defaults.
+- **Notifications**: the in-app notification feed and preference defaults have been removed; no additional setup is required beyond configuring essential email credentials.
 
 With these steps Aleya should be fully operational for local development or evaluation.
 
