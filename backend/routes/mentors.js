@@ -1,5 +1,6 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
+const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
@@ -290,6 +291,7 @@ router.delete(
   "/links/:mentorId",
   authenticate,
   requireRole("journaler"),
+  [body("password").isString().notEmpty().withMessage("Password is required")],
   async (req, res, next) => {
     const mentorId = Number(req.params.mentorId);
 
@@ -297,7 +299,26 @@ router.delete(
       return res.status(400).json({ error: "Invalid mentor id" });
     }
 
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
+      const { rows } = await pool.query(
+        `SELECT password_hash FROM users WHERE id = $1`,
+        [req.user.id]
+      );
+
+      if (!rows.length) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      const isValid = await bcrypt.compare(req.body.password, rows[0].password_hash);
+      if (!isValid) {
+        return res.status(401).json({ error: "Incorrect password" });
+      }
+
       const client = await pool.connect();
 
       try {
