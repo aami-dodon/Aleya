@@ -121,21 +121,22 @@ function PanicButton() {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-emerald-950/40 px-4 py-10"
+          className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-emerald-950/40 p-4 sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby="sos-dialog-heading"
           onClick={closeDialog}
         >
           <div
-            className="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl sm:p-8"
+            className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <h2
-                  id="sos-dialog-heading"
-                  className="text-xl font-semibold text-emerald-900"
+            <div className="max-h-[min(85vh,40rem)] overflow-y-auto p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <h2
+                    id="sos-dialog-heading"
+                    className="text-xl font-semibold text-emerald-900"
                 >
                   Request urgent support
                 </h2>

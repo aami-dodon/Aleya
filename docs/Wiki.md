@@ -1,5 +1,10 @@
 # Repository Wiki
 
+## 2025-09-20
+- Centered the SOS modal in `frontend/src/components/PanicButton.js` and constrained its height so it no longer renders off the
+  top of the viewport on smaller screens.
+- Documented the modal layout guidance in `frontend/AGENTS.md` to keep future overlays aligned and scrollable.
+
 ## 2025-09-19
 - Fixed the mentor panic alert route definition in `backend/routes/mentors.js` by restoring the missing closing `);` so Docker n
   odemon no longer crashes on startup.
