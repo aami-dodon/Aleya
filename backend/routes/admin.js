@@ -3,7 +3,6 @@ const { body, validationResult } = require("express-validator");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
-const { dispatchNotification } = require("../utils/notifications");
 
 const router = express.Router();
 
@@ -240,27 +239,8 @@ router.post(
         [approval.id]
       );
 
-      const approvalRecord = hydrated[0];
-
-      if (approvalRecord?.status && approvalRecord.status !== "pending") {
-        const { rows: mentorUsers } = await pool.query(
-          `SELECT id, name, email, notification_preferences
-           FROM users
-           WHERE email = $1`,
-          [approvalRecord.email.toLowerCase()]
-        );
-
-        if (mentorUsers.length) {
-          await dispatchNotification(req.app, "mentor_application_decision", {
-            recipient: mentorUsers[0],
-            mentor: mentorUsers[0],
-            status: approvalRecord.status,
-          });
-        }
-      }
-
       const statusCode = existing.rows.length ? 200 : 201;
-      return res.status(statusCode).json({ approval: approvalRecord });
+      return res.status(statusCode).json({ approval: hydrated[0] });
     } catch (error) {
       await client.query("ROLLBACK");
       return next(error);
@@ -389,26 +369,7 @@ router.patch(
         [approval.id]
       );
 
-      const approvalRecord = hydrated[0];
-
-      if (approvalRecord?.status && approvalRecord.status !== "pending") {
-        const { rows: mentorUsers } = await pool.query(
-          `SELECT id, name, email, notification_preferences
-           FROM users
-           WHERE email = $1`,
-          [approvalRecord.email.toLowerCase()]
-        );
-
-        if (mentorUsers.length) {
-          await dispatchNotification(req.app, "mentor_application_decision", {
-            recipient: mentorUsers[0],
-            mentor: mentorUsers[0],
-            status: approvalRecord.status,
-          });
-        }
-      }
-
-      return res.json({ approval: approvalRecord });
+      return res.json({ approval: hydrated[0] });
     } catch (error) {
       await client.query("ROLLBACK");
       return next(error);

@@ -210,10 +210,7 @@ router.get(
       );
 
       const { rows: unreadNotifications } = await pool.query(
-        `SELECT COUNT(*)
-         FROM user_notifications
-         WHERE user_id = $1
-           AND read_at IS NULL`,
+        `SELECT COUNT(*) FROM mentor_notifications WHERE mentor_id = $1 AND read_at IS NULL`,
         [req.user.id]
       );
 
