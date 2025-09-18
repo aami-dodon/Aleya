@@ -24,13 +24,6 @@ Code Quality: Good
 Notes:
 - Mentor search, request, acceptance, confirmation, and unlinking endpoints enforce role checks and manage mentorship records atomically.【F:backend/routes/mentors.js†L29-L376】
 
-## Reminders
-Feature Name: Reminders
-Present: No
-Tasks:
-- Task 1: Implement a backend scheduler to send daily/weekly reminder emails honoring user preferences (Complexity: High).
-- Task 2: Restore a settings interface so journalers can opt into reminder cadences (Complexity: Medium).【F:README.md†L28-L33】【49301e†L1-L12】
-
 ## Mentor notifications
 Feature Name: Mentor notifications
 Present: Yes
