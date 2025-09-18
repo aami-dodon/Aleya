@@ -4,6 +4,43 @@ import apiClient from "../api/client";
 const AuthContext = createContext();
 const STORAGE_KEY = "aleya.auth";
 
+function safeGetItem(key) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    return window.localStorage.getItem(key);
+  } catch (error) {
+    console.warn("Unable to access localStorage", error);
+    return null;
+  }
+}
+
+function safeSetItem(key, value) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(key, value);
+  } catch (error) {
+    console.warn("Unable to persist auth state", error);
+  }
+}
+
+function safeRemoveItem(key) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    console.warn("Unable to clear auth state", error);
+  }
+}
+
 export function AuthProvider({ children }) {
   const [state, setState] = useState({
     user: null,
@@ -13,14 +50,14 @@ export function AuthProvider({ children }) {
   });
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = safeGetItem(STORAGE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
         setState((prev) => ({ ...prev, ...parsed, loading: false }));
       } catch (error) {
         console.warn("Failed to parse stored auth state", error);
-        localStorage.removeItem(STORAGE_KEY);
+        safeRemoveItem(STORAGE_KEY);
         setState((prev) => ({ ...prev, loading: false }));
       }
     } else {
@@ -30,12 +67,12 @@ export function AuthProvider({ children }) {
 
   const persist = (token, user) => {
     const payload = { token, user };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    safeSetItem(STORAGE_KEY, JSON.stringify(payload));
     setState({ token, user, loading: false, error: null });
   };
 
   const clear = () => {
-    localStorage.removeItem(STORAGE_KEY);
+    safeRemoveItem(STORAGE_KEY);
     setState({ user: null, token: null, loading: false, error: null });
   };
 
