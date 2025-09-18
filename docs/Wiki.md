@@ -1,4 +1,11 @@
 
+# 2025-10-03
+
+- Introduced `backend/utils/emailTemplates.js` as the shared theme wrapper for transactional emails, ensuring subjects include the
+  `[Aleya]` prefix, a consistent preheader, and the grove-inspired styling.
+- Updated the registration verification email flow in `backend/routes/auth.js` to render through the new template so the
+  verification button, copy, and fallback link all inherit the Aleya theme.
+
 # 2025-10-02
 
 - Dropped the `notification_preferences` column from `users`, removed the default constant in `backend/utils/bootstrap.js`, and pruned all backend references so the notification system is fully retired end-to-end.
