@@ -1,3 +1,8 @@
+# 2025-09-24
+- Added an admin-only DELETE `/admin/forms/:id` route that blocks removal of default templates while allowing admins to prune
+  mentee-created forms and automatically clear their assignments.
+- Noted in `backend/AGENTS.md` that default templates should remain protected when adjusting admin form management logic.
+
 # 2025-09-21
 - Added a secondary cancel action to the SOS modal in `frontend/src/components/PanicButton.js` using the shared `btn-secondary`
   token so people can close the dialog without reaching the header button.

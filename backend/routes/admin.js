@@ -513,6 +513,40 @@ router.patch(
   }
 );
 
+router.delete(
+  "/forms/:id",
+  authenticate,
+  requireRole("admin"),
+  async (req, res, next) => {
+    const formId = Number.parseInt(req.params.id, 10);
+
+    if (!Number.isInteger(formId)) {
+      return res.status(400).json({ error: "Invalid form id" });
+    }
+
+    try {
+      const { rows } = await pool.query(
+        `SELECT is_default FROM journal_forms WHERE id = $1`,
+        [formId]
+      );
+
+      if (!rows.length) {
+        return res.status(404).json({ error: "Form not found" });
+      }
+
+      if (rows[0].is_default) {
+        return res.status(400).json({ error: "Default forms cannot be deleted" });
+      }
+
+      await pool.query(`DELETE FROM journal_forms WHERE id = $1`, [formId]);
+
+      return res.json({ success: true });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
 router.get(
   "/mentors",
   authenticate,

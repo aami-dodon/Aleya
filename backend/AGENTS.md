@@ -4,3 +4,5 @@
 - Keep mentor panic alert flows consistent with mentor escalation requirements and ensure new middleware is added as individual arguments instead of wrapped arrays when Express parsing causes issues.
 - Document all backend changes in `docs/Wiki.md` so future contributors understand the context behind updates.
 - Double-check route definitions end with their closing `);` pair so `node --check` passes before pushing changes.
+- When touching the admin form management endpoints, keep the default template protections intact so system templates are never
+  deleted by mistake.
