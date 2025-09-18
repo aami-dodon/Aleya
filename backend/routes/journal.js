@@ -6,12 +6,7 @@ const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 const { normalizeMood } = require("../utils/mood");
 const { shapeEntryForMentor } = require("../utils/entries");
-const {
-  notifyMentorEntry,
-  notifyAdmins,
-  dispatchNotification,
-  NOTIFICATION_TEMPLATES,
-} = require("../utils/notifications");
+const { sendMentorEntryEmail } = require("../utils/notifications");
 
 const router = express.Router();
 
@@ -212,8 +207,18 @@ router.post(
         );
 
         await Promise.all(
-          mentors.map(async (mentor) => {
-            await notifyMentorEntry(req.app, {
+          mentors.map((mentor) =>
+            pool.query(
+              `INSERT INTO mentor_notifications (mentor_id, type, entry_id, visibility)
+               VALUES ($1, 'entry', $2, $3)` ,
+              [mentor.id, entry.id, visibility]
+            )
+          )
+        );
+
+        await Promise.all(
+          mentors.map((mentor) =>
+            sendMentorEntryEmail(req.app, {
               mentor,
               journaler: {
                 id: req.user.id,
@@ -221,53 +226,8 @@ router.post(
                 email: req.user.email,
               },
               entry,
-            });
-
-            const { rows: assignments } = await pool.query(
-              `SELECT form_id
-               FROM mentor_form_assignments
-               WHERE mentor_id = $1 AND journaler_id = $2`,
-              [mentor.id, req.user.id]
-            );
-
-            if (!assignments.length) {
-              return;
-            }
-
-            const formIds = assignments.map((assignment) => assignment.form_id);
-            const { rows: completion } = await pool.query(
-              `SELECT DISTINCT form_id
-               FROM journal_entries
-               WHERE journaler_id = $1 AND form_id = ANY($2::int[])`,
-              [req.user.id, formIds]
-            );
-
-            if (completion.length !== formIds.length) {
-              return;
-            }
-
-            const existing = await pool.query(
-              `SELECT id FROM user_notifications
-               WHERE user_id = $1 AND type = 'form_all_completed_mentor'
-                 AND metadata->>'journalerId' = $2`,
-              [mentor.id, String(req.user.id)]
-            );
-
-            if (existing.rows.length) {
-              return;
-            }
-
-            await dispatchNotification(req.app, "form_all_completed_mentor", {
-              recipient: mentor,
-              mentor,
-              journaler: {
-                id: req.user.id,
-                name: req.user.name,
-                email: req.user.email,
-              },
-              completedCount: formIds.length,
-            });
-          })
+            })
+          )
         );
       }
 
@@ -356,62 +316,33 @@ router.patch(
         responses: JSON.stringify(cleaned),
       });
 
-      const journaler = {
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email,
-      };
-
       if (visibility === "private") {
         await pool.query(
-          `DELETE FROM user_notifications
-           WHERE type = 'mentor_entry_shared'
-             AND metadata->>'entryId' = $1`,
-          [String(entryId)]
+          `DELETE FROM mentor_notifications WHERE entry_id = $1`,
+          [entryId]
         );
       } else {
-        const { rows: mentors } = await pool.query(
-          `SELECT m.id, m.email, m.name, m.notification_preferences
-           FROM mentor_links ml
-           JOIN users m ON m.id = ml.mentor_id
-           WHERE ml.journaler_id = $1`,
-          [req.user.id]
+        const result = await pool.query(
+          `UPDATE mentor_notifications SET visibility = $1 WHERE entry_id = $2`,
+          [visibility, entryId]
         );
 
-        await Promise.all(
-          mentors.map(async (mentor) => {
-            const payload = NOTIFICATION_TEMPLATES.mentor_entry_shared.buildInApp({
-              journaler,
-              entry,
-            });
+        if (!result.rowCount) {
+          const { rows: mentors } = await pool.query(
+            `SELECT mentor_id FROM mentor_links WHERE journaler_id = $1`,
+            [req.user.id]
+          );
 
-            const result = await pool.query(
-              `UPDATE user_notifications
-               SET title = $1,
-                   body = $2,
-                   metadata = COALESCE(metadata, '{}'::jsonb) || jsonb_build_object('sharedLevel', $3, 'mood', $4)
-               WHERE user_id = $5
-                 AND type = 'mentor_entry_shared'
-                 AND metadata->>'entryId' = $6`,
-              [
-                payload.title,
-                payload.body || null,
-                entry.sharedLevel,
-                entry.mood || null,
-                mentor.id,
-                String(entryId),
-              ]
-            );
-
-            if (!result.rowCount) {
-              await notifyMentorEntry(req.app, {
-                mentor,
-                journaler,
-                entry,
-              });
-            }
-          })
-        );
+          await Promise.all(
+            mentors.map((mentor) =>
+              pool.query(
+                `INSERT INTO mentor_notifications (mentor_id, type, entry_id, visibility)
+                 VALUES ($1, 'entry', $2, $3)` ,
+                [mentor.mentor_id, entryId, visibility]
+              )
+            )
+          );
+        }
       }
 
       return res.json({ entry });
@@ -443,13 +374,6 @@ router.delete(
       if (!result.rows.length) {
         return res.status(404).json({ error: "Entry not found" });
       }
-
-      await pool.query(
-        `DELETE FROM user_notifications
-         WHERE type = 'mentor_entry_shared'
-           AND metadata->>'entryId' = $1`,
-        [String(entryId)]
-      );
 
       return res.json({ success: true });
     } catch (error) {
@@ -578,25 +502,6 @@ router.get("/export", authenticate, async (req, res, next) => {
     const body = JSON.stringify(payload, null, 2);
     const stream = Readable.from(body);
     stream.on("error", next);
-
-    await dispatchNotification(req.app, "data_export_requested_user", {
-      recipient: req.user,
-      user: {
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email,
-      },
-      entryCount: entries.length,
-    });
-
-    await notifyAdmins(req.app, "data_export_requested_admin", () => ({
-      user: {
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email,
-      },
-      entryCount: entries.length,
-    }));
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const filename = `journal-entries-${targetJournalerId}-${timestamp}.json`;

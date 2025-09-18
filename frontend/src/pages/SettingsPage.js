@@ -24,13 +24,6 @@ function SettingsPage() {
     remindersDaily: false,
     remindersWeekly: true,
     mentorNotifications: "summary",
-    notificationsEmail: true,
-    notificationsInApp: true,
-    notifyAccount: true,
-    notifyMentorship: true,
-    notifyForms: true,
-    notifyExports: true,
-    notifyAlerts: true,
     password: "",
     mentorProfile: {
       expertise: [],
@@ -53,13 +46,6 @@ function SettingsPage() {
       remindersDaily: user.notificationPreferences?.reminders?.daily ?? false,
       remindersWeekly: user.notificationPreferences?.reminders?.weekly ?? true,
       mentorNotifications: user.notificationPreferences?.mentorNotifications || "summary",
-      notificationsEmail: user.notificationPreferences?.channels?.email ?? true,
-      notificationsInApp: user.notificationPreferences?.channels?.inApp ?? true,
-      notifyAccount: user.notificationPreferences?.categories?.account ?? true,
-      notifyMentorship: user.notificationPreferences?.categories?.mentorship ?? true,
-      notifyForms: user.notificationPreferences?.categories?.forms ?? true,
-      notifyExports: user.notificationPreferences?.categories?.exports ?? true,
-      notifyAlerts: user.notificationPreferences?.categories?.alerts ?? true,
       password: "",
       mentorProfile: {
         expertise: parseExpertise(mentorProfile.expertise),
@@ -139,17 +125,6 @@ function SettingsPage() {
           weekly: form.remindersWeekly,
         },
         mentorNotifications: form.mentorNotifications,
-        channels: {
-          email: form.notificationsEmail,
-          inApp: form.notificationsInApp,
-        },
-        categories: {
-          account: form.notifyAccount,
-          mentorship: form.notifyMentorship,
-          forms: form.notifyForms,
-          exports: form.notifyExports,
-          alerts: form.notifyAlerts,
-        },
       },
     };
     if (form.password) {
@@ -294,94 +269,6 @@ function SettingsPage() {
                 onChange={handleChange}
               />
               Weekly summary updates
-            </label>
-          </fieldset>
-
-          <fieldset className="space-y-3 rounded-2xl border border-emerald-100 bg-white/60 p-4">
-            <legend className="text-sm font-semibold text-emerald-900">
-              Notification channels
-            </legend>
-            <p className={`${bodySmallTextClasses} text-emerald-900/70`}>
-              Choose how Aleya reaches you with updates.
-            </p>
-            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
-              <input
-                type="checkbox"
-                name="notificationsEmail"
-                className={checkboxClasses}
-                checked={form.notificationsEmail}
-                onChange={handleChange}
-              />
-              Email notifications
-            </label>
-            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
-              <input
-                type="checkbox"
-                name="notificationsInApp"
-                className={checkboxClasses}
-                checked={form.notificationsInApp}
-                onChange={handleChange}
-              />
-              In-app alerts
-            </label>
-          </fieldset>
-
-          <fieldset className="space-y-3 rounded-2xl border border-emerald-100 bg-white/60 p-4">
-            <legend className="text-sm font-semibold text-emerald-900">
-              Notification categories
-            </legend>
-            <p className={`${bodySmallTextClasses} text-emerald-900/70`}>
-              Toggle the types of alerts you want to receive.
-            </p>
-            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
-              <input
-                type="checkbox"
-                name="notifyAccount"
-                className={checkboxClasses}
-                checked={form.notifyAccount}
-                onChange={handleChange}
-              />
-              Account and security
-            </label>
-            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
-              <input
-                type="checkbox"
-                name="notifyMentorship"
-                className={checkboxClasses}
-                checked={form.notifyMentorship}
-                onChange={handleChange}
-              />
-              Mentorship updates
-            </label>
-            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
-              <input
-                type="checkbox"
-                name="notifyForms"
-                className={checkboxClasses}
-                checked={form.notifyForms}
-                onChange={handleChange}
-              />
-              Forms and assignments
-            </label>
-            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
-              <input
-                type="checkbox"
-                name="notifyExports"
-                className={checkboxClasses}
-                checked={form.notifyExports}
-                onChange={handleChange}
-              />
-              Data exports
-            </label>
-            <label className="flex items-center gap-2 text-sm font-medium text-emerald-900/80">
-              <input
-                type="checkbox"
-                name="notifyAlerts"
-                className={checkboxClasses}
-                checked={form.notifyAlerts}
-                onChange={handleChange}
-              />
-              Urgent alerts
             </label>
           </fieldset>
 

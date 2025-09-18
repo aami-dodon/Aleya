@@ -18,9 +18,7 @@ export function NotificationProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const inAppPreference =
-    user?.notificationPreferences?.channels?.inApp ?? true;
-  const isEnabled = Boolean(token && user && inAppPreference !== false);
+  const isEnabled = Boolean(token && user);
 
   const fetchNotifications = useCallback(async () => {
     if (!isEnabled) {
@@ -32,7 +30,7 @@ export function NotificationProvider({ children }) {
 
     try {
       setLoading(true);
-      const response = await apiClient.get("/notifications", token);
+      const response = await apiClient.get("/mentors/notifications", token);
       setNotifications(response.notifications || []);
       setError(null);
     } catch (err) {
@@ -49,20 +47,6 @@ export function NotificationProvider({ children }) {
     }
 
     fetchNotifications();
-
-    const interval = setInterval(fetchNotifications, 60000);
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        fetchNotifications();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
   }, [fetchNotifications, isEnabled]);
 
   const markAsRead = useCallback(
@@ -73,7 +57,7 @@ export function NotificationProvider({ children }) {
 
       try {
         await apiClient.post(
-          `/notifications/${notificationId}/read`,
+          `/mentors/notifications/${notificationId}/read`,
           null,
           token
         );

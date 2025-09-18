@@ -70,18 +70,18 @@ function NotificationBell() {
 
   const helperText = (() => {
     if (user?.role === "mentor") {
-      return "New entries appear here when mentees share reflections with you. Adjust what you receive in Settings.";
+      return "New entries appear here when mentees share reflections with you.";
     }
 
     if (user?.role === "journaler") {
-      return "Updates from your mentors and the Aleya team will appear here. Manage your preferences in Settings.";
+      return "Updates from your mentors and the Aleya team will appear here.";
     }
 
     if (user?.role === "admin") {
-      return "Platform alerts and recent changes will be listed here. Fine-tune categories in Settings.";
+      return "Platform alerts and recent changes will be listed here.";
     }
 
-    return "Notifications will appear here when there are updates for your account. You can control channels in Settings.";
+    return "Notifications will appear here when there are updates for your account.";
   })();
 
   return (

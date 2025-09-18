@@ -9,10 +9,6 @@ const requireRole = require("../middleware/requireRole");
 const { DEFAULT_NOTIFICATION_PREFS } = require("../utils/bootstrap");
 const { logger } = require("../utils/logger");
 const { sendEmail } = require("../utils/mailer");
-const {
-  notifyAdmins,
-  dispatchNotification,
-} = require("../utils/notifications");
 
 const router = express.Router();
 
@@ -359,24 +355,6 @@ router.post(
 
       await client.query("COMMIT");
 
-      const newUser = {
-        id: userId,
-        name: trimmedName || name,
-        email: normalizedEmail,
-      };
-
-      if (role === "journaler") {
-        await notifyAdmins(req.app, "mentee_registered_admin", () => ({
-          mentee: newUser,
-        }));
-      } else if (role === "mentor") {
-        await notifyAdmins(
-          req.app,
-          "mentor_application_submitted_admin",
-          () => ({ mentor: newUser })
-        );
-      }
-
       return res.status(201).json({
         message:
           "Account created. Please verify your email address to complete registration.",
@@ -658,14 +636,6 @@ router.delete("/me", authenticate, async (req, res, next) => {
     }
 
     await pool.query("DELETE FROM users WHERE id = $1", [req.user.id]);
-
-    await notifyAdmins(req.app, "account_deleted_admin", () => ({
-      user: {
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email,
-      },
-    }));
 
     return res.json({ message: "Account deleted" });
   } catch (error) {
