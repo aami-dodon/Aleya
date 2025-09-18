@@ -10,3 +10,5 @@
 - For modal overlays, center panels with `fixed inset-0 flex min-h-screen items-center justify-center` and wrap the panel
   content in a scrollable container (e.g. `max-h-[min(85vh,40rem)] overflow-y-auto`) so longer forms remain visible on smaller
   screens.
+- Pair destructive or primary modal actions with a secondary "Cancel" control that uses `btn-secondary` so people always have
+  a clear escape hatch.

@@ -121,7 +121,7 @@ function PanicButton() {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-emerald-950/40 p-4 sm:p-6"
+          className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-emerald-950/40 px-4 py-6 sm:px-6 sm:py-10"
           role="dialog"
           aria-modal="true"
           aria-labelledby="sos-dialog-heading"
@@ -209,7 +209,15 @@ function PanicButton() {
                     <p className="text-sm text-emerald-600">{success}</p>
                   )}
 
-                  <div className="flex justify-end">
+                  <div className="flex justify-end gap-3">
+                    <button
+                      type="button"
+                      className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+                      onClick={closeDialog}
+                      disabled={sending}
+                    >
+                      Cancel
+                    </button>
                     <button
                       type="submit"
                       className={`${dangerButtonClasses} px-5 py-2.5 text-sm`}
