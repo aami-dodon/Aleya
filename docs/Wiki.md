@@ -1,3 +1,9 @@
+# 2025-09-21
+- Added a secondary cancel action to the SOS modal in `frontend/src/components/PanicButton.js` using the shared `btn-secondary`
+  token so people can close the dialog without reaching the header button.
+- Adjusted the SOS overlay container spacing to keep the panel vertically centered instead of hugging the top edge of the
+  viewport.
+
 # Repository Wiki
 ## 2025-09-21
 - Removed unused typography utility classes (`text-body-strong`, `text-body-muted`, `text-body-sm-muted`) from the Tailwind
