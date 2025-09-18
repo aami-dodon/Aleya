@@ -34,6 +34,7 @@ function RegisterPage() {
   const [mentorApplicationSubmitted, setMentorApplicationSubmitted] =
     useState(false);
   const [mentorApprovalMessage, setMentorApprovalMessage] = useState("");
+  const [passwordsMismatch, setPasswordsMismatch] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -49,6 +50,22 @@ function RegisterPage() {
   });
 
   const { suggestions: expertiseSuggestions } = useExpertiseSuggestions({ limit: 40 });
+
+  const syncPasswordMismatchError = (nextForm) => {
+    const { password, confirmPassword } = nextForm;
+    const normalizedPassword = (password || "").trim();
+    const normalizedConfirmPassword = (confirmPassword || "").trim();
+    const mismatch =
+      normalizedPassword.length > 0 &&
+      normalizedConfirmPassword.length > 0 &&
+      normalizedPassword !== normalizedConfirmPassword;
+
+    setPasswordsMismatch(mismatch);
+
+    if (!mismatch) {
+      setLocalError(null);
+    }
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;

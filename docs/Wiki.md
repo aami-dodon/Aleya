@@ -16,6 +16,9 @@
 - Added a live password confirmation check on `RegisterPage` so the retype field highlights mismatches, shares a gentle reminder,
   and keeps the submit action disabled until both entries match. Noted the guidance in `frontend/AGENTS.md` for future frontend
   contributors.
+- Fixed the `RegisterPage` password confirmation helper so `passwordsMismatch` is defined via state and synced on every edit,
+  preventing runtime reference errors while keeping the inline reminder and disabled submit flow intact. Documented the helper in
+  `frontend/AGENTS.md`.
 
 
 - Added an admin-only Journaler navigation entry that links to the new `/journalers` route where the entire journaler management
