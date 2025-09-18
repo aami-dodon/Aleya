@@ -70,18 +70,18 @@ function NotificationBell() {
 
   const helperText = (() => {
     if (user?.role === "mentor") {
-      return "New entries appear here when mentees share reflections with you. Adjust what you receive in Settings.";
+      return "Mentee reflections glow here when they choose to share. Adjust the lanterns you receive in Settings.";
     }
 
     if (user?.role === "journaler") {
-      return "Updates from your mentors and the Aleya team will appear here. Manage your preferences in Settings.";
+      return "Mentor replies and Aleya updates gather here. Shape the flow in Settings.";
     }
 
     if (user?.role === "admin") {
-      return "Platform alerts and recent changes will be listed here. Fine-tune categories in Settings.";
+      return "Platform signals and recent changes shimmer here. Tune the categories in Settings.";
     }
 
-    return "Notifications will appear here when there are updates for your account. You can control channels in Settings.";
+    return "Updates will appear here whenever Aleya needs your attention. Choose your channels in Settings.";
   })();
 
   return (
@@ -136,7 +136,7 @@ function NotificationBell() {
                 navigate("/dashboard");
               }}
             >
-              View dashboard
+              View full dashboard
             </button>
           </div>
           <NotificationList

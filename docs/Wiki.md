@@ -25,3 +25,7 @@
 - Adjusted the mentor panic alert route to list each validator middleware individually instead of wrapping them in an array. This resolves a syntax parsing error observed when Docker booted the backend and keeps Express middleware handling straightforward.
 - Confirmed the route still requires mentors to be authenticated before sending panic alerts, aligning with the README description of the feature.
 - Added `backend/AGENTS.md` to capture backend-specific contributing notes and remind developers to update this wiki when changes are made.
+# 2025-09-22
+- Rewrote major frontend copy (landing, authentication, dashboards, notifications, SOS modal) with Aleya’s poetic grove tone so the experience feels consistently luminous and nature-infused.
+- Updated `frontend/AGENTS.md` to note the new copy voice guidance for future contributors.
+

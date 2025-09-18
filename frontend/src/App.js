@@ -33,7 +33,7 @@ function ProtectedRoute({ roles, children }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <LoadingState label="Preparing Aleya" />;
+    return <LoadingState label="Lighting the Aleya path" />;
   }
 
   if (!user) {

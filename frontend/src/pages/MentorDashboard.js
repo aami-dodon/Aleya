@@ -69,14 +69,14 @@ function MentorDashboard() {
   };
 
   if (loading && !dashboard) {
-    return <LoadingState label="Loading mentor dashboard" />;
+    return <LoadingState label="Illuminating your mentor canopy" />;
   }
 
   return (
     <div className="flex w-full flex-1 flex-col gap-8">
       <SectionCard
-        title="Mentor overview"
-        subtitle="Encourage consistency and spot tender seasons quickly"
+        title="Mentor constellation"
+        subtitle="Encourage steady practice and notice tender seasons quickly"
       >
         {error && (
           <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
@@ -88,29 +88,29 @@ function MentorDashboard() {
             <MetricCard
               title="Active mentees"
               value={dashboard.overview?.menteeCount || 0}
-              description="Number of journalers currently linked with you."
+              description="Journalers currently linked beneath your guidance."
             />
             <MetricCard
-              title="Pending requests"
+              title="Pending invitations"
               value={dashboard.overview?.pendingRequests || 0}
-              description="People waiting for your response."
+              description="People waiting for your welcome."
             />
             <MetricCard
               title="Unread updates"
               value={dashboard.overview?.unreadNotifications || 0}
-              description="Entries shared with you that need a review."
+              description="Shared reflections ready for your care."
             />
           </div>
         ) : (
           <p className={emptyStateClasses}>
-            Link with a journaler to begin mentoring.
+            Link with a journaler to begin weaving this constellation.
           </p>
         )}
       </SectionCard>
 
       <SectionCard
-        title="Incoming mentorship requests"
-        subtitle="Review invitations and accept when it’s a good fit"
+        title="Incoming mentorship invitations"
+        subtitle="Review each invitation and respond when the timing feels right"
       >
         <MentorRequestList
           requests={requests}
@@ -123,7 +123,7 @@ function MentorDashboard() {
 
       <SectionCard
         title="Mentees"
-        subtitle="Recent reflections shared with you"
+        subtitle="Recent reflections your mentees have shared"
       >
         {dashboard?.mentees?.length ? (
           <div className="grid gap-4 lg:grid-cols-2">
@@ -141,7 +141,7 @@ function MentorDashboard() {
                 {mentee.trend?.length ? (
                   <MoodTrendChart data={mentee.trend} />
                 ) : (
-                  <p className={emptyStateClasses}>No shared entries yet.</p>
+                  <p className={emptyStateClasses}>No shared entries yet—invite them to share when ready.</p>
                 )}
                 {mentee.alerts?.lowMood?.length > 0 && (
                   <div className="rounded-2xl border-l-4 border-amber-400 bg-amber-50/80 p-4">
@@ -185,13 +185,13 @@ function MentorDashboard() {
             ))}
           </div>
         ) : (
-          <p className={emptyStateClasses}>No mentees yet. Accept a request to begin.</p>
+          <p className={emptyStateClasses}>No mentees yet. Accept a request to begin weaving together.</p>
         )}
       </SectionCard>
 
       <SectionCard
         title="Notifications"
-        subtitle="Entries shared with you based on mentee privacy settings"
+        subtitle="Entries shared with you according to each mentee’s privacy"
       >
         <NotificationList
           notifications={notifications}

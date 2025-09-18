@@ -23,11 +23,11 @@ function NotificationList({
   notifications,
   onMarkRead,
   loading = false,
-  emptyLabel = "You're all caught up.",
+  emptyLabel = "The lantern is quiet for now.",
   limit,
 }) {
   if (loading) {
-    return <LoadingState label="Loading notifications" compact />;
+    return <LoadingState label="Gathering shared lanterns" compact />;
   }
 
   const visibleNotifications = Array.isArray(notifications)
@@ -101,7 +101,7 @@ function NotificationList({
                 )}
                 {createdAt && (
                   <p className={`${bodySmallMutedTextClasses} text-emerald-900/60`}>
-                    Sent {createdAt}
+                    Lantern lit {createdAt}
                   </p>
                 )}
               </div>

@@ -82,7 +82,7 @@ function MentorProfileDialog({ mentor, onClose, onRequest, canRequest }) {
 
           {!mentor.availability && !mentor.bio && (
             <p className={bodySmallMutedTextClasses}>
-              This mentor hasn&apos;t shared a detailed profile yet.
+              This mentor hasn&apos;t shared their story yet, but their lantern is lit.
             </p>
           )}
         </div>

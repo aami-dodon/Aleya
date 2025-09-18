@@ -43,30 +43,32 @@ function LoginPage() {
           <span
             className={`inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-2 shadow-sm shadow-emerald-900/5 ${bodySmallStrongTextClasses} text-emerald-700`}
           >
-            🌿 Welcome back
+            🌿 Returning to the grove
           </span>
           <h1 className={`${displayTextClasses} text-emerald-950`}>
-            Welcome back
+            Welcome back to your luminous grove.
           </h1>
           <p className={`${leadTextClasses} text-emerald-900/80`}>
-            Continue tending your growth journey. Sign in to pick up where you
-            left off.
+            Continue tending the practice you planted. Step inside to gather
+            yesterday's wisdom and set intention for today.
           </p>
           <div className="grid gap-4 rounded-3xl border border-emerald-100 bg-white/70 p-6 shadow-inner shadow-emerald-900/5 sm:grid-cols-2">
             <div className="space-y-1">
               <p className={`${bodySmallStrongTextClasses} text-emerald-800`}>
-                Track momentum
+                Trace your rhythm
               </p>
               <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
-                Review your reflections and notice the progress you are making.
+                Revisit your reflections and witness how each note becomes a
+                new ring of growth.
               </p>
             </div>
             <div className="space-y-1">
               <p className={`${bodySmallStrongTextClasses} text-emerald-800`}>
-                Stay connected
+                Stay entwined
               </p>
               <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
-                Message mentors, respond to prompts, and nurture your practice.
+                Share with mentors, respond to gentle prompts, and let your
+                practice stay companioned.
               </p>
             </div>
           </div>
@@ -74,10 +76,11 @@ function LoginPage() {
         <div className="rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-2xl shadow-emerald-900/10 backdrop-blur md:p-10">
           <div className="mb-8 space-y-2 text-center">
             <p className={`${eyebrowTextClasses} text-emerald-600`}>
-              Sign in to your account
+              Step back into Aleya
             </p>
             <p className={`${bodySmallMutedTextClasses} text-emerald-900/70`}>
-              Enter your credentials to continue exploring Aleya.
+              Enter your credentials to reopen the pathways you’ve been
+              tending.
             </p>
           </div>
           <form className="space-y-5" onSubmit={handleSubmit}>
@@ -125,7 +128,7 @@ function LoginPage() {
               to="/register"
               className="font-semibold text-emerald-700 transition hover:text-emerald-600"
             >
-              Create an account
+              Plant your account
             </Link>
           </p>
         </div>

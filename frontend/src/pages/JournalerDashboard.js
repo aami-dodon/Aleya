@@ -143,7 +143,7 @@ function JournalerDashboard() {
   const handleSubmit = async (payload) => {
     setSubmitting(true);
     setStatusVariant("info");
-    setStatusMessage("Submitting your journal entry...");
+    setStatusMessage("Sending your reflection into the grove...");
     setError(null);
 
     try {
@@ -152,7 +152,7 @@ function JournalerDashboard() {
       const dash = await apiClient.get("/dashboard/journaler", token);
       setDashboard(dash);
       setStatusVariant("success");
-      setStatusMessage("Journal entry saved.");
+      setStatusMessage("Your reflection now sings within Aleya.");
       setFormResetKey((prev) => prev + 1);
     } catch (err) {
       setStatusVariant("info");
@@ -164,14 +164,14 @@ function JournalerDashboard() {
   };
 
   if (loading && !dashboard) {
-    return <LoadingState label="Loading dashboard" />;
+    return <LoadingState label="Illuminating your canopy" />;
   }
 
   return (
     <div className="flex w-full flex-1 flex-col gap-8">
       <SectionCard
         title={`Welcome back, ${user?.name || "friend"}`}
-        subtitle="Your emotional landscape at a glance"
+        subtitle="Your luminous landscape gathered in one glance"
       >
         {error && (
           <p className="rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-600">
@@ -181,9 +181,9 @@ function JournalerDashboard() {
         {dashboard ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <MetricCard
-              title="Reflection streak"
+              title="Reflection rings"
               value={`${dashboard.streak || 0} days`}
-              description="How many consecutive days you've checked in."
+              description="Consecutive days you've whispered into your journal."
             />
             <MetricCard
               title="Average mood"
@@ -193,11 +193,11 @@ function JournalerDashboard() {
             <MetricCard
               title="Weekly rhythm"
               value={`${dashboard.stats?.consistency || 0} entries / week`}
-              description="Keep showing up—tiny notes become growth rings."
+              description="Return often—small notes become the rings of your tree."
             />
           </div>
         ) : (
-          <p className={emptyStateClasses}>Submit an entry to unlock insights.</p>
+          <p className={emptyStateClasses}>Offer today’s reflection to awaken your insights.</p>
         )}
       </SectionCard>
 
@@ -231,8 +231,8 @@ function JournalerDashboard() {
 
         <div className="flex flex-col gap-6">
           <SectionCard
-            title="Mood trend"
-            subtitle="Last reflections in a glance"
+            title="Mood constellations"
+            subtitle="Recent reflections traced across time"
             action={
               <select
                 className={`${selectCompactClasses} w-full md:w-40`}
@@ -253,60 +253,57 @@ function JournalerDashboard() {
                 <MoodTrendChart data={filteredMoodTrend} />
               ) : (
                 <p className={emptyStateClasses}>
-                  No mood entries in this timeframe yet. Try a different filter to review
-                  earlier reflections.
+                  No moods appear in this window yet. Try another filter to revisit earlier constellations.
                 </p>
               )
             ) : (
               <p className={emptyStateClasses}>
-                The chart grows after your first few entries.
+                The chart will glow once your first few entries take root.
               </p>
             )}
           </SectionCard>
 
           <SectionCard
             title="Sleep quality"
-            subtitle="Log how you slept each day to observe restorative patterns."
+            subtitle="Log your rest each day to notice restorative tides."
           >
             {dashboard?.sleepTrend?.length ? (
               filteredSleepTrend.length ? (
                 <MoodTrendChart data={filteredSleepTrend} />
               ) : (
                 <p className={emptyStateClasses}>
-                  No sleep entries in this timeframe yet. Try a different filter to review earlier
-                  rest notes.
+                  No rest notes live in this window yet. Adjust the filter to revisit earlier dreams.
                 </p>
               )
             ) : (
               <p className={emptyStateClasses}>
-                Track your rest by adding sleep quality when you journal.
+                Invite rest into view by noting sleep quality as you journal.
               </p>
             )}
           </SectionCard>
 
           <SectionCard
-            title="Energy level"
-            subtitle="Capture how energized you feel to spot ebb-and-flow trends."
+            title="Energy tide"
+            subtitle="Capture how your spark rises and softens over time."
           >
             {dashboard?.energyTrend?.length ? (
               filteredEnergyTrend.length ? (
                 <MoodTrendChart data={filteredEnergyTrend} />
               ) : (
                 <p className={emptyStateClasses}>
-                  No energy entries in this timeframe yet. Try a different filter to explore earlier
-                  check-ins.
+                  No energy notes appear in this window. Adjust the filter to explore earlier currents.
                 </p>
               )
             ) : (
               <p className={emptyStateClasses}>
-                Note your energy levels in the form to unlock this insight.
+                Record your energy in each form to awaken this insight.
               </p>
             )}
           </SectionCard>
         </div>
       </div>
 
-      <SectionCard title="Recent entries" subtitle="Revisit your notes and growth moments">
+      <SectionCard title="Recent entries" subtitle="Revisit the notes and growth rings you’ve gathered">
         {filteredEntries.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredEntries.slice(0, 6).map((entry) => (
@@ -351,8 +348,8 @@ function JournalerDashboard() {
         ) : (
           <p className={emptyStateClasses}>
             {entries.length
-              ? "No entries in this timeframe yet. Adjust the filter to revisit earlier notes."
-              : "Your journal is waiting. Capture today's mood to begin your tree-ring."}
+              ? "No entries shine in this window yet. Adjust the filter to revisit earlier notes."
+              : "Your journal is waiting. Capture today’s mood to grow your first ring."}
           </p>
         )}
       </SectionCard>

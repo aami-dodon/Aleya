@@ -53,7 +53,7 @@ function PanicButton() {
       const response = await apiClient.get("/mentors/support-network", token);
       setContacts(response.mentors || []);
     } catch (err) {
-      setError(err.message || "Unable to load mentors.");
+      setError(err.message || "Unable to reach your circle of mentors.");
     } finally {
       setLoading(false);
     }
@@ -68,11 +68,11 @@ function PanicButton() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!selectedMentor) {
-      setError("Select a mentor to contact.");
+      setError("Choose a mentor to receive your flare.");
       return;
     }
     if (!message.trim()) {
-      setError("Add a brief note before sending.");
+      setError("Add a brief note so your mentor knows how to arrive.");
       return;
     }
 
@@ -92,12 +92,12 @@ function PanicButton() {
       );
       setSuccess(
         target?.name
-          ? `SOS alert sent to ${target.name}.`
-          : "SOS alert sent successfully."
+          ? `Aleya has carried your SOS to ${target.name}.`
+          : "Aleya has carried your SOS."
       );
       setMessage("");
     } catch (err) {
-      setError(err.message || "Failed to send SOS alert.");
+      setError(err.message || "Aleya could not send the SOS. Try again in a moment.");
     } finally {
       setSending(false);
     }
@@ -137,13 +137,13 @@ function PanicButton() {
                   <h2
                     id="sos-dialog-heading"
                     className="text-xl font-semibold text-emerald-900"
-                >
-                  Request urgent support
-                </h2>
-                <p className={bodySmallMutedTextClasses}>
-                  Choose a mentor you are linked with and share why you need immediate help.
-                </p>
-              </div>
+                  >
+                    Send a flare for support
+                  </h2>
+                  <p className={bodySmallMutedTextClasses}>
+                    Choose a linked mentor and share why you need immediate care so they can arrive prepared.
+                  </p>
+                </div>
               <button
                 type="button"
                 className={`${secondaryButtonClasses} px-4 py-2 text-sm`}
@@ -155,12 +155,12 @@ function PanicButton() {
 
             <div className="mt-6 space-y-4">
               {loading && (
-                <p className={bodySmallMutedTextClasses}>Loading mentors…</p>
+                <p className={bodySmallMutedTextClasses}>Calling your mentors…</p>
               )}
 
               {!loading && !hasContacts && !error && (
                 <p className={bodySmallMutedTextClasses}>
-                  You are not linked with any mentors yet. Invite a mentor to enable SOS alerts.
+                  You are not yet linked with mentors. Invite one to activate this SOS lantern.
                 </p>
               )}
 
@@ -168,7 +168,7 @@ function PanicButton() {
                 <form className="space-y-5" onSubmit={handleSubmit}>
                   <div className="space-y-2">
                     <label className={bodySmallStrongTextClasses} htmlFor="sos-mentor">
-                      Contact
+                      Reach out to
                     </label>
                     <select
                       id="sos-mentor"
@@ -194,7 +194,7 @@ function PanicButton() {
                       id="sos-message"
                       className={textareaClasses}
                       rows={4}
-                      placeholder="Share context so they know how to help right away."
+                      placeholder="Share context so they can meet you right away."
                       value={message}
                       onChange={(event) => setMessage(event.target.value)}
                       disabled={sending}
@@ -223,7 +223,7 @@ function PanicButton() {
                       className={`${dangerButtonClasses} px-5 py-2.5 text-sm`}
                       disabled={sending}
                     >
-                      {sending ? "Sending…" : "Send SOS alert"}
+                      {sending ? "Sending…" : "Send SOS lantern"}
                     </button>
                   </div>
                 </form>
