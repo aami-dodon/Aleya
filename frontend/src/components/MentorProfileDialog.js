@@ -1,13 +1,17 @@
 import {
   bodyTextClasses,
   bodySmallMutedTextClasses,
+  chipBaseClasses,
   mediumHeadingClasses,
   primaryButtonClasses,
   secondaryButtonClasses,
 } from "../styles/ui";
+import { parseExpertise } from "../utils/expertise";
 
 function MentorProfileDialog({ mentor, onClose, onRequest, canRequest }) {
   if (!mentor) return null;
+
+  const expertiseTags = parseExpertise(mentor.expertise);
 
   const handleRequest = () => {
     if (typeof onRequest === "function") {
@@ -35,8 +39,14 @@ function MentorProfileDialog({ mentor, onClose, onRequest, canRequest }) {
             >
               {mentor.name}
             </h2>
-            {mentor.expertise && (
-              <p className={bodySmallMutedTextClasses}>{mentor.expertise}</p>
+            {expertiseTags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {expertiseTags.map((tag) => (
+                  <span key={tag} className={chipBaseClasses}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
             )}
             {mentor.email && (
               <p className={bodySmallMutedTextClasses}>{mentor.email}</p>

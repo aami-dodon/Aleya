@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import SectionCard from "../components/SectionCard";
+import TagInput from "../components/TagInput";
 import { useAuth } from "../context/AuthContext";
 import {
   checkboxClasses,
@@ -12,6 +13,7 @@ import {
   textareaClasses,
 } from "../styles/ui";
 import TIMEZONE_OPTIONS from "../utils/timezones";
+import { formatExpertise, parseExpertise } from "../utils/expertise";
 
 function SettingsPage() {
   const { user, token, updateProfile, deleteAccount } = useAuth();
@@ -24,7 +26,7 @@ function SettingsPage() {
     mentorNotifications: "summary",
     password: "",
     mentorProfile: {
-      expertise: "",
+      expertise: [],
       availability: "",
       bio: "",
     },
@@ -35,6 +37,8 @@ function SettingsPage() {
 
   useEffect(() => {
     if (!user) return;
+    const mentorProfile = user.mentorProfile || { expertise: "", availability: "", bio: "" };
+
     setForm({
       name: user.name,
       email: user.email,
@@ -43,7 +47,11 @@ function SettingsPage() {
       remindersWeekly: user.notificationPreferences?.reminders?.weekly ?? true,
       mentorNotifications: user.notificationPreferences?.mentorNotifications || "summary",
       password: "",
-      mentorProfile: user.mentorProfile || { expertise: "", availability: "", bio: "" },
+      mentorProfile: {
+        expertise: parseExpertise(mentorProfile.expertise),
+        availability: mentorProfile.availability || "",
+        bio: mentorProfile.bio || "",
+      },
     });
   }, [user]);
 
@@ -60,6 +68,13 @@ function SettingsPage() {
     setForm((prev) => ({
       ...prev,
       mentorProfile: { ...prev.mentorProfile, [name]: value },
+    }));
+  };
+
+  const handleExpertiseChange = (nextExpertise) => {
+    setForm((prev) => ({
+      ...prev,
+      mentorProfile: { ...prev.mentorProfile, expertise: parseExpertise(nextExpertise) },
     }));
   };
 
@@ -116,7 +131,10 @@ function SettingsPage() {
       payload.password = form.password;
     }
     if (user.role === "mentor") {
-      payload.mentorProfile = form.mentorProfile;
+      payload.mentorProfile = {
+        ...form.mentorProfile,
+        expertise: formatExpertise(form.mentorProfile.expertise),
+      };
     }
 
     await updateProfile(payload);
@@ -273,12 +291,9 @@ function SettingsPage() {
               <h3 className="text-lg font-semibold text-emerald-900">Mentor profile</h3>
               <label className="block text-sm font-semibold text-emerald-900/80">
                 Expertise
-                <input
-                  type="text"
-                  name="expertise"
-                  className={inputClasses}
+                <TagInput
                   value={form.mentorProfile.expertise}
-                  onChange={handleMentorChange}
+                  onChange={handleExpertiseChange}
                 />
               </label>
               <label className="block text-sm font-semibold text-emerald-900/80">

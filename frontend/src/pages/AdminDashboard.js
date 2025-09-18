@@ -11,6 +11,7 @@ import {
   tableHeaderClasses,
   tableRowClasses,
 } from "../styles/ui";
+import { parseExpertise } from "../utils/expertise";
 
 function AdminDashboard() {
   const { token } = useAuth();
@@ -129,24 +130,35 @@ function AdminDashboard() {
       >
         {mentors.length ? (
           <ul className="grid gap-4">
-            {mentors.map((mentor) => (
-              <li
-                key={mentor.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-5"
-              >
-                <div className="space-y-1">
-                  <p className="text-base font-semibold text-emerald-900">
-                    {mentor.name}
-                  </p>
-                  <p className={infoTextClasses}>
-                    {mentor.expertise || "Expertise not provided"}
-                  </p>
-                </div>
-                <span className={`${chipBaseClasses} text-xs uppercase`}> 
-                  {mentor.mentee_count} mentees
-                </span>
-              </li>
-            ))}
+            {mentors.map((mentor) => {
+              const expertiseTags = parseExpertise(mentor.expertise);
+              return (
+                <li
+                  key={mentor.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-5"
+                >
+                  <div className="space-y-1">
+                    <p className="text-base font-semibold text-emerald-900">
+                      {mentor.name}
+                    </p>
+                    {expertiseTags.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {expertiseTags.map((tag) => (
+                          <span key={tag} className={chipBaseClasses}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className={infoTextClasses}>Expertise not provided</p>
+                    )}
+                  </div>
+                  <span className={`${chipBaseClasses} text-xs uppercase`}>
+                    {mentor.mentee_count} mentees
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className={emptyStateClasses}>No mentors onboarded yet.</p>

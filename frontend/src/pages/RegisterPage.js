@@ -15,6 +15,8 @@ import {
   xSmallHeadingClasses,
 } from "../styles/ui";
 import TIMEZONE_OPTIONS from "../utils/timezones";
+import TagInput from "../components/TagInput";
+import { formatExpertise, parseExpertise } from "../utils/expertise";
 
 const ROLES = [
   { value: "journaler", label: "Journaler" },
@@ -36,7 +38,7 @@ function RegisterPage() {
     role: "journaler",
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     mentorProfile: {
-      expertise: "",
+      expertise: [],
       availability: "",
       bio: "",
     },
@@ -54,6 +56,14 @@ function RegisterPage() {
     setForm((prev) => ({
       ...prev,
       mentorProfile: { ...prev.mentorProfile, [name]: value },
+    }));
+  };
+
+  const handleExpertiseChange = (nextExpertise) => {
+    setLocalError(null);
+    setForm((prev) => ({
+      ...prev,
+      mentorProfile: { ...prev.mentorProfile, expertise: parseExpertise(nextExpertise) },
     }));
   };
 
@@ -77,7 +87,10 @@ function RegisterPage() {
       };
 
       if (form.role === "mentor") {
-        payload.mentorProfile = form.mentorProfile;
+        payload.mentorProfile = {
+          ...form.mentorProfile,
+          expertise: formatExpertise(form.mentorProfile.expertise),
+        };
       }
 
       const response = await register(payload);
@@ -274,13 +287,10 @@ function RegisterPage() {
                 </h3>
                 <label className={`block ${formLabelClasses}`}>
                   Expertise
-                  <input
-                    type="text"
-                    name="expertise"
+                  <TagInput
                     value={form.mentorProfile.expertise}
-                    onChange={handleMentorChange}
-                    className={inputClasses}
-                    placeholder="What topics can you guide on?"
+                    onChange={handleExpertiseChange}
+                    placeholder="Press Enter to add each area of expertise"
                   />
                 </label>
                 <label className={`block ${formLabelClasses}`}>
