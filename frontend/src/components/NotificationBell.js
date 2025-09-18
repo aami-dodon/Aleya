@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NotificationList from "./NotificationList";
 import { useNotifications } from "../context/NotificationContext";
+import { useAuth } from "../context/AuthContext";
 import {
   bodySmallMutedTextClasses,
   iconButtonClasses,
@@ -16,6 +17,7 @@ function NotificationBell() {
     markAsRead,
     isEnabled,
   } = useNotifications();
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef(null);
   const panelRef = useRef(null);
@@ -65,6 +67,22 @@ function NotificationBell() {
   const handleMarkRead = async (notificationId) => {
     await markAsRead(notificationId);
   };
+
+  const helperText = (() => {
+    if (user?.role === "mentor") {
+      return "New entries appear here when mentees share reflections with you.";
+    }
+
+    if (user?.role === "journaler") {
+      return "Updates from your mentors and the Aleya team will appear here.";
+    }
+
+    if (user?.role === "admin") {
+      return "Platform alerts and recent changes will be listed here.";
+    }
+
+    return "Notifications will appear here when there are updates for your account.";
+  })();
 
   return (
     <div className="relative">
@@ -128,7 +146,7 @@ function NotificationBell() {
             limit={5}
           />
           <p className={`${bodySmallMutedTextClasses} mt-3 text-emerald-900/70`}>
-            New entries appear here when mentees share reflections with you.
+            {helperText}
           </p>
         </div>
       )}

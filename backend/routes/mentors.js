@@ -444,7 +444,7 @@ router.get(
 router.get(
   "/notifications",
   authenticate,
-  requireRole("mentor"),
+  requireRole("mentor", "journaler", "admin"),
   async (req, res, next) => {
     try {
       const { rows } = await pool.query(
@@ -567,7 +567,7 @@ router.post(
 router.post(
   "/notifications/:id/read",
   authenticate,
-  requireRole("mentor"),
+  requireRole("mentor", "journaler", "admin"),
   async (req, res, next) => {
     try {
       const result = await pool.query(
