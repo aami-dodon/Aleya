@@ -1,5 +1,10 @@
 
 # 2025-09-28
+
+- Let journalers open assigned forms inline on `JournalHistoryPage` by rendering `JournalEntryForm` when they press the "Bloom"
+  button instead of redirecting through the dashboard. This keeps the CTA styling with `primaryButtonClasses` and allows
+  reflections to begin without leaving the history view.
+- Updated `frontend/AGENTS.md` to capture the inline Bloom guidance so future contributors preserve the on-page experience.
 - Added a live password confirmation check on `RegisterPage` so the retype field highlights mismatches, shares a gentle reminder,
   and keeps the submit action disabled until both entries match. Noted the guidance in `frontend/AGENTS.md` for future frontend
   contributors.

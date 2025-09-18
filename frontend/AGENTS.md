@@ -30,8 +30,4 @@ tays balanced across breakpoints.
   the filter controls, and ensure the mentee association list stays actionable with the existing remove affordance.
 - Admins now see the form catalogue under the "Form Management" header; keep the copy aligned and pair the filter controls with
   accessible labels (use `sr-only` utilities) so screen readers announce each option clearly.
-- Journalers see their assigned forms within `JournalHistoryPage`; keep the poetic CTA that links to `/dashboard?formId=...` using
-  the shared `primaryButtonClasses` so each card offers the single-word "Bloom" invitation.
-- The registration form validates password confirmation on the client: highlight the retype input, surface a gentle error message,
-  and prevent submission until both fields match.
 
