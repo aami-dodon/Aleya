@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import SectionCard from "../components/SectionCard";
@@ -30,6 +31,8 @@ const FIELD_TYPES = [
 
 function FormBuilderPage() {
   const { token, user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paramsString = searchParams.toString();
   const [forms, setForms] = useState([]);
   const [mentees, setMentees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,9 +43,18 @@ function FormBuilderPage() {
     fields: [createField()],
   });
   const [assignment, setAssignment] = useState({ menteeId: "", formId: "" });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [visibilityFilter, setVisibilityFilter] = useState("all");
-  const [creatorFilter, setCreatorFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get("q") || "");
+  const [visibilityFilter, setVisibilityFilter] = useState(() => {
+    const param = searchParams.get("visibility") || "all";
+    const allowed = new Set(["all", "default", "mentor", "admin"]);
+    return allowed.has(param) ? param : "all";
+  });
+  const [creatorFilter, setCreatorFilter] = useState(
+    () => searchParams.get("creator") || "all"
+  );
+  const [creatorIdFilter, setCreatorIdFilter] = useState(
+    () => searchParams.get("creatorId") || ""
+  );
   const isAdmin = user.role === "admin";
   const isMentor = user.role === "mentor";
   const adminTableGridTemplate =
@@ -70,17 +82,115 @@ function FormBuilderPage() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    const nextSearch = searchParams.get("q") || "";
+    if (nextSearch !== searchTerm) {
+      setSearchTerm(nextSearch);
+    }
+
+    const nextVisibility = searchParams.get("visibility") || "all";
+    const allowedVisibility = new Set(["all", "default", "mentor", "admin"]);
+    const normalizedVisibility = allowedVisibility.has(nextVisibility)
+      ? nextVisibility
+      : "all";
+    if (normalizedVisibility !== visibilityFilter) {
+      setVisibilityFilter(normalizedVisibility);
+    }
+
+    const nextCreator = searchParams.get("creator") || "all";
+    if (nextCreator !== creatorFilter) {
+      setCreatorFilter(nextCreator);
+    }
+
+    const nextCreatorId = searchParams.get("creatorId") || "";
+    if (nextCreatorId !== creatorIdFilter) {
+      setCreatorIdFilter(nextCreatorId);
+    }
+  }, [
+    creatorFilter,
+    creatorIdFilter,
+    paramsString,
+    searchParams,
+    searchTerm,
+    visibilityFilter,
+  ]);
+
+  useEffect(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    const nextParams = new URLSearchParams();
+
+    if (normalizedSearch) {
+      nextParams.set("q", normalizedSearch);
+    }
+
+    if (visibilityFilter !== "all") {
+      nextParams.set("visibility", visibilityFilter);
+    }
+
+    if (creatorIdFilter) {
+      nextParams.set("creatorId", creatorIdFilter);
+      if (creatorFilter && creatorFilter !== "all") {
+        nextParams.set("creator", creatorFilter);
+      }
+    } else if (creatorFilter !== "all") {
+      nextParams.set("creator", creatorFilter);
+    }
+
+    const nextString = nextParams.toString();
+    if (nextString !== paramsString) {
+      setSearchParams(nextParams);
+    }
+  }, [
+    creatorFilter,
+    creatorIdFilter,
+    paramsString,
+    searchTerm,
+    setSearchParams,
+    visibilityFilter,
+  ]);
+
+  useEffect(() => {
+    if (!creatorIdFilter) {
+      return;
+    }
+
+    if (!forms.length) {
+      return;
+    }
+
+    const match = forms.find(
+      (form) => String(form.created_by) === creatorIdFilter
+    );
+
+    if (match) {
+      const label = match.creatorName || "Unknown creator";
+      if (label !== creatorFilter) {
+        setCreatorFilter(label);
+      }
+    } else if (creatorFilter !== "Unknown creator") {
+      setCreatorFilter("Unknown creator");
+    }
+  }, [creatorFilter, creatorIdFilter, forms]);
+
   const creatorOptions = useMemo(() => {
     const names = new Set();
 
     forms.forEach((form) => {
       if (form.creatorName) {
         names.add(form.creatorName);
+      } else {
+        names.add("Unknown creator");
       }
     });
 
-    return Array.from(names).sort((a, b) => a.localeCompare(b));
-  }, [forms]);
+    if (creatorFilter !== "all" && creatorFilter) {
+      names.add(creatorFilter);
+    }
+
+    return Array.from(names)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b));
+  }, [creatorFilter, forms]);
 
   const filteredForms = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -90,7 +200,11 @@ function FormBuilderPage() {
         return false;
       }
 
-      if (creatorFilter !== "all") {
+      if (creatorIdFilter) {
+        if (String(form.created_by) !== creatorIdFilter) {
+          return false;
+        }
+      } else if (creatorFilter !== "all") {
         const creatorName = form.creatorName || "";
         if (!creatorName || creatorName !== creatorFilter) {
           return false;
@@ -120,17 +234,19 @@ function FormBuilderPage() {
 
       return true;
     });
-  }, [forms, searchTerm, visibilityFilter, creatorFilter]);
+  }, [forms, searchTerm, visibilityFilter, creatorFilter, creatorIdFilter]);
 
   const filtersApplied =
     searchTerm.trim().length > 0 ||
     visibilityFilter !== "all" ||
-    creatorFilter !== "all";
+    creatorFilter !== "all" ||
+    Boolean(creatorIdFilter);
 
   const handleClearFilters = useCallback(() => {
     setSearchTerm("");
     setVisibilityFilter("all");
     setCreatorFilter("all");
+    setCreatorIdFilter("");
   }, []);
 
   const handleDeleteForm = useCallback(
@@ -443,7 +559,10 @@ function FormBuilderPage() {
               id="form-creator-filter"
               className={`${selectCompactClasses} w-full sm:w-44`}
               value={creatorFilter}
-              onChange={(event) => setCreatorFilter(event.target.value)}
+              onChange={(event) => {
+                setCreatorIdFilter("");
+                setCreatorFilter(event.target.value);
+              }}
             >
               <option value="all">All creators</option>
               {creatorOptions.map((name) => (

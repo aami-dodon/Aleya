@@ -10,6 +10,7 @@ import MentorDashboard from "./pages/MentorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import MentorConnectionsPage from "./pages/MentorConnectionsPage";
 import JournalerManagementPage from "./pages/JournalerManagementPage";
+import JournalAdminPage from "./pages/JournalAdminPage";
 import JournalHistoryPage from "./pages/JournalHistoryPage";
 import FormBuilderPage from "./pages/FormBuilderPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -97,6 +98,14 @@ function AppRoutes() {
               element={
                 <ProtectedRoute roles={["admin"]}>
                   <JournalerManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/journals"
+              element={
+                <ProtectedRoute roles={["admin"]}>
+                  <JournalAdminPage />
                 </ProtectedRoute>
               }
             />

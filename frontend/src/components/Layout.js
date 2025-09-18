@@ -29,6 +29,7 @@ const roleNavigation = {
   admin: [
     { to: "/dashboard", label: "Dashboard" },
     { to: "/journalers", label: "Journaler" },
+    { to: "/journals", label: "Journals" },
     { to: "/mentorship", label: "Mentors" },
     { to: "/forms", label: "Forms" },
     { to: "/settings", label: "Settings" },

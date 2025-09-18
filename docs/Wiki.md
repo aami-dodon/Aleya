@@ -1,4 +1,23 @@
 
+# 2025-10-08
+
+- Let the mentor and journaler admin directories honor a shared `mentorId` focus filter, wiring the new select inputs through
+  `useSearchParams` so deep links from Journals surface the intended guide and the `View journalers` shortcut lands on their
+  linked mentees instantly.
+- Updated mentor cards to pass both `mentorId` and human labels when jumping to Forms or Journalers, and taught the Forms admin
+  table to hydrate from a new `creatorId` query parameter so creator filters stick even when a mentor lacks a display name.
+- Noted the ID-based linking guidance in `frontend/AGENTS.md` to keep future dashboard navigation consistent across the admin
+  stewardship pages.
+
+# 2025-10-07
+
+- Unified the admin stewardship pages by refactoring journaler and mentor directories into the shared table layout, wiring their
+  filters through `useSearchParams`, and adding quick jumps into the new Journals index.
+- Added `frontend/src/pages/JournalAdminPage.js` plus matching backend `/admin/journals` endpoints so admins can search, filter,
+  and delete journal entries while tracing mentor ties directly from the dashboard.
+- Extended the admin forms view to hydrate filters from the query string, letting cross-page "View forms" links land on the
+  intended creator or visibility selection.
+
 # 2025-10-06
 
 - Reworked the admin form library table to drive its column layout through a shared `--table-grid` CSS variable so headers and
