@@ -1,3 +1,7 @@
+# 2025-10-13
+
+- Documented the frontend and backend package suites plus the platform's custom functionality highlights in `README.md` so new contributors can quickly see the tooling stack and advanced flows beyond static pages.
+
 # 2025-10-12
 
 - Retired the legacy mentor approval backend by deleting the unused routes plus the `mentor_approvals` table from the bootstrap helper and schema so registrations remain instant after verification.
