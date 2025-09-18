@@ -1,3 +1,8 @@
+# 2025-10-11
+
+- Retired the README reference to email reminders now that the cadence controls remain out of scope, and removed the dormant
+  backlog entry from `docs/features.md` to keep the feature review aligned with the current product story.
+
 # 2025-10-10
 
 - Reintroduced share-aware mentor email notifications that trigger after journal entry creation by wiring `dispatchEntryNotifications`

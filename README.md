@@ -27,7 +27,6 @@ Aleya is a journaling and mentorship platform that pairs reflective journaling t
 - **Journal entry forms:** A collection of customizable forms rather than a single template. The default form captures mood (happy, loved, proud, relaxed, tired, anxious, angry, sad), the causes of today's emotions, and learnings. Optional fields include sleep, energy, and activities. Mentors can assign additional or specialised forms after both parties confirm the mentorship link.
 - **Authentication:** Email + password with email verification.
 - **Mentor linking:** Journalers can invite or select mentors, forming a mentorship connection only after mutual consent.
-- **Reminders:** Daily or weekly reminders delivered via email.
 - **Mentor notifications:** Email summaries of mentee entries with privacy controls to respect journaler choices.
 - **Panic support alerts:** A persistent panic button lets mentors escalate concerns to their own linked mentors with an urgent note, triggering an "important" email.
 - **Dashboards:** Role-specific dashboards showing streaks, average mood, trendlines, progress overviews, mentee highlights, and low-mood alerts.
