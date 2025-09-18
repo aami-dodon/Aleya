@@ -28,6 +28,16 @@ const createTableStatements = [
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )`,
+  `CREATE TABLE IF NOT EXISTS mentor_approvals (
+      id SERIAL PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      name TEXT,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
+      application JSONB,
+      requested_at TIMESTAMPTZ DEFAULT NOW(),
+      decided_at TIMESTAMPTZ,
+      decided_by INTEGER REFERENCES users(id) ON DELETE SET NULL
+    )`,
   `CREATE TABLE IF NOT EXISTS mentor_profiles (
       user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
       expertise TEXT,
@@ -109,6 +119,7 @@ const createTableStatements = [
   `CREATE INDEX IF NOT EXISTS idx_mentor_notifications_mentor ON mentor_notifications (mentor_id, created_at DESC)` ,
   `CREATE INDEX IF NOT EXISTS idx_mentor_assignments_journaler ON mentor_form_assignments (journaler_id)` ,
   `CREATE INDEX IF NOT EXISTS idx_mentor_links_journaler ON mentor_links (journaler_id)` ,
+  `CREATE INDEX IF NOT EXISTS idx_mentor_approvals_status ON mentor_approvals (status)` ,
   `ALTER TABLE mentor_requests DROP CONSTRAINT IF EXISTS mentor_requests_status_check` ,
   `ALTER TABLE mentor_requests ADD CONSTRAINT mentor_requests_status_check CHECK (status IN ('pending','mentor_accepted','confirmed','declined','ended'))` ,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE` ,

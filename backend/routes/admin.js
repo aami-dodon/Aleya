@@ -6,6 +6,8 @@ const requireRole = require("../middleware/requireRole");
 
 const router = express.Router();
 
+const APPROVAL_STATUSES = ["pending", "approved", "rejected"];
+
 router.get(
   "/overview",
   authenticate,
@@ -50,6 +52,329 @@ router.get(
       });
     } catch (error) {
       return next(error);
+    }
+  }
+);
+
+router.get(
+  "/mentor-approvals",
+  authenticate,
+  requireRole("admin"),
+  async (req, res, next) => {
+    try {
+      const filters = [];
+      const params = [];
+
+      if (req.query.status) {
+        const status = String(req.query.status).toLowerCase();
+
+        if (!APPROVAL_STATUSES.includes(status)) {
+          return res.status(400).json({ error: "Invalid status filter" });
+        }
+
+        params.push(status);
+        filters.push(`ma.status = $${params.length}`);
+      }
+
+      const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
+
+      const { rows } = await pool.query(
+        `SELECT ma.*, u.name AS decided_by_name
+         FROM mentor_approvals ma
+         LEFT JOIN users u ON u.id = ma.decided_by
+         ${whereClause}
+         ORDER BY ma.requested_at DESC, ma.id DESC`,
+        params
+      );
+
+      return res.json({ approvals: rows });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+router.post(
+  "/mentor-approvals",
+  authenticate,
+  requireRole("admin"),
+  [
+    body("email").isEmail().withMessage("A valid email is required"),
+    body("status")
+      .optional()
+      .isIn(APPROVAL_STATUSES)
+      .withMessage("Invalid status"),
+    body("name").optional().isString(),
+    body("application")
+      .optional()
+      .custom((value) => value === null || typeof value === "object")
+      .withMessage("Application must be an object"),
+  ],
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const normalizedEmail = req.body.email.toLowerCase();
+    const providedStatus = req.body.status
+      ? req.body.status.toLowerCase()
+      : "pending";
+    const providedName =
+      typeof req.body.name === "string" && req.body.name.trim().length
+        ? req.body.name.trim()
+        : null;
+    const applicationPayload =
+      req.body.application === undefined
+        ? undefined
+        : req.body.application === null
+        ? null
+        : req.body.application;
+
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const existing = await client.query(
+        `SELECT id FROM mentor_approvals WHERE email = $1 FOR UPDATE`,
+        [normalizedEmail]
+      );
+
+      let approval;
+      const applicationValue =
+        applicationPayload === undefined
+          ? null
+          : applicationPayload === null
+          ? null
+          : JSON.stringify(applicationPayload);
+
+      if (!existing.rows.length) {
+        const { rows } = await client.query(
+          `INSERT INTO mentor_approvals (
+             email,
+             name,
+             status,
+             application,
+             requested_at,
+             decided_at,
+             decided_by
+           )
+           VALUES ($1, $2, $3, $4, NOW(),
+             CASE WHEN $3 <> 'pending' THEN NOW() ELSE NULL END,
+             CASE WHEN $3 <> 'pending' THEN $5 ELSE NULL END)
+           RETURNING *`,
+          [
+            normalizedEmail,
+            providedName,
+            providedStatus,
+            applicationValue,
+            providedStatus === "pending" ? null : req.user.id,
+          ]
+        );
+
+        approval = rows[0];
+      } else {
+        const approvalId = existing.rows[0].id;
+        const updates = [];
+        const values = [];
+        let index = 1;
+
+        if (req.body.name !== undefined) {
+          updates.push(`name = $${index}`);
+          values.push(providedName);
+          index += 1;
+        }
+
+        if (applicationPayload !== undefined) {
+          updates.push(`application = $${index}`);
+          values.push(applicationValue);
+          index += 1;
+        }
+
+        if (req.body.status) {
+          updates.push(`status = $${index}`);
+          values.push(providedStatus);
+          index += 1;
+
+          if (providedStatus === "pending") {
+            updates.push(`requested_at = NOW()`);
+            updates.push(`decided_at = NULL`);
+            updates.push(`decided_by = NULL`);
+          } else {
+            updates.push(`decided_at = NOW()`);
+            updates.push(`decided_by = $${index}`);
+            values.push(req.user.id);
+            index += 1;
+          }
+        }
+
+        if (!updates.length) {
+          approval = (
+            await client.query(
+              `SELECT * FROM mentor_approvals WHERE id = $1`,
+              [approvalId]
+            )
+          ).rows[0];
+        } else {
+          values.push(approvalId);
+          const { rows } = await client.query(
+            `UPDATE mentor_approvals
+             SET ${updates.join(", ")}
+             WHERE id = $${index}
+             RETURNING *`,
+            values
+          );
+          approval = rows[0];
+        }
+      }
+
+      await client.query("COMMIT");
+
+      const { rows: hydrated } = await client.query(
+        `SELECT ma.*, u.name AS decided_by_name
+         FROM mentor_approvals ma
+         LEFT JOIN users u ON u.id = ma.decided_by
+         WHERE ma.id = $1`,
+        [approval.id]
+      );
+
+      const statusCode = existing.rows.length ? 200 : 201;
+      return res.status(statusCode).json({ approval: hydrated[0] });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return next(error);
+    } finally {
+      client.release();
+    }
+  }
+);
+
+router.patch(
+  "/mentor-approvals/:id",
+  authenticate,
+  requireRole("admin"),
+  [
+    body("status")
+      .optional()
+      .isIn(APPROVAL_STATUSES)
+      .withMessage("Invalid status"),
+    body("name").optional().isString(),
+    body("application")
+      .optional()
+      .custom((value) => value === null || typeof value === "object")
+      .withMessage("Application must be an object"),
+  ],
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const approvalId = Number.parseInt(req.params.id, 10);
+    if (!Number.isInteger(approvalId)) {
+      return res.status(400).json({ error: "Invalid approval id" });
+    }
+
+    const providedName =
+      typeof req.body.name === "string" && req.body.name.trim().length
+        ? req.body.name.trim()
+        : null;
+    const applicationPayload =
+      req.body.application === undefined
+        ? undefined
+        : req.body.application === null
+        ? null
+        : req.body.application;
+    const providedStatus = req.body.status
+      ? req.body.status.toLowerCase()
+      : null;
+
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const existing = await client.query(
+        `SELECT * FROM mentor_approvals WHERE id = $1 FOR UPDATE`,
+        [approvalId]
+      );
+
+      if (!existing.rows.length) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "Approval not found" });
+      }
+
+      const updates = [];
+      const values = [];
+      let index = 1;
+
+      if (req.body.name !== undefined) {
+        updates.push(`name = $${index}`);
+        values.push(providedName);
+        index += 1;
+      }
+
+      if (applicationPayload !== undefined) {
+        updates.push(`application = $${index}`);
+        values.push(
+          applicationPayload === null
+            ? null
+            : JSON.stringify(applicationPayload)
+        );
+        index += 1;
+      }
+
+      if (providedStatus) {
+        updates.push(`status = $${index}`);
+        values.push(providedStatus);
+        index += 1;
+
+        if (providedStatus === "pending") {
+          updates.push(`requested_at = NOW()`);
+          updates.push(`decided_at = NULL`);
+          updates.push(`decided_by = NULL`);
+        } else {
+          updates.push(`decided_at = NOW()`);
+          updates.push(`decided_by = $${index}`);
+          values.push(req.user.id);
+          index += 1;
+        }
+      }
+
+      if (!updates.length) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({ error: "No changes provided" });
+      }
+
+      values.push(approvalId);
+
+      const { rows } = await client.query(
+        `UPDATE mentor_approvals
+         SET ${updates.join(", ")}
+         WHERE id = $${index}
+         RETURNING *`,
+        values
+      );
+
+      const approval = rows[0];
+
+      await client.query("COMMIT");
+
+      const { rows: hydrated } = await client.query(
+        `SELECT ma.*, u.name AS decided_by_name
+         FROM mentor_approvals ma
+         LEFT JOIN users u ON u.id = ma.decided_by
+         WHERE ma.id = $1`,
+        [approval.id]
+      );
+
+      return res.json({ approval: hydrated[0] });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return next(error);
+    } finally {
+      client.release();
     }
   }
 );
