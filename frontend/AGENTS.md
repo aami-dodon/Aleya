@@ -30,6 +30,8 @@ tays balanced across breakpoints.
   the filter controls, and ensure the mentee association list stays actionable with the existing remove affordance.
 - Admins now see the form catalogue under the "Form Management" header; keep the copy aligned and pair the filter controls with
   accessible labels (use `sr-only` utilities) so screen readers announce each option clearly.
+- The shared `table-header` and `table-row` tokens power the responsive admin tables. They collapse into stacked cards on small
+  screens and expand to the three-column grid on medium breakpoints—preserve that pattern when listing forms or similar resources.
 
 - `RegisterPage` keeps the password confirmation helper (`syncPasswordMismatchError`) to disable submission and surface the inline
   reminder until both entries match—preserve this flow when adjusting the form.
