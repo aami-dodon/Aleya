@@ -325,7 +325,8 @@ router.post(
 
     try {
       const { rows } = await pool.query(
-        `SELECT id, password_hash, is_verified FROM users WHERE email = $1`,
+        `SELECT id, name, password_hash, is_verified
+         FROM users WHERE email = $1`,
         [normalizedEmail]
       );
 
@@ -341,9 +342,36 @@ router.post(
       }
 
       if (userRow.is_verified === false) {
-        return res
-          .status(403)
-          .json({ error: "Please verify your email before signing in." });
+        const verificationToken = crypto.randomBytes(32).toString("hex");
+        const verificationTokenHash = crypto
+          .createHash("sha256")
+          .update(verificationToken)
+          .digest("hex");
+        const verificationExpiresAt = new Date(
+          Date.now() + VERIFICATION_TOKEN_TTL_HOURS * 60 * 60 * 1000
+        );
+
+        await pool.query(
+          `UPDATE users
+             SET verification_token_hash = $1,
+                 verification_token_expires_at = $2,
+                 updated_at = NOW()
+           WHERE id = $3`,
+          [verificationTokenHash, verificationExpiresAt, userRow.id]
+        );
+
+        await sendVerificationEmail(
+          req.app,
+          { email: normalizedEmail, name: userRow.name },
+          verificationToken
+        );
+
+        return res.status(403).json({
+          error:
+            "Please verify your email before signing in. We've sent a new verification link to your email.",
+          verificationExpiresAt: verificationExpiresAt.toISOString(),
+          verificationExpiresInHours: VERIFICATION_TOKEN_TTL_HOURS,
+        });
       }
 
       const user = await fetchUserById(userRow.id);
