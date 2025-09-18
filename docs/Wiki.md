@@ -1,3 +1,7 @@
+# 2025-09-27
+- Hid the journal reminder controls on the admin settings page so administrators no longer see the daily reflection or weekly
+  summary toggles.
+
 # 2025-09-26
 - Extended the admin mentorship hub with a new Journaler management panel that lets admins search by name/email, review linked
   mentors, unlink relationships, and delete journaler accounts. Backed the UI with enriched `/admin/journalers` data and a new
