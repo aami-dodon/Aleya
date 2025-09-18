@@ -1,4 +1,9 @@
 
+# 2025-09-29
+
+- Wrapped the authenticated shell with a new `GlobalErrorBoundary` component that renders a gentle fallback, offers retry and reload affordances, and records window errors plus unhandled promise rejections so runtime exceptions no longer splash raw traces across the UI.
+- Added `frontend/AGENTS.md` guidance describing how to extend the boundary while keeping technical diagnostics tucked behind the existing disclosure toggle.
+
 # 2025-09-28
 
 - Introduced a public `/api/auth/expertise` endpoint that aggregates mentor profile keywords, returning the most common tags in
