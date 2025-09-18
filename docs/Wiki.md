@@ -29,3 +29,7 @@
 - Rewrote major frontend copy (landing, authentication, dashboards, notifications, SOS modal) with Aleya’s poetic grove tone so the experience feels consistently luminous and nature-infused.
 - Updated `frontend/AGENTS.md` to note the new copy voice guidance for future contributors.
 
+# 2025-09-23
+- Removed the landing page administrator feature card and tightened the feature grid to two columns so only journalers and mentors are highlighted.
+- Extended `frontend/AGENTS.md` with a note about keeping the landing feature cards balanced across breakpoints.
+
