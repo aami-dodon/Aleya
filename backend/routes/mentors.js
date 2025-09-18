@@ -520,4 +520,6 @@ router.post(
       return next(error);
     }
   }
+);
+
 module.exports = router;
