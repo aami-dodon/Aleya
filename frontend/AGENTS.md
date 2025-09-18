@@ -21,3 +21,5 @@ tays balanced across breakpoints.
   balanced and easier to maintain.
 - Admins view a pared-down settings experience: hide mentor notification controls, the weekly summary toggle, profile submit
   actions, and the data export/deletion tools whenever `user.role === "admin"`.
+- Admin mentor management lives on `/mentorship`: show mentor cards with linked mentees, allow linking by email, and surface a
+  `Delete mentor` control using the shared button tokens so admins can curate relationships gracefully.

@@ -6,3 +6,5 @@
 - Double-check route definitions end with their closing `);` pair so `node --check` passes before pushing changes.
 - When touching the admin form management endpoints, keep the default template protections intact so system templates are never
   deleted by mistake.
+- Admin mentor management now includes routes for linking/unlinking journalers and deleting mentors; ensure mentor/journaler
+  integrity checks remain in place and update the wiki when adjusting these flows.
