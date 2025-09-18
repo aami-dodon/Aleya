@@ -63,7 +63,7 @@ function NotificationList({
               <div className="space-y-2">
                 <div className="space-y-1">
                   <p className="text-base font-semibold text-rose-700">
-                    Panic alert from {senderName || "a mentor"}
+                    SOS alert from {senderName || "a mentee"}
                   </p>
                   <p className={`${bodySmallStrongTextClasses} text-rose-600`}>
                     Immediate support requested
