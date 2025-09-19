@@ -30,9 +30,7 @@ const consoleTransport = new transports.Console({
       const splat = info[Symbol.for("splat")] || [];
       const splatString = splat
         .map((value) =>
-          typeof value === "object"
-            ? JSON.stringify(value, null, 2)
-            : String(value)
+          typeof value === "object" ? JSON.stringify(value, null, 2) : String(value)
         )
         .join(" ");
 

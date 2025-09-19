@@ -1,333 +1,160 @@
 # Aleya
 
-Aleya is a journaling and mentorship platform that pairs reflective journaling tools with mentor guidance. The repository hosts an Express + PostgreSQL API (`backend/`) and a React client (`frontend/`).
+Aleya is a journaling and mentorship platform that pairs reflective prompts with
+mentor support. The repository hosts an Express + PostgreSQL API (`backend/`) and a
+React client (`frontend/`). This refresh tidies the repository layout, adds automated
+quality checks, and documents how to grow the grove together.
 
-## Product overview
+## Table of contents
 
-### Vision & purpose
+1. [Architecture](#architecture)
+2. [Getting started](#getting-started)
+3. [Running the backend](#running-the-backend)
+4. [Running the frontend](#running-the-frontend)
+5. [Quality gates](#quality-gates)
+6. [Testing](#testing)
+7. [Environment & configuration](#environment--configuration)
+8. [Project documentation](#project-documentation)
+9. [Contributing](#contributing)
+10. [License](#license)
 
-- **One-liner:** Aleya is a journaling and mentorship app that helps people reflect on their emotions, build habits, and grow with guidance.
-- **Who is it for?** Individuals who want to journal for self-growth, mentors who want to support them, and administrators who manage the platform.
-- **Why now?** Mental health challenges continue to rise because advice is often fragmented—focused solely on body, mind, work, or spirit. Aleya takes a holistic approach inspired by a tree: roots (self-care), trunk (purpose), branches (learning and relationships), and fruit (creative expression). Life feels whole only when every part is nurtured, so the product aims to guide users through integrated wellbeing.
-
-### Users & roles
-
-- **Journaler**
-  - Goals: Build a journaling habit, track emotions and mood, and see progress over time.
-  - Pain points: Consistency is difficult and accountability is limited without support.
-- **Mentor**
-  - Goals: Support mentees, spot red flags quickly, and encourage consistent reflection.
-  - Needs: Simple dashboards, digestible entry summaries, and timely alerts when mentees reach out.
-- **Administrator**
-  - Goals: Oversee the platform and keep user journeys running smoothly.
-  - Responsibilities: Configure user journeys, manage journal forms, handle user data securely, monitor platform health, and onboard mentors.
-
-### Core features (MVP)
-
-- **Journal entry forms:** A collection of customizable forms rather than a single template. The default form captures mood (happy, loved, proud, relaxed, tired, anxious, angry, sad), the causes of today's emotions, and learnings. Optional fields include sleep, energy, and activities. Mentors can assign additional or specialised forms after both parties confirm the mentorship link.
-- **Authentication:** Email + password with email verification.
-- **Mentor linking:** Journalers can invite or select mentors, forming a mentorship connection only after mutual consent.
-- **Mentor notifications:** Email summaries of mentee entries with privacy controls to respect journaler choices.
-- **Panic support alerts:** A persistent panic button lets mentors escalate concerns to their own linked mentors with an urgent note, triggering an "important" email.
-- **Dashboards:** Role-specific dashboards showing streaks, average mood, trendlines, progress overviews, mentee highlights, and low-mood alerts.
-
-### User flows
-
-#### Journaler flow
-
-1. **Sign up & onboarding** – Create an account, complete the profile, and begin journaling immediately with the default form.
-2. **Explore & journal** – Fill in entries using the default form at any time.
-3. **Optionally choose a mentor** – Search for or invite a mentor and send a request.
-4. **Mentor acceptance** – Mentor accepts the request; the journaler confirms, completing the mutual-consent handshake.
-5. **Form assignment** – Mentors can assign additional or custom forms once the link is confirmed.
-6. **Complete forms & submit entries** – Journalers complete default and assigned forms and submit entries.
-7. **Mentor notification flow** – Mentors receive email updates based on the journaler’s sharing preferences.
-8. **Dashboard review** – Journalers view streaks, mood trends, and progress overviews.
-9. **Account & settings management** – Journalers manage profiles, reset passwords, and may delete the account.
-
-#### Mentor flow
-
-1. **Sign up & onboarding** – Create a profile including expertise, availability, and preferences.
-2. **Login & dashboard access** – View mentee lists, progress summaries, and alerts.
-3. **Accept/decline requests** – Review incoming requests and accept to establish the mutual link.
-4. **Assign forms** – After mutual consent, select or customise forms for each journaler.
-5. **Track progress** – Monitor streaks, mood trends, and flagged entries.
-6. **Engagement & feedback** – Provide encouragement, notes, or comments to mentees.
-7. **Profile & reputation** – Maintain mentor profiles, respond to ratings, and manage account settings.
-
-#### Administrator flow
-
-1. **Sign up & onboarding** – Create an administrator account with elevated access.
-2. **Login & dashboard access** – Manage system-level settings and monitor platform performance.
-3. **Create & manage forms** – Build journal forms mentors can assign to journalers.
-4. **Support mentors** – Onboard new mentors, review profiles, and provide resources.
-5. **Moderation & escalation** – Handle disputes, flag or suspend abusive mentors, and resolve complaints.
-6. **Platform oversight** – Ensure data security, manage user data, and monitor platform health.
-
-### Privacy & controls
-
-- **Data collection:** Journal entries, profile information, mentor–mentee links, and activity streaks.
-- **User choices:** Journalers decide what mentors see—mood only, summaries, or full entries.
-- **Confidentiality:** Default-form data stays private unless explicitly shared by the journaler.
-- **Admin oversight:** Administrators manage forms and journeys but cannot view private journal content.
-- **Security:** Data is stored securely using encryption and access control, with crisis keyword detection available for emergency escalation without exposing private details.
-- **Lifecycle management:** Journalers and mentors can deactivate or delete accounts; data is archived or erased accordingly.
-- **Status updates:** Aleya now relies on dashboards and transactional emails (e.g. verification links); the legacy in-app notification system has been retired.
-
-### Design principles
-
-- **Holistic layout:** Tree-inspired metaphors—roots for self-care, trunk for growth, branches for learning and relationships, and fruit for creative expression.
-- **Calm aesthetic:** Soft colour palette (muted blues/greens, warm neutrals), rounded edges, and minimal clutter.
-- **Accessible & responsive:** Mobile-first design, smooth transitions, and readable typography.
-
-## Project structure
+## Architecture
 
 ```
 .
-├── backend/        # Express API, PostgreSQL migrations, bootstrap logic
-├── frontend/       # React application served with Create React App tooling
-├── docker-compose.yml
+├── backend/            # Express API, PostgreSQL helpers, automated jobs
+│   ├── src/            # Application source code
+│   ├── tests/          # Jest unit tests
+│   └── docs/           # Schema references and backend-specific guides
+├── frontend/           # React application powered by CRA + Tailwind
+├── docs/               # Living knowledge base (Wiki, theme showcase, features)
+├── .github/workflows/  # Continuous integration pipelines
+├── docker-compose.yml  # Optional local orchestration for backend + frontend
 └── README.md
 ```
 
-## Packages & tooling
+Key product personas:
 
-### Frontend
+- **Journalers** cultivate habits through poetic, mood-aware prompts.
+- **Mentors** guide journalers with dashboards, digests, and panic alerts.
+- **Administrators** steward forms, relationships, and health metrics.
 
-- **React 19** for composing the journaling and mentorship experience.
-- **React Router 6** to orchestrate authenticated and role-specific navigation.
-- **date-fns** utilities for streak, trend, and digest date calculations.
-- **Tailwind CSS 3** layered through PostCSS and Autoprefixer to power the shared design tokens documented in `frontend/src/index.css` and [`docs/theme.html`](docs/theme.html).
-- **React Testing Library** (`@testing-library/*`) and Jest DOM helpers that exercise dashboards, flows, and components.
-- **Create React App tooling** (`react-scripts`) to bundle, lint, and test the client.
+Core highlights include mutual-consent mentor linking, mood analytics, panic
+support, and a dashboard suite for each role. The retired in-app notification
+system has been replaced with transactional email flows.
 
-### Backend
+## Getting started
 
-- **Express 5** for routing, middleware, and admin dashboards.
-- **pg** as the PostgreSQL driver paired with connection bootstrap helpers.
-- **bcryptjs** to hash account credentials.
-- **jsonwebtoken** for issuing and verifying session tokens.
-- **express-validator** to guard inputs across registration, mentorship, and admin endpoints.
-- **cors** middleware for frontend-to-backend communication.
-- **dotenv** to hydrate environment variables in local development.
-- **nodemailer** and **winston** for transactional email delivery and structured logging.
-- **nodemon** (dev dependency) to reload the API during iterative development.
-
-### Frontend styling system
-
-The React client uses Tailwind CSS with a small design system exposed in `frontend/src/index.css`. Buttons, form controls, and typography tokens are wrapped in named classes (e.g. `btn-primary`, `form-input`, `text-display`) and re-exported from `frontend/src/styles/ui.js` for ergonomic use inside React components. A static showcase of the tokens lives in [`docs/theme.html`](docs/theme.html) for quick visual verification outside the React build.
-
-## Custom functionality highlights
-
-- **Inline Bloom journaling** keeps journalers within their history view when mentors assign new forms, gently scrolling the revealed card into focus while preserving the poetic CTA styling.
-- **Mentor digest and real-time notifications** dispatch transactional emails—verification, panic alerts, entry summaries, and scheduled digests—through the shared templating helpers.
-- **Admin stewardship suite** spans mentor, journaler, form, and journal entry directories with synchronized filters, deep-linkable query parameters, and responsive table tokens.
-- **Expertise discovery** aggregates mentor profile keywords via a public `/api/auth/expertise` endpoint so registration flows can suggest popular guidance areas.
-- **Global error boundary** wraps the authenticated shell, offering luminous fallback copy, retry controls, and soft telemetry capture when runtime issues surface.
-
-## Prerequisites
-
-Before running Aleya locally make sure you have:
-
-- **Node.js 18+** and **npm** (ships with Node). The Dockerfiles target Node 18.  
-- **PostgreSQL 13+** (local installation, Docker container, or managed instance).  
-- **Git** for cloning the repository.  
-- *(Optional)* **Docker & Docker Compose** if you prefer containerised development.
-
-## 1. Configure environment variables
-
-Update `backend/.env` (a sample file is checked into the repo) with the following variables:
-
-```
-DATABASE_URL=postgres://<user>:<password>@<host>:<port>/<database>
-DATABASE_SSL=false        # set to true only when your database requires SSL
-PORT=5000
-CORS_ORIGIN=http://localhost:3000
-JWT_SECRET=super-secret-value
-
-# Logging configuration
-LOG_FILE=logs/aleya.log
-LOG_LEVEL=info
-LOG_MAX_SIZE=5242880
-LOG_MAX_FILES=5
-
-# Optional: seed a default administrator account on startup
-SEED_ADMIN_EMAIL=admin@example.com
-SEED_ADMIN_PASSWORD=ChangeMe123!
-SEED_ADMIN_NAME=Aleya Admin
-
-# SMTP configuration for email notifications
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=your-smtp-username
-SMTP_PASSWORD=your-smtp-password
-SMTP_FROM="Aleya <no-reply@example.com>"
-SMTP_SECURE=false
-# Optional: adjust mentor digest lookback (hours)
-MENTOR_DIGEST_WINDOW_HOURS=24
-```
-
-- `DATABASE_URL` is required so the API can connect to PostgreSQL. The backend tests the connection on boot and will fail if it cannot reach the database.
-- `initializePlatform` automatically applies the SQL schema, ensures the default journaling form exists, and (optionally) seeds the admin user when the server starts.
-- `LOG_FILE`, `LOG_LEVEL`, `LOG_MAX_SIZE`, and `LOG_MAX_FILES` configure structured logging. Paths supplied in `LOG_FILE` are resolved relative to `backend/` unless absolute; rotation kicks in once the file size limit is reached.
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_FROM` configure the SMTP server used for notification emails. The backend validates these settings during start-up and will exit with a descriptive error if any value is missing or malformed.
-- Set `SMTP_SECURE=true` when connecting to port 465 or any server that requires an implicit TLS connection. For ports that upgrade via STARTTLS (such as 587) leave it as `false`.
-
-Create `frontend/.env` (the file must start with `REACT_APP_` variables for Create React App):
-
-```
-REACT_APP_API_URL=http://localhost:5000/api
-```
-
-## 2. Install dependencies
-
-Install dependencies for each workspace:
+Clone the repository and install dependencies for both packages.
 
 ```bash
-# From the repository root
+git clone <repository-url>
+cd Aleya
+
+# Backend setup
 cd backend
 npm install
 
-cd ../frontend
+# Frontend setup (in a separate shell)
+cd frontend
 npm install
 ```
 
-## 3. Prepare the database
+Node.js 18+ is recommended for parity with the Docker images and CI pipeline.
 
-1. Create an empty PostgreSQL database, e.g. using `createdb aleya` or your GUI of choice.  
-2. Ensure the credentials in `DATABASE_URL` can create tables. On startup the API will run the bootstrap routine that executes the schema, inserts the default "Daily Roots Check-In" form, and seeds an admin account when the `SEED_ADMIN_*` variables are provided.
-
-No additional migration step is needed—the schema is managed automatically.
-
-## 4. Run the application (local Node processes)
-
-In one terminal start the backend (uses Nodemon in development):
+## Running the backend
 
 ```bash
 cd backend
-npm run dev
+cp .env-sample .env   # populate with your database + SMTP credentials
+npm run dev           # start the API with Nodemon
 ```
 
-The API listens on `PORT` (default `5000`) and exposes a `/api/health` endpoint you can use to confirm connectivity.
+The server boots from `backend/src/index.js`, validates SMTP credentials via
+`src/utils/email.js`, and initialises the platform if seed credentials are
+provided. API routes live under `src/routes/` and reuse shared middleware,
+services, and utilities.
 
-In a second terminal start the React client:
+### Mentor digest job
+
+```
+npm run mentor-digest
+```
+
+Dispatches mentor digest emails for the configured look-back window. Update the
+`MENTOR_DIGEST_WINDOW_HOURS` environment variable to tweak the range.
+
+## Running the frontend
 
 ```bash
 cd frontend
-npm start
+cp .env-sample .env    # configure API origin and feature flags
+npm start              # run the React development server
 ```
 
-By default the frontend runs on `http://localhost:3000` and proxies API calls to `REACT_APP_API_URL`.
+The client leans on shared Tailwind tokens defined in `frontend/src/index.css`.
+Admin dashboards reuse the responsive table tokens documented in
+`frontend/AGENTS.md`.
 
-## Logging
+## Quality gates
 
-The backend emits structured JSON logs via [Winston](https://github.com/winstonjs/winston). Messages are written both to stdout and to the file configured by `LOG_FILE` (default `backend/logs/aleya.log`). To follow the log file during development:
+Automated checks live in `.github/workflows/ci.yml` and run on every push or
+pull request:
+
+- `npm run format:check` – ensures Prettier formatting for backend sources/tests.
+- `npm run lint` – ESLint (recommended + Prettier) for backend code.
+- `npm test` – Jest unit tests for backend utilities.
+
+Run them locally before you push:
 
 ```bash
-tail -f backend/logs/aleya.log
+cd backend
+npm run format:check
+npm run lint
+npm test
 ```
 
-If you customise `LOG_FILE` in `.env`, the logger will create the directory automatically. Log rotation is controlled by `LOG_MAX_SIZE` (bytes) and `LOG_MAX_FILES`.
+Frontend testing remains available through `npm test` inside the `frontend/`
+directory.
 
-## Notification system (retired)
+## Testing
 
-Earlier versions of Aleya offered an in-app notification feed and granular user preferences. That system has been removed in favour of a simpler experience centred on dashboards and essential emails (such as verification links and panic alerts). Environment variables related to the old notification APIs are no longer required.
+Unit tests live under `backend/tests/` and currently cover shared helpers such as
+`src/utils/mood.js`. Add new tests alongside the modules you touch. Test output
+is written to `backend/coverage/` (ignored by Git).
 
-## 5. Running with Docker (optional)
+Integration tests can be added with Jest + Supertest; wire them into the
+`backend/tests/` tree and update the CI workflow accordingly.
 
-You can develop with Docker once your database is reachable from the containers (for a locally running Postgres instance on macOS/Windows use `host.docker.internal` in `DATABASE_URL`).
+## Environment & configuration
 
-```bash
-docker compose up --build
-```
+- `backend/.env-sample` documents required credentials for the API, including
+  PostgreSQL, JWT, logging, and SMTP settings.
+- `frontend/.env-sample` lists client configuration such as the API base URL.
+- Docker users can run `docker compose up --build` to orchestrate both services
+  (PostgreSQL is expected to be provisioned separately).
 
-- The compose file starts the frontend and backend containers.  
-- Provide environment variables (especially `DATABASE_URL` and `JWT_SECRET`) via `backend/.env` before running Compose—the file is mounted into the backend container.  
-- PostgreSQL itself is **not** provisioned by `docker-compose.yml`; run it separately or extend the compose file with your own `postgres` service.
+## Project documentation
 
-## 6. Useful scripts
+- `docs/Wiki.md` – running history of architectural and feature decisions.
+- `docs/features.md` – product capabilities and future opportunities.
+- `docs/theme.html` – static showcase of Tailwind tokens shared by the UI.
+- Package-specific `AGENTS.md` files capture conventions for each area; update
+  them whenever you introduce new patterns.
 
-| Location   | Command            | Purpose |
-|------------|--------------------|---------|
-| `backend`  | `npm run dev`       | Start API in watch mode using Nodemon. |
-| `backend`  | `npm start`         | Start API without file watching (production style). |
-| `backend`  | `npm run mentor-digest` | Send mentor digest emails for the configured lookback window. |
-| `frontend` | `npm start`         | Run the React development server with hot reload. |
-| `frontend` | `npm run build`     | Build the production-ready static assets. |
-| `frontend` | `npm test`          | Launch the Jest/React Testing Library runner. |
+## Contributing
 
-## 7. API reference
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow, coding
+standards, and review expectations. Community expectations are outlined in the
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
-All endpoints are served from the `/api` prefix and return JSON. Supply an `Authorization: Bearer <token>` header for protected routes.
+Highlights:
 
-### Health check
+- Keep backend code in `src/` and add Jest tests beside the behaviour you change.
+- Update the wiki (`docs/Wiki.md`) and relevant `AGENTS.md` files with every
+  substantial change.
+- Run the quality gates (format, lint, test) before requesting review.
 
-- `GET /api/health` – Lightweight probe to confirm the server can connect to PostgreSQL.
+## License
 
-### Authentication & profile
-
-- `POST /api/auth/register` – Create a journaler or mentor account and trigger a verification email. *(Public)*
-- `POST /api/auth/verify-email` – Confirm a pending account using the emailed token. *(Public)*
-- `POST /api/auth/login` – Exchange credentials for a JWT and hydrated profile. *(Public)*
-- `GET /api/auth/me` – Return the authenticated user profile, including mentor metadata when applicable. *(Authenticated)*
-- `PATCH /api/auth/me` – Update name, timezone, password, and mentor profile fields. *(Authenticated)*
-- `GET /api/auth/mentor/profiles` – List mentor profiles for administrative review. *(Admin only)*
-
-### Form library
-
-- `GET /api/forms/default` – Fetch the default "Daily Roots Check-In" journaling form. *(Public)*
-- `GET /api/forms` – Return forms visible to the current user (defaults, assigned mentor forms, or the full catalogue for admins). *(Authenticated)*
-- `POST /api/forms` – Create a reusable journaling form; mentors craft templates that automatically save with `mentor` visibility. *(Mentor)*
-- `POST /api/forms/:formId/assign` – Assign a form to a journaler; mentors must already be linked to the journaler. *(Mentor or admin)*
-- `DELETE /api/forms/:formId/assign/:journalerId` – Remove a form assignment from a journaler. *(Mentor or admin)*
-
-### Journal entries
-
-- `POST /api/journal-entries` – Submit a journal entry, automatically normalising mood, building a summary, and notifying linked mentors according to the share level. *(Journaler)*
-- `GET /api/journal-entries` – Journalers retrieve their own history (with optional `limit`); mentors provide `journalerId` to view non-private entries for linked mentees. *(Authenticated)*
-- `GET /api/journal-entries/:id` – Fetch a single entry; access is limited to the author or linked mentors when the entry is shared beyond `private`. *(Authenticated)*
-- `GET /api/journal-entries/:id/comments` – List mentor comments attached to an entry. *(Authenticated)*
-- `POST /api/journal-entries/:id/comments` – Add a mentor comment to a shared entry for a linked journaler. *(Mentor)*
-
-### Mentorship workflows
-
-- `GET /api/mentors` – Search mentors by name, email, or expertise using the `q` query parameter. *(Authenticated)*
-- `GET /api/mentors/requests` – View mentorship requests relevant to the signed-in mentor or journaler. *(Authenticated)*
-- `POST /api/mentors/requests` – Journalers request a mentor (prevents self-selection and duplicate links). *(Journaler)*
-- `POST /api/mentors/requests/:id/accept` – Mentors acknowledge a pending request. *(Mentor)*
-- `POST /api/mentors/requests/:id/confirm` – Journalers confirm an accepted request, establishing a mentor link. *(Journaler)*
-- `POST /api/mentors/requests/:id/decline` – Decline a request as the involved mentor or journaler. *(Authenticated)*
-- `GET /api/mentors/mentees` – Display linked journalers with their latest shared reflections. *(Mentor)*
-
-
-### Dashboards & analytics
-
-- `GET /api/dashboard/journaler` – Aggregate streaks, average mood, highlights, and trend data for the journaler dashboard. *(Journaler)*
-- `GET /api/dashboard/mentor` – Surface mentee trends, risk alerts, and activity indicators for mentors. *(Mentor)*
-
-### Administration
-
-- `GET /api/admin/overview` – Platform-level counts of users, forms, entries, mentor links, and pending requests. *(Admin)*
-- `GET /api/admin/forms` – Review the full form library with assignment counts and creators. *(Admin)*
-- `PATCH /api/admin/forms/:id` – Update form visibility, description, or default status. *(Admin)*
-- `GET /api/admin/mentors` – List mentors with profile details and mentee counts. *(Admin)*
-
-## 8. Troubleshooting
-
-- **Database connection errors** – Confirm PostgreSQL is running, the credentials in `DATABASE_URL` are valid, and set `DATABASE_SSL=true` only when the server requires TLS. The backend will log "Database unreachable" if the health check fails.
-- **Schema missing after first boot** – Ensure the database user has permissions to create tables. `initializePlatform` runs automatically on startup and seeds the default form and admin account when credentials are provided.
-- **Requests blocked by CORS** – Update `CORS_ORIGIN` with the frontend origin (comma-separated for multiple hosts) so browsers can call the API successfully.
-- **Unexpected 401/403 responses** – Verify the frontend is attaching the JWT in the `Authorization` header and that the account role matches the endpoint (e.g. admin routes require `admin`). Clearing the stored session in localStorage can resolve stale tokens.
-- **Mentors cannot assign forms** – Mentors must first confirm a mentorship link with the journaler; otherwise the `/forms/:id/assign` route returns `403`.
-
-## 9. Additional notes
-
-- **Authentication** uses JSON Web Tokens. Set `JWT_SECRET` to a strong value in production.
-- **CORS**: update `CORS_ORIGIN` (comma-separated list) if you host the frontend on another domain.
-- **Notifications**: the in-app notification feed and preference defaults have been removed; no additional setup is required beyond configuring essential email credentials.
-
-With these steps Aleya should be fully operational for local development or evaluation.
-
-## 10. Project wiki
-
-See [docs/wiki.md](docs/wiki.md) for frontend specifications, backend internals, and architecture notes.
+This project is licensed under the [MIT License](LICENSE).

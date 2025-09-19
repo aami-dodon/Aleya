@@ -51,9 +51,7 @@ function buildVerificationLink(token) {
   const fallbackBase =
     process.env.APP_BASE_URL ||
     process.env.FRONTEND_URL ||
-    (process.env.CORS_ORIGIN
-      ? process.env.CORS_ORIGIN.split(",")[0].trim()
-      : null) ||
+    (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",")[0].trim() : null) ||
     "http://localhost:3000";
 
   try {
@@ -63,9 +61,7 @@ function buildVerificationLink(token) {
     baseUrl.searchParams.set("token", token);
     return baseUrl.toString();
   } catch (error) {
-    return `http://localhost:3000/verify-email?token=${encodeURIComponent(
-      token
-    )}`;
+    return `http://localhost:3000/verify-email?token=${encodeURIComponent(token)}`;
   }
 }
 
@@ -208,10 +204,7 @@ router.post(
       .custom((value, { req }) => value === req.body.password)
       .withMessage("Passwords must match"),
     body("name").trim().notEmpty().withMessage("Name is required"),
-    body("role")
-      .optional()
-      .isIn(REGISTER_ROLES)
-      .withMessage("Invalid role"),
+    body("role").optional().isIn(REGISTER_ROLES).withMessage("Invalid role"),
   ],
   async (req, res, next) => {
     if (!handleValidation(req, res)) return;
@@ -229,18 +222,18 @@ router.post(
     const normalizedEmail = email.toLowerCase();
     const role =
       requestedRole && REGISTER_ROLES.includes(requestedRole)
-      ? requestedRole
-      : "journaler";
+        ? requestedRole
+        : "journaler";
     const trimmedName = typeof name === "string" ? name.trim() : "";
+    const normalizedName = trimmedName || name;
     const resolvedTimezone = timezone || "UTC";
 
     try {
       await client.query("BEGIN");
 
-      const existing = await client.query(
-        "SELECT id FROM users WHERE email = $1",
-        [normalizedEmail]
-      );
+      const existing = await client.query("SELECT id FROM users WHERE email = $1", [
+        normalizedEmail,
+      ]);
 
       if (existing.rows.length) {
         await client.query("ROLLBACK");
@@ -273,7 +266,7 @@ router.post(
         [
           normalizedEmail,
           passwordHash,
-          name,
+          normalizedName,
           role,
           resolvedTimezone,
           verificationTokenHash,
@@ -306,17 +299,11 @@ router.post(
 
       await sendVerificationEmail(
         req.app,
-        { email: normalizedEmail, name },
+        { email: normalizedEmail, name: normalizedName },
         verificationToken
       );
 
       await client.query("COMMIT");
-
-      const newUser = {
-        id: userId,
-        name: trimmedName || name,
-        email: normalizedEmail,
-      };
 
       return res.status(201).json({
         message:
@@ -336,10 +323,7 @@ router.post(
 
 router.post(
   "/login",
-  [
-    body("email").isEmail(),
-    body("password").notEmpty(),
-  ],
+  [body("email").isEmail(), body("password").notEmpty()],
   async (req, res, next) => {
     if (!handleValidation(req, res)) return;
 
@@ -416,10 +400,7 @@ router.post(
     if (!handleValidation(req, res)) return;
 
     const { token } = req.body;
-    const tokenHash = crypto
-      .createHash("sha256")
-      .update(token)
-      .digest("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
     try {
       const { rows } = await pool.query(
@@ -430,9 +411,7 @@ router.post(
       );
 
       if (!rows.length) {
-        return res
-          .status(400)
-          .json({ error: "Invalid or expired verification link." });
+        return res.status(400).json({ error: "Invalid or expired verification link." });
       }
 
       const user = rows[0];
@@ -530,10 +509,7 @@ router.patch("/me", authenticate, async (req, res, next) => {
     if (updates.length) {
       const setClause = `${updates.join(", ")}, updated_at = NOW()`;
       values.push(req.user.id);
-      await pool.query(
-        `UPDATE users SET ${setClause} WHERE id = $${index}`,
-        values
-      );
+      await pool.query(`UPDATE users SET ${setClause} WHERE id = $${index}`, values);
     }
 
     if (req.user.role === "mentor" && mentorProfile) {
@@ -570,9 +546,7 @@ router.delete("/me", authenticate, async (req, res, next) => {
   }
 
   try {
-    const {
-      rows: existingRows,
-    } = await pool.query(
+    const { rows: existingRows } = await pool.query(
       "SELECT password_hash FROM users WHERE id = $1",
       [req.user.id]
     );
@@ -582,10 +556,7 @@ router.delete("/me", authenticate, async (req, res, next) => {
     }
 
     const [userRecord] = existingRows;
-    const isValidPassword = await bcrypt.compare(
-      password,
-      userRecord.password_hash
-    );
+    const isValidPassword = await bcrypt.compare(password, userRecord.password_hash);
 
     if (!isValidPassword) {
       return res.status(401).json({ error: "Incorrect password" });

@@ -86,15 +86,15 @@ const createTableStatements = [
       comment TEXT NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`,
-  `CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date ON journal_entries (journaler_id, entry_date DESC)` ,
-  `CREATE INDEX IF NOT EXISTS idx_mentor_assignments_journaler ON mentor_form_assignments (journaler_id)` ,
-  `CREATE INDEX IF NOT EXISTS idx_mentor_links_journaler ON mentor_links (journaler_id)` ,
-  `ALTER TABLE mentor_requests DROP CONSTRAINT IF EXISTS mentor_requests_status_check` ,
-  `ALTER TABLE mentor_requests ADD CONSTRAINT mentor_requests_status_check CHECK (status IN ('pending','mentor_accepted','confirmed','declined','ended'))` ,
-  `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE` ,
-  `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_hash TEXT` ,
-  `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires_at TIMESTAMPTZ` ,
-  `UPDATE users SET is_verified = TRUE WHERE is_verified IS NULL`
+  `CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date ON journal_entries (journaler_id, entry_date DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_mentor_assignments_journaler ON mentor_form_assignments (journaler_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_mentor_links_journaler ON mentor_links (journaler_id)`,
+  `ALTER TABLE mentor_requests DROP CONSTRAINT IF EXISTS mentor_requests_status_check`,
+  `ALTER TABLE mentor_requests ADD CONSTRAINT mentor_requests_status_check CHECK (status IN ('pending','mentor_accepted','confirmed','declined','ended'))`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_hash TEXT`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires_at TIMESTAMPTZ`,
+  `UPDATE users SET is_verified = TRUE WHERE is_verified IS NULL`,
 ];
 
 const DEFAULT_FORM = {
@@ -155,7 +155,6 @@ const DEFAULT_FORM = {
 
 async function ensureSchema() {
   for (const statement of createTableStatements) {
-    // eslint-disable-next-line no-await-in-loop
     await pool.query(statement);
   }
 }
@@ -182,7 +181,6 @@ async function ensureDefaultForm() {
 
       // insert default fields
       for (const field of DEFAULT_FORM.fields) {
-        // eslint-disable-next-line no-await-in-loop
         await client.query(
           `INSERT INTO journal_form_fields
             (form_id, label, field_type, required, options, helper_text)
@@ -204,7 +202,6 @@ async function ensureDefaultForm() {
           new Set([field.label, ...(field.matchLabels || [])])
         );
 
-        // eslint-disable-next-line no-await-in-loop
         const fieldCheck = await client.query(
           `SELECT id FROM journal_form_fields
              WHERE form_id = $1 AND label = ANY($2::text[])
@@ -221,7 +218,6 @@ async function ensureDefaultForm() {
         ];
 
         if (!fieldCheck.rows.length) {
-          // eslint-disable-next-line no-await-in-loop
           await client.query(
             `INSERT INTO journal_form_fields
               (form_id, label, field_type, required, options, helper_text)
@@ -229,7 +225,6 @@ async function ensureDefaultForm() {
             [formId, ...params]
           );
         } else {
-          // eslint-disable-next-line no-await-in-loop
           await client.query(
             `UPDATE journal_form_fields
                 SET label = $2,

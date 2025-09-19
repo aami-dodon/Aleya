@@ -6,9 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "development-secret";
 
 module.exports = async function authenticate(req, res, next) {
   const authHeader = req.headers.authorization || "";
-  const token = authHeader.startsWith("Bearer ")
-    ? authHeader.slice(7).trim()
-    : null;
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
 
   if (!token) {
     return res.status(401).json({ error: "Authentication required" });

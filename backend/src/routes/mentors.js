@@ -139,7 +139,7 @@ router.post(
         `INSERT INTO mentor_requests (journaler_id, mentor_id, message)
          VALUES ($1, $2, $3)
          ON CONFLICT (journaler_id, mentor_id)
-         DO UPDATE SET status = 'pending', message = EXCLUDED.message, updated_at = NOW()` ,
+         DO UPDATE SET status = 'pending', message = EXCLUDED.message, updated_at = NOW()`,
         [req.user.id, mentorId, message || null]
       );
 
@@ -224,31 +224,27 @@ router.post(
   }
 );
 
-router.post(
-  "/requests/:id/decline",
-  authenticate,
-  async (req, res, next) => {
-    const { role, id } = req.user;
+router.post("/requests/:id/decline", authenticate, async (req, res, next) => {
+  const { role, id } = req.user;
 
-    try {
-      const result = await pool.query(
-        `UPDATE mentor_requests
+  try {
+    const result = await pool.query(
+      `UPDATE mentor_requests
          SET status = 'declined', updated_at = NOW()
          WHERE id = $1 AND ((mentor_id = $2 AND $3 = 'mentor') OR (journaler_id = $2 AND $3 = 'journaler'))
          RETURNING id`,
-        [req.params.id, id, role]
-      );
+      [req.params.id, id, role]
+    );
 
-      if (!result.rowCount) {
-        return res.status(404).json({ error: "Request not found" });
-      }
-
-      return res.json({ success: true });
-    } catch (error) {
-      return next(error);
+    if (!result.rowCount) {
+      return res.status(404).json({ error: "Request not found" });
     }
+
+    return res.json({ success: true });
+  } catch (error) {
+    return next(error);
   }
-);
+});
 
 router.delete(
   "/links/:mentorId",
@@ -268,10 +264,9 @@ router.delete(
     }
 
     try {
-      const { rows } = await pool.query(
-        `SELECT password_hash FROM users WHERE id = $1`,
-        [req.user.id]
-      );
+      const { rows } = await pool.query(`SELECT password_hash FROM users WHERE id = $1`, [
+        req.user.id,
+      ]);
 
       if (!rows.length) {
         return res.status(401).json({ error: "User not found" });
@@ -332,14 +327,10 @@ router.delete(
   }
 );
 
-router.get(
-  "/mentees",
-  authenticate,
-  requireRole("mentor"),
-  async (req, res, next) => {
-    try {
-      const { rows } = await pool.query(
-        `SELECT ml.id, ml.established_at,
+router.get("/mentees", authenticate, requireRole("mentor"), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT ml.id, ml.established_at,
                 j.id AS journaler_id, j.name AS journaler_name, j.email AS journaler_email,
                 je.id AS latest_entry_id, je.entry_date AS latest_entry_date,
                 je.mood AS latest_mood, je.summary AS latest_summary, je.shared_level
@@ -354,31 +345,30 @@ router.get(
          ) je ON TRUE
          WHERE ml.mentor_id = $1
          ORDER BY j.name`,
-        [req.user.id]
-      );
+      [req.user.id]
+    );
 
-      const mentees = rows.map((row) => ({
-        id: row.journaler_id,
-        name: row.journaler_name,
-        email: row.journaler_email,
-        establishedAt: row.established_at,
-        latestEntry: row.latest_entry_id
-          ? {
-              id: row.latest_entry_id,
-              entryDate: row.latest_entry_date,
-              mood: row.latest_mood,
-              summary: row.latest_summary,
-              sharedLevel: row.shared_level,
-            }
-          : null,
-      }));
+    const mentees = rows.map((row) => ({
+      id: row.journaler_id,
+      name: row.journaler_name,
+      email: row.journaler_email,
+      establishedAt: row.established_at,
+      latestEntry: row.latest_entry_id
+        ? {
+            id: row.latest_entry_id,
+            entryDate: row.latest_entry_date,
+            mood: row.latest_mood,
+            summary: row.latest_summary,
+            sharedLevel: row.shared_level,
+          }
+        : null,
+    }));
 
-      return res.json({ mentees });
-    } catch (error) {
-      return next(error);
-    }
+    return res.json({ mentees });
+  } catch (error) {
+    return next(error);
   }
-);
+});
 
 router.get(
   "/support-network",
@@ -419,7 +409,7 @@ router.post(
     }
 
     const mentorId = Number(req.body.mentorId);
-    const message = req.body.message.trim();
+    const _message = req.body.message.trim();
 
     try {
       const { rows } = await pool.query(
@@ -434,7 +424,7 @@ router.post(
         return res.status(404).json({ error: "Mentor link not found" });
       }
 
-      const targetMentor = rows[0];
+      const _targetMentor = rows[0];
       return res.status(201).json({
         success: true,
         notification: null,

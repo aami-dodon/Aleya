@@ -1,38 +1,36 @@
-# Node modules
+# Node dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+backend/node_modules/
+frontend/node_modules/
 
 # Environment files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-!/backend/.env
+*.env
+backend/.env
+frontend/.env
 
 # Logs
-logs
 *.log
-pids
-*.pid
-*.seed
-*.pid.lock
+logs/
 
-# Build output
+# Build artifacts
+backend/coverage/
+frontend/build/
 dist/
 build/
+
+# Editor & OS files
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Test caches
+.nyc_output/
 coverage/
 
-# Mac system files
-.DS_Store
+# Docker
+*.pid
 
-# Editor folders
-.vscode/
-.idea/
-*.swp
-
-# Postgres data (if you ever mount locally)
-pgdata/
-backend/.env
+# Misc
+.tmp/

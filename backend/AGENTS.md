@@ -1,5 +1,6 @@
 # Backend Agent Notes
 
+- The backend source now lives in `src/` with Jest specs in `tests/`. Run `npm run format:check`, `npm run lint`, and `npm test` before committing so CI stays green.
 - When changing backend routes or utilities, run `node --check <file>` on the touched modules to catch syntax issues early.
 - Keep mentor panic alert flows consistent with mentor escalation requirements and ensure new middleware is added as individual arguments instead of wrapped arrays when Express parsing causes issues.
 - Document all backend changes in `docs/Wiki.md` so future contributors understand the context behind updates.

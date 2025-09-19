@@ -7,9 +7,7 @@ function getMailTransporter(app) {
   }
 
   if (!app.locals.mailTransporter) {
-    app.locals.mailTransporter = nodemailer.createTransport(
-      app.locals.mailSettings
-    );
+    app.locals.mailTransporter = nodemailer.createTransport(app.locals.mailSettings);
   }
 
   return app.locals.mailTransporter;

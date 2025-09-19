@@ -72,21 +72,18 @@ function buildWellbeingTrend(
     .map((matcher) => matcher?.toString().toLowerCase())
     .filter(Boolean);
 
-  const normalizedValueMap = Object.entries(valueMap).reduce(
-    (acc, [key, config]) => {
-      if (!key) {
-        return acc;
-      }
-
-      const normalizedKey = key.toString().toLowerCase();
-      acc[normalizedKey] = {
-        score: Number(config?.score) || null,
-        label: config?.label || key,
-      };
+  const normalizedValueMap = Object.entries(valueMap).reduce((acc, [key, config]) => {
+    if (!key) {
       return acc;
-    },
-    {}
-  );
+    }
+
+    const normalizedKey = key.toString().toLowerCase();
+    acc[normalizedKey] = {
+      score: Number(config?.score) || null,
+      label: config?.label || key,
+    };
+    return acc;
+  }, {});
 
   const recent = [...entries]
     .sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date))
@@ -98,9 +95,7 @@ function buildWellbeingTrend(
         return null;
       }
 
-      const responses = Array.isArray(entry.responses)
-        ? entry.responses
-        : [];
+      const responses = Array.isArray(entry.responses) ? entry.responses : [];
 
       const match = responses.find((response) => {
         const label = response?.label?.toString().toLowerCase();
@@ -115,9 +110,7 @@ function buildWellbeingTrend(
         return null;
       }
 
-      const value = Array.isArray(match.value)
-        ? match.value[0]
-        : match.value;
+      const value = Array.isArray(match.value) ? match.value[0] : match.value;
 
       if (value === null || value === undefined) {
         return null;

@@ -46,7 +46,8 @@ function describeMood(score) {
   if (score >= 4.5) {
     return {
       tone: "flourishing",
-      message: "You're thriving emotionally. Celebrate and keep nourishing your routines.",
+      message:
+        "You're thriving emotionally. Celebrate and keep nourishing your routines.",
     };
   }
 
@@ -66,7 +67,8 @@ function describeMood(score) {
 
   return {
     tone: "tender",
-    message: "This season feels heavy. Consider reaching out to your mentor or a trusted friend.",
+    message:
+      "This season feels heavy. Consider reaching out to your mentor or a trusted friend.",
   };
 }
 
