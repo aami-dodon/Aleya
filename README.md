@@ -8,6 +8,12 @@ quality checks, and documents how to grow the grove together.
 ### Landing Page
 ![Landing Page](docs/Web-Aleya.png)
 
+
+## Mobile Layout Screenshots
+
+![Screen 1](docs/Mobile-1.png)  
+![Screen 2](docs/Mobile-2.png)  
+
 ## Table of contents
 
 1. [Architecture](#architecture)
