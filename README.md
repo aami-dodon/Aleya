@@ -5,6 +5,9 @@ mentor support. The repository hosts an Express + PostgreSQL API (`backend/`) an
 React client (`frontend/`). This refresh tidies the repository layout, adds automated
 quality checks, and documents how to grow the grove together.
 
+### Landing Page
+![Landing Page](docs/Web-Aleya.png)
+
 ## Table of contents
 
 1. [Architecture](#architecture)
