@@ -10,9 +10,10 @@ quality checks, and documents how to grow the grove together.
 
 
 ## Mobile Layout Screenshots
-
-![Screen 1](docs/Mobile-1.png)  
-![Screen 2](docs/Mobile-2.png)  
+<p align="center">
+  <img src="docs/Mobile-1.png" alt="Mobile 1" width="250"/>
+  <img src="docs/Mobile-2.png" alt="Mobile 2" width="250"/>
+</p>
 
 ## Table of contents
 
