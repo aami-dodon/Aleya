@@ -3,6 +3,9 @@
 - Reorganized the backend into `src/` and `tests/`, moved the SQL schema into `backend/docs/`, and added Jest + Prettier + ESLint tooling with CI coverage for format, lint, and unit tests.
 - Added repository hygiene files (`.gitignore`, `LICENSE`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`) and refreshed the README with setup, quality gate, and documentation guidance.
 - Created a backend utility test suite (`tests/utils/mood.test.js`) and documented the new workflow in `backend/AGENTS.md`.
+- Reimagined the authenticated mobile header so the sticky bar keeps a slender profile while the navigation opens as a floating
+  tray beneath it, keeping the main content visible. Captured the overlay guidance in `frontend/AGENTS.md` for future frontend
+  updates.
 
 # 2025-10-13
 
