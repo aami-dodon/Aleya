@@ -1,3 +1,8 @@
+# 2025-10-15
+
+- Added a root `backend/index.js` shim so Docker and nodemon resolve the backend entrypoint consistently now that the actual
+  server lives in `src/index.js`, and documented the expectation in `backend/AGENTS.md` for future updates.
+
 # 2025-10-14
 
 - Reorganized the backend into `src/` and `tests/`, moved the SQL schema into `backend/docs/`, and added Jest + Prettier + ESLint tooling with CI coverage for format, lint, and unit tests.

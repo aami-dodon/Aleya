@@ -12,6 +12,8 @@
   same helpers—when changing time windows, honour the `MENTOR_DIGEST_WINDOW_HOURS` env and keep the job script
   (`jobs/sendMentorDigest.js`) aligned.
 - Double-check route definitions end with their closing `);` pair so `node --check` passes before pushing changes.
+- Docker-compose now binds nodemon to the repository root `index.js` shim. When adjusting the entrypoint, keep that shim requiring
+  `src/index.js` so local development and containers stay aligned.
 - When touching the admin form management endpoints, keep the default template protections intact so system templates are never
   deleted by mistake.
 - Admin mentor management now includes routes for linking/unlinking journalers and deleting mentors; ensure mentor/journaler
