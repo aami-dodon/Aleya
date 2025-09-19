@@ -20,9 +20,7 @@ function parseBoolean(value, fallback) {
     return false;
   }
 
-  throw new Error(
-    "SMTP_SECURE must be one of: true, false, 1, 0, yes, no"
-  );
+  throw new Error("SMTP_SECURE must be one of: true, false, 1, 0, yes, no");
 }
 
 function extractEmailAddress(value) {
@@ -40,9 +38,7 @@ function validateMailSettings(env = process.env) {
   });
 
   if (missing.length) {
-    throw new Error(
-      `Missing SMTP configuration values: ${missing.join(", ")}`
-    );
+    throw new Error(`Missing SMTP configuration values: ${missing.join(", ")}`);
   }
 
   const port = Number(env.SMTP_PORT);

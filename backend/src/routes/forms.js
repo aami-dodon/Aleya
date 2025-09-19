@@ -8,9 +8,7 @@ const router = express.Router();
 
 const fieldValidators = [
   body("title").trim().notEmpty().withMessage("Title is required"),
-  body("fields")
-    .isArray({ min: 1 })
-    .withMessage("At least one field is required"),
+  body("fields").isArray({ min: 1 }).withMessage("At least one field is required"),
 ];
 
 function parseJsonColumn(value, fallback) {
@@ -216,10 +214,9 @@ router.post(
           continue;
         }
 
-        // eslint-disable-next-line no-await-in-loop
         await client.query(
           `INSERT INTO journal_form_fields (form_id, label, field_type, required, options, helper_text)
-           VALUES ($1, $2, $3, $4, $5, $6)` ,
+           VALUES ($1, $2, $3, $4, $5, $6)`,
           [
             formId,
             field.label,
@@ -296,7 +293,7 @@ router.post(
         `INSERT INTO mentor_form_assignments (mentor_id, journaler_id, form_id)
          VALUES ($1, $2, $3)
          ON CONFLICT (journaler_id, form_id)
-         DO UPDATE SET mentor_id = EXCLUDED.mentor_id, assigned_at = NOW()` ,
+         DO UPDATE SET mentor_id = EXCLUDED.mentor_id, assigned_at = NOW()`,
         [req.user.id, journalerId, formId]
       );
 
@@ -346,9 +343,7 @@ router.delete(
       }
 
       if (rows[0].is_default) {
-        return res
-          .status(400)
-          .json({ error: "The default form cannot be unlinked" });
+        return res.status(400).json({ error: "The default form cannot be unlinked" });
       }
 
       const result = await pool.query(
@@ -359,9 +354,7 @@ router.delete(
       );
 
       if (!result.rows.length) {
-        return res
-          .status(404)
-          .json({ error: "Form assignment not found" });
+        return res.status(404).json({ error: "Form assignment not found" });
       }
 
       return res.json({ success: true });

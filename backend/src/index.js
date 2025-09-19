@@ -70,9 +70,7 @@ app.use((err, req, res, next) => {
     return next(err);
   }
 
-  res
-    .status(err.status || 500)
-    .json({ error: err.message || "Internal server error" });
+  res.status(err.status || 500).json({ error: err.message || "Internal server error" });
 });
 
 const PORT = process.env.PORT || 5000;
@@ -80,11 +78,7 @@ const PORT = process.env.PORT || 5000;
 initializePlatform()
   .then(() => {
     app.listen(PORT, () => {
-      logger.info(
-        "Aleya API listening on port %s (logs: %s)",
-        PORT,
-        resolvedLogFile
-      );
+      logger.info("Aleya API listening on port %s (logs: %s)", PORT, resolvedLogFile);
     });
   })
   .catch((error) => {

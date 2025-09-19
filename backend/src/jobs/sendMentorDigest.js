@@ -3,9 +3,7 @@ require("dotenv").config();
 const pool = require("../db");
 const { validateMailSettings } = require("../utils/email");
 const { logger, serializeError } = require("../utils/logger");
-const {
-  dispatchMentorDigests,
-} = require("../services/mentorNotifications");
+const { dispatchMentorDigests } = require("../services/mentorNotifications");
 
 const RANGE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   month: "short",

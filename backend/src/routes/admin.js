@@ -7,62 +7,53 @@ const router = express.Router();
 
 const SHARING_LEVELS = ["private", "mood", "summary", "full"];
 
-router.get(
-  "/overview",
-  authenticate,
-  requireRole("admin"),
-  async (req, res, next) => {
-    try {
-      const { rows: userCounts } = await pool.query(
-        `SELECT
+router.get("/overview", authenticate, requireRole("admin"), async (req, res, next) => {
+  try {
+    const { rows: userCounts } = await pool.query(
+      `SELECT
            COUNT(*) FILTER (WHERE role = 'journaler') AS journalers,
            COUNT(*) FILTER (WHERE role = 'mentor') AS mentors,
            COUNT(*) FILTER (WHERE role = 'admin') AS admins
          FROM users`
-      );
+    );
 
-      const { rows: formCounts } = await pool.query(
-        `SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE is_default) AS defaults
+    const { rows: formCounts } = await pool.query(
+      `SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE is_default) AS defaults
          FROM journal_forms`
-      );
+    );
 
-      const { rows: entryCounts } = await pool.query(
-        `SELECT COUNT(*) AS total
+    const { rows: entryCounts } = await pool.query(
+      `SELECT COUNT(*) AS total
          FROM journal_entries`
-      );
+    );
 
-      const { rows: linkCounts } = await pool.query(
-        `SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE established_at >= NOW() - INTERVAL '30 days') AS recent
+    const { rows: linkCounts } = await pool.query(
+      `SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE established_at >= NOW() - INTERVAL '30 days') AS recent
          FROM mentor_links`
-      );
+    );
 
-      const { rows: pendingRequests } = await pool.query(
-        `SELECT COUNT(*) AS pending
+    const { rows: pendingRequests } = await pool.query(
+      `SELECT COUNT(*) AS pending
          FROM mentor_requests
          WHERE status = 'pending'`
-      );
+    );
 
-      return res.json({
-        users: userCounts[0] || {},
-        forms: formCounts[0] || {},
-        entries: entryCounts[0] || {},
-        mentorLinks: linkCounts[0] || {},
-        pendingRequests: Number(pendingRequests[0]?.pending || 0),
-      });
-    } catch (error) {
-      return next(error);
-    }
+    return res.json({
+      users: userCounts[0] || {},
+      forms: formCounts[0] || {},
+      entries: entryCounts[0] || {},
+      mentorLinks: linkCounts[0] || {},
+      pendingRequests: Number(pendingRequests[0]?.pending || 0),
+    });
+  } catch (error) {
+    return next(error);
   }
-);
+});
 
-router.get(
-  "/forms",
-  authenticate,
-  requireRole("admin"),
-  async (req, res, next) => {
-    try {
-      const { rows } = await pool.query(
-        `SELECT f.id, f.title, f.description, f.visibility, f.is_default, f.created_at,
+router.get("/forms", authenticate, requireRole("admin"), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT f.id, f.title, f.description, f.visibility, f.is_default, f.created_at,
                 u.name AS created_by_name,
                 COUNT(mfa.*) AS assignments
          FROM journal_forms f
@@ -70,14 +61,13 @@ router.get(
          LEFT JOIN mentor_form_assignments mfa ON mfa.form_id = f.id
          GROUP BY f.id, u.name
          ORDER BY f.is_default DESC, f.created_at DESC`
-      );
+    );
 
-      return res.json({ forms: rows });
-    } catch (error) {
-      return next(error);
-    }
+    return res.json({ forms: rows });
+  } catch (error) {
+    return next(error);
   }
-);
+});
 
 router.patch(
   "/forms/:id",
@@ -184,14 +174,10 @@ router.delete(
   }
 );
 
-router.get(
-  "/mentors",
-  authenticate,
-  requireRole("admin"),
-  async (req, res, next) => {
-    try {
-      const { rows } = await pool.query(
-        `SELECT u.id, u.name, u.email,
+router.get("/mentors", authenticate, requireRole("admin"), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT u.id, u.name, u.email,
                 mp.expertise, mp.availability, mp.bio,
                 COALESCE(
                   JSON_AGG(
@@ -211,37 +197,31 @@ router.get(
          WHERE u.role = 'mentor'
          GROUP BY u.id, mp.expertise, mp.availability, mp.bio
          ORDER BY u.name`
-      );
+    );
 
-      return res.json({ mentors: rows });
-    } catch (error) {
-      return next(error);
-    }
+    return res.json({ mentors: rows });
+  } catch (error) {
+    return next(error);
   }
-);
+});
 
-router.get(
-  "/journalers",
-  authenticate,
-  requireRole("admin"),
-  async (req, res, next) => {
-    const search = (req.query.q || "").trim().toLowerCase();
-    const limit = Math.min(Number.parseInt(req.query.limit, 10) || 25, 100);
+router.get("/journalers", authenticate, requireRole("admin"), async (req, res, next) => {
+  const search = (req.query.q || "").trim().toLowerCase();
+  const limit = Math.min(Number.parseInt(req.query.limit, 10) || 25, 100);
 
-    try {
-      const params = [];
-      let whereClause = "WHERE j.role = 'journaler'";
+  try {
+    const params = [];
+    let whereClause = "WHERE j.role = 'journaler'";
 
-      if (search) {
-        params.push(`%${search}%`);
-        whereClause +=
-          ` AND (LOWER(j.name) LIKE $${params.length} OR LOWER(j.email) LIKE $${params.length})`;
-      }
+    if (search) {
+      params.push(`%${search}%`);
+      whereClause += ` AND (LOWER(j.name) LIKE $${params.length} OR LOWER(j.email) LIKE $${params.length})`;
+    }
 
-      params.push(limit);
+    params.push(limit);
 
-      const { rows } = await pool.query(
-        `SELECT
+    const { rows } = await pool.query(
+      `SELECT
             j.id,
             j.name,
             j.email,
@@ -263,15 +243,14 @@ router.get(
          GROUP BY j.id
          ORDER BY j.name
          LIMIT $${params.length}`,
-        params
-      );
+      params
+    );
 
-      return res.json({ journalers: rows });
-    } catch (error) {
-      return next(error);
-    }
+    return res.json({ journalers: rows });
+  } catch (error) {
+    return next(error);
   }
-);
+});
 
 router.post(
   "/mentor-links",
@@ -307,9 +286,7 @@ router.post(
     }
 
     if (!journalerId && !journalerEmail) {
-      return res
-        .status(400)
-        .json({ error: "journalerId or journalerEmail is required" });
+      return res.status(400).json({ error: "journalerId or journalerEmail is required" });
     }
 
     const client = await pool.connect();
@@ -373,9 +350,7 @@ router.post(
 
       if (existingLink.rows.length) {
         await client.query("ROLLBACK");
-        return res
-          .status(400)
-          .json({ error: "Mentor and journaler are already linked" });
+        return res.status(400).json({ error: "Mentor and journaler are already linked" });
       }
 
       await client.query(
@@ -393,12 +368,10 @@ router.post(
 
       await client.query("COMMIT");
 
-      return res
-        .status(201)
-        .json({
-          success: true,
-          link: { mentorId, journalerId: journalerRow.id },
-        });
+      return res.status(201).json({
+        success: true,
+        link: { mentorId, journalerId: journalerRow.id },
+      });
     } catch (error) {
       await client.query("ROLLBACK");
       return next(error);
@@ -508,101 +481,92 @@ router.delete(
   }
 );
 
-router.get(
-  "/journals",
-  authenticate,
-  requireRole("admin"),
-  async (req, res, next) => {
-    const search = (req.query.q || "").trim().toLowerCase();
-    const sharedLevelFilter = (req.query.sharedLevel || "").trim().toLowerCase();
-    const moodFilter = (req.query.mood || "").trim().toLowerCase();
-    const journalerIdParam = req.query.journalerId;
-    const mentorIdParam = req.query.mentorId;
-    const formIdParam = req.query.formId;
-    const limit = Math.min(Number.parseInt(req.query.limit, 10) || 50, 200);
+router.get("/journals", authenticate, requireRole("admin"), async (req, res, next) => {
+  const search = (req.query.q || "").trim().toLowerCase();
+  const sharedLevelFilter = (req.query.sharedLevel || "").trim().toLowerCase();
+  const moodFilter = (req.query.mood || "").trim().toLowerCase();
+  const journalerIdParam = req.query.journalerId;
+  const mentorIdParam = req.query.mentorId;
+  const formIdParam = req.query.formId;
+  const limit = Math.min(Number.parseInt(req.query.limit, 10) || 50, 200);
 
-    const journalerId =
-      journalerIdParam !== undefined
-        ? Number.parseInt(journalerIdParam, 10)
-        : null;
-    const mentorId =
-      mentorIdParam !== undefined ? Number.parseInt(mentorIdParam, 10) : null;
-    const formId =
-      formIdParam !== undefined ? Number.parseInt(formIdParam, 10) : null;
+  const journalerId =
+    journalerIdParam !== undefined ? Number.parseInt(journalerIdParam, 10) : null;
+  const mentorId =
+    mentorIdParam !== undefined ? Number.parseInt(mentorIdParam, 10) : null;
+  const formId = formIdParam !== undefined ? Number.parseInt(formIdParam, 10) : null;
 
-    if (journalerIdParam !== undefined && (!Number.isInteger(journalerId) || journalerId <= 0)) {
-      return res.status(400).json({ error: "Invalid journalerId" });
-    }
+  if (
+    journalerIdParam !== undefined &&
+    (!Number.isInteger(journalerId) || journalerId <= 0)
+  ) {
+    return res.status(400).json({ error: "Invalid journalerId" });
+  }
 
-    if (mentorIdParam !== undefined && (!Number.isInteger(mentorId) || mentorId <= 0)) {
-      return res.status(400).json({ error: "Invalid mentorId" });
-    }
+  if (mentorIdParam !== undefined && (!Number.isInteger(mentorId) || mentorId <= 0)) {
+    return res.status(400).json({ error: "Invalid mentorId" });
+  }
 
-    if (formIdParam !== undefined && (!Number.isInteger(formId) || formId <= 0)) {
-      return res.status(400).json({ error: "Invalid formId" });
-    }
+  if (formIdParam !== undefined && (!Number.isInteger(formId) || formId <= 0)) {
+    return res.status(400).json({ error: "Invalid formId" });
+  }
 
-    if (
-      sharedLevelFilter &&
-      !SHARING_LEVELS.includes(sharedLevelFilter.toLowerCase())
-    ) {
-      return res.status(400).json({ error: "Invalid shared level" });
-    }
+  if (sharedLevelFilter && !SHARING_LEVELS.includes(sharedLevelFilter.toLowerCase())) {
+    return res.status(400).json({ error: "Invalid shared level" });
+  }
 
-    const conditions = [];
-    const params = [];
+  const conditions = [];
+  const params = [];
 
-    if (sharedLevelFilter) {
-      params.push(sharedLevelFilter);
-      conditions.push(`je.shared_level = $${params.length}`);
-    }
+  if (sharedLevelFilter) {
+    params.push(sharedLevelFilter);
+    conditions.push(`je.shared_level = $${params.length}`);
+  }
 
-    if (moodFilter) {
-      params.push(moodFilter);
-      conditions.push(`LOWER(COALESCE(je.mood, '')) = $${params.length}`);
-    }
+  if (moodFilter) {
+    params.push(moodFilter);
+    conditions.push(`LOWER(COALESCE(je.mood, '')) = $${params.length}`);
+  }
 
-    if (journalerId) {
-      params.push(journalerId);
-      conditions.push(`je.journaler_id = $${params.length}`);
-    }
+  if (journalerId) {
+    params.push(journalerId);
+    conditions.push(`je.journaler_id = $${params.length}`);
+  }
 
-    if (formId) {
-      params.push(formId);
-      conditions.push(`je.form_id = $${params.length}`);
-    }
+  if (formId) {
+    params.push(formId);
+    conditions.push(`je.form_id = $${params.length}`);
+  }
 
-    if (mentorId) {
-      params.push(mentorId);
-      conditions.push(
-        `EXISTS (
+  if (mentorId) {
+    params.push(mentorId);
+    conditions.push(
+      `EXISTS (
            SELECT 1 FROM mentor_links ml
            WHERE ml.journaler_id = je.journaler_id AND ml.mentor_id = $${params.length}
          )`
-      );
-    }
+    );
+  }
 
-    if (search) {
-      params.push(`%${search}%`);
-      const index = params.length;
-      conditions.push(
-        `(
+  if (search) {
+    params.push(`%${search}%`);
+    const index = params.length;
+    conditions.push(
+      `(
            LOWER(journaler.name) LIKE $${index}
            OR LOWER(journaler.email) LIKE $${index}
            OR LOWER(COALESCE(form.title, '')) LIKE $${index}
            OR LOWER(COALESCE(je.summary, '')) LIKE $${index}
          )`
-      );
-    }
+    );
+  }
 
-    params.push(limit);
-    const whereClause = conditions.length
-      ? `WHERE ${conditions.join(" AND ")}`
-      : "";
+  params.push(limit);
+  const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
-    try {
-      const { rows } = await pool.query(
-        `SELECT
+  try {
+    const { rows } = await pool.query(
+      `SELECT
            je.id,
            je.journaler_id,
            je.form_id,
@@ -639,33 +603,30 @@ router.get(
            form.title
          ORDER BY je.created_at DESC
          LIMIT $${params.length}`,
-        params
-      );
+      params
+    );
 
-      const entries = rows.map((row) => ({
-        id: row.id,
-        entryDate: row.entry_date,
-        createdAt: row.created_at,
-        mood: row.mood,
-        sharedLevel: row.shared_level,
-        summary: row.summary,
-        journaler: {
-          id: row.journaler_id,
-          name: row.journaler_name,
-          email: row.journaler_email,
-        },
-        form: row.form_id
-          ? { id: row.form_id, title: row.form_title }
-          : null,
-        mentors: Array.isArray(row.mentors) ? row.mentors : [],
-      }));
+    const entries = rows.map((row) => ({
+      id: row.id,
+      entryDate: row.entry_date,
+      createdAt: row.created_at,
+      mood: row.mood,
+      sharedLevel: row.shared_level,
+      summary: row.summary,
+      journaler: {
+        id: row.journaler_id,
+        name: row.journaler_name,
+        email: row.journaler_email,
+      },
+      form: row.form_id ? { id: row.form_id, title: row.form_title } : null,
+      mentors: Array.isArray(row.mentors) ? row.mentors : [],
+    }));
 
-      return res.json({ entries });
-    } catch (error) {
-      return next(error);
-    }
+    return res.json({ entries });
+  } catch (error) {
+    return next(error);
   }
-);
+});
 
 router.delete(
   "/journals/:id",
@@ -679,10 +640,9 @@ router.delete(
     }
 
     try {
-      const result = await pool.query(
-        `DELETE FROM journal_entries WHERE id = $1`,
-        [entryId]
-      );
+      const result = await pool.query(`DELETE FROM journal_entries WHERE id = $1`, [
+        entryId,
+      ]);
 
       if (!result.rowCount) {
         return res.status(404).json({ error: "Journal entry not found" });

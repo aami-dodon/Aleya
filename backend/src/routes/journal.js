@@ -6,9 +6,7 @@ const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 const { normalizeMood } = require("../utils/mood");
 const { shapeEntryForMentor } = require("../utils/entries");
-const {
-  dispatchEntryNotifications,
-} = require("../services/mentorNotifications");
+const { dispatchEntryNotifications } = require("../services/mentorNotifications");
 const router = express.Router();
 
 const SHARING_LEVELS = ["private", "mood", "summary", "full"];
@@ -67,9 +65,7 @@ function summarizeResponses(cleaned) {
   }
 
   let summaryParts = [];
-  const moodField = cleaned.find((entry) =>
-    entry.label.toLowerCase().includes("mood")
-  );
+  const moodField = cleaned.find((entry) => entry.label.toLowerCase().includes("mood"));
   const causeField = cleaned.find((entry) =>
     entry.label.toLowerCase().startsWith("what caused")
   );
@@ -181,7 +177,7 @@ router.post(
       const { rows } = await pool.query(
         `INSERT INTO journal_entries (journaler_id, form_id, responses, mood, shared_level, summary)
          VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING id, journaler_id, form_id, entry_date, created_at, mood, shared_level, summary` ,
+         RETURNING id, journaler_id, form_id, entry_date, created_at, mood, shared_level, summary`,
         [
           req.user.id,
           formId,
@@ -273,13 +269,7 @@ router.patch(
          SET responses = $1, mood = $2, shared_level = $3, summary = $4
          WHERE id = $5
          RETURNING id, journaler_id, form_id, entry_date, created_at, mood, shared_level, summary`,
-        [
-          JSON.stringify(cleaned),
-          mood,
-          visibility,
-          summary,
-          entryId,
-        ]
+        [JSON.stringify(cleaned), mood, visibility, summary, entryId]
       );
 
       const entry = formatEntry({
@@ -298,32 +288,27 @@ router.patch(
   }
 );
 
-router.delete(
-  "/:id",
-  authenticate,
-  requireRole("journaler"),
-  async (req, res, next) => {
-    const entryId = Number(req.params.id);
-    if (!Number.isInteger(entryId) || entryId <= 0) {
-      return res.status(400).json({ error: "Invalid entry id" });
-    }
-
-    try {
-      const result = await pool.query(
-        `DELETE FROM journal_entries WHERE id = $1 AND journaler_id = $2 RETURNING id`,
-        [entryId, req.user.id]
-      );
-
-      if (!result.rows.length) {
-        return res.status(404).json({ error: "Entry not found" });
-      }
-
-      return res.json({ success: true });
-    } catch (error) {
-      return next(error);
-    }
+router.delete("/:id", authenticate, requireRole("journaler"), async (req, res, next) => {
+  const entryId = Number(req.params.id);
+  if (!Number.isInteger(entryId) || entryId <= 0) {
+    return res.status(400).json({ error: "Invalid entry id" });
   }
-);
+
+  try {
+    const result = await pool.query(
+      `DELETE FROM journal_entries WHERE id = $1 AND journaler_id = $2 RETURNING id`,
+      [entryId, req.user.id]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({ error: "Entry not found" });
+    }
+
+    return res.json({ success: true });
+  } catch (error) {
+    return next(error);
+  }
+});
 
 router.get("/", authenticate, async (req, res, next) => {
   const limit = Math.min(Number(req.query.limit) || 30, 100);
@@ -346,9 +331,7 @@ router.get("/", authenticate, async (req, res, next) => {
     if (req.user.role === "mentor") {
       const journalerId = Number(req.query.journalerId);
       if (!journalerId) {
-        return res
-          .status(400)
-          .json({ error: "journalerId query parameter is required" });
+        return res.status(400).json({ error: "journalerId query parameter is required" });
       }
 
       const link = await pool.query(
@@ -370,9 +353,7 @@ router.get("/", authenticate, async (req, res, next) => {
         [journalerId, limit]
       );
 
-      const entries = rows.map((row) =>
-        shapeEntryForMentor(formatEntry(row))
-      );
+      const entries = rows.map((row) => shapeEntryForMentor(formatEntry(row)));
       return res.json({ entries });
     }
 
@@ -402,9 +383,7 @@ router.get("/export", authenticate, async (req, res, next) => {
     } else if (req.user.role === "mentor") {
       const journalerId = Number(req.query.journalerId);
       if (!journalerId) {
-        return res
-          .status(400)
-          .json({ error: "journalerId query parameter is required" });
+        return res.status(400).json({ error: "journalerId query parameter is required" });
       }
 
       const link = await pool.query(
@@ -450,10 +429,7 @@ router.get("/export", authenticate, async (req, res, next) => {
     const filename = `journal-entries-${targetJournalerId}-${timestamp}.json`;
 
     res.setHeader("Content-Type", "application/json");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${filename}"`
-    );
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
 
     return stream.pipe(res);
   } catch (error) {
@@ -505,65 +481,61 @@ router.get("/:id", authenticate, async (req, res, next) => {
   }
 });
 
-router.get(
-  "/:id/comments",
-  authenticate,
-  async (req, res, next) => {
-    const entryId = Number(req.params.id);
+router.get("/:id/comments", authenticate, async (req, res, next) => {
+  const entryId = Number(req.params.id);
 
-    if (!Number.isInteger(entryId) || entryId <= 0) {
-      return res.status(400).json({ error: "Invalid entry id" });
+  if (!Number.isInteger(entryId) || entryId <= 0) {
+    return res.status(400).json({ error: "Invalid entry id" });
+  }
+
+  try {
+    const { rows: entryRows } = await pool.query(
+      `SELECT journaler_id, shared_level FROM journal_entries WHERE id = $1`,
+      [entryId]
+    );
+
+    if (!entryRows.length) {
+      return res.status(404).json({ error: "Entry not found" });
     }
 
-    try {
-      const { rows: entryRows } = await pool.query(
-        `SELECT journaler_id, shared_level FROM journal_entries WHERE id = $1`,
-        [entryId]
-      );
+    const entry = entryRows[0];
 
-      if (!entryRows.length) {
-        return res.status(404).json({ error: "Entry not found" });
-      }
-
-      const entry = entryRows[0];
-
-      if (req.user.role === "journaler") {
-        if (entry.journaler_id !== req.user.id) {
-          return res.status(403).json({ error: "Access denied" });
-        }
-      } else if (req.user.role === "mentor") {
-        if (entry.shared_level === "private") {
-          return res.status(403).json({ error: "Entry is private" });
-        }
-
-        const { rows: linkRows } = await pool.query(
-          `SELECT id FROM mentor_links WHERE mentor_id = $1 AND journaler_id = $2`,
-          [req.user.id, entry.journaler_id]
-        );
-
-        if (!linkRows.length) {
-          return res.status(403).json({ error: "No mentorship link established" });
-        }
-      } else {
+    if (req.user.role === "journaler") {
+      if (entry.journaler_id !== req.user.id) {
         return res.status(403).json({ error: "Access denied" });
       }
+    } else if (req.user.role === "mentor") {
+      if (entry.shared_level === "private") {
+        return res.status(403).json({ error: "Entry is private" });
+      }
 
-      const { rows } = await pool.query(
-        `SELECT c.id, c.comment, c.created_at,
+      const { rows: linkRows } = await pool.query(
+        `SELECT id FROM mentor_links WHERE mentor_id = $1 AND journaler_id = $2`,
+        [req.user.id, entry.journaler_id]
+      );
+
+      if (!linkRows.length) {
+        return res.status(403).json({ error: "No mentorship link established" });
+      }
+    } else {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const { rows } = await pool.query(
+      `SELECT c.id, c.comment, c.created_at,
                 m.id AS mentor_id, m.name AS mentor_name
          FROM entry_comments c
          JOIN users m ON m.id = c.mentor_id
          WHERE c.entry_id = $1
          ORDER BY c.created_at ASC`,
-        [entryId]
-      );
+      [entryId]
+    );
 
-      return res.json({ comments: rows });
-    } catch (error) {
-      return next(error);
-    }
+    return res.json({ comments: rows });
+  } catch (error) {
+    return next(error);
   }
-);
+});
 
 router.post(
   "/:id/comments",

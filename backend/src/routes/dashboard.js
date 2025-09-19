@@ -92,9 +92,7 @@ router.get(
         1,
         Math.ceil((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24))
       );
-      const consistency = Number(
-        ((entries.length / daysTracked) * 7).toFixed(2)
-      );
+      const consistency = Number(((entries.length / daysTracked) * 7).toFixed(2));
 
       const moodBreakdown = entries.reduce((acc, row) => {
         if (!row.mood) return acc;
@@ -123,114 +121,109 @@ router.get(
   }
 );
 
-router.get(
-  "/mentor",
-  authenticate,
-  requireRole("mentor"),
-  async (req, res, next) => {
-    try {
-      const { rows: menteeRows } = await pool.query(
-        `SELECT ml.journaler_id, j.name, j.email
+router.get("/mentor", authenticate, requireRole("mentor"), async (req, res, next) => {
+  try {
+    const { rows: menteeRows } = await pool.query(
+      `SELECT ml.journaler_id, j.name, j.email
          FROM mentor_links ml
          JOIN users j ON j.id = ml.journaler_id
          WHERE ml.mentor_id = $1
          ORDER BY j.name`,
-        [req.user.id]
-      );
+      [req.user.id]
+    );
 
-      const menteeIds = menteeRows.map((row) => row.journaler_id);
+    const menteeIds = menteeRows.map((row) => row.journaler_id);
 
-      let entryRows = [];
-      if (menteeIds.length) {
-        const { rows } = await pool.query(
-          `SELECT e.*, f.title AS form_title, j.name AS journaler_name
+    let entryRows = [];
+    if (menteeIds.length) {
+      const { rows } = await pool.query(
+        `SELECT e.*, f.title AS form_title, j.name AS journaler_name
            FROM journal_entries e
            JOIN journal_forms f ON f.id = e.form_id
            JOIN users j ON j.id = e.journaler_id
            WHERE e.journaler_id = ANY($1::int[]) AND e.shared_level <> 'private'
            ORDER BY e.entry_date DESC, e.created_at DESC`,
-          [menteeIds]
-        );
-        entryRows = rows;
-      }
-
-      const entriesByMentee = new Map();
-      entryRows.forEach((row) => {
-        if (!entriesByMentee.has(row.journaler_id)) {
-          entriesByMentee.set(row.journaler_id, []);
-        }
-        entriesByMentee.get(row.journaler_id).push(row);
-      });
-
-      const mentees = menteeRows.map((row) => {
-        const entries = entriesByMentee.get(row.journaler_id) || [];
-        const averageMood = calculateAverageMood(entries);
-        const recentEntries = entries.slice(0, 5).map((entry) => ({
-          id: entry.id,
-          entryDate: entry.entry_date,
-          mood: entry.mood,
-          summary: entry.summary,
-          sharedLevel: entry.shared_level,
-        }));
-
-        const lowMoodFlags = entries.filter((entry) => {
-          const score = getMoodScore(entry.mood);
-          return typeof score === "number" && score <= 2;
-        });
-
-        const crisisFlags = entries.filter((entry) =>
-          detectCrisisKeywords(parseResponses(entry.responses), entry.summary)
-        );
-
-        return {
-          id: row.journaler_id,
-          name: row.name,
-          email: row.email,
-          averageMood,
-          trend: buildMoodTrend(entries, 14),
-          recentEntries,
-          alerts: {
-            lowMood: lowMoodFlags.map((entry) => ({
-              id: entry.id,
-              entryDate: entry.entry_date,
-              mood: entry.mood,
-            })),
-            crisis: crisisFlags.map((entry) => ({
-              id: entry.id,
-              entryDate: entry.entry_date,
-              summary: entry.summary,
-            })),
-          },
-        };
-      });
-
-      const { rows: pendingRequests } = await pool.query(
-        `SELECT COUNT(*) FROM mentor_requests WHERE mentor_id = $1 AND status = 'pending'`,
-        [req.user.id]
+        [menteeIds]
       );
+      entryRows = rows;
+    }
 
-      const recentEntries = entryRows.slice(0, 8).map((entry) => ({
+    const entriesByMentee = new Map();
+    entryRows.forEach((row) => {
+      if (!entriesByMentee.has(row.journaler_id)) {
+        entriesByMentee.set(row.journaler_id, []);
+      }
+      entriesByMentee.get(row.journaler_id).push(row);
+    });
+
+    const mentees = menteeRows.map((row) => {
+      const entries = entriesByMentee.get(row.journaler_id) || [];
+      const averageMood = calculateAverageMood(entries);
+      const recentEntries = entries.slice(0, 5).map((entry) => ({
         id: entry.id,
-        journalerId: entry.journaler_id,
-        journalerName: entry.journaler_name,
         entryDate: entry.entry_date,
         mood: entry.mood,
         summary: entry.summary,
         sharedLevel: entry.shared_level,
       }));
 
-      return res.json({
-        overview: {
-          menteeCount: mentees.length,
-          pendingRequests: Number(pendingRequests[0]?.count || 0),
-        },
-        mentees,
-        recentEntries,
+      const lowMoodFlags = entries.filter((entry) => {
+        const score = getMoodScore(entry.mood);
+        return typeof score === "number" && score <= 2;
       });
-    } catch (error) {
-      return next(error);
-    }
+
+      const crisisFlags = entries.filter((entry) =>
+        detectCrisisKeywords(parseResponses(entry.responses), entry.summary)
+      );
+
+      return {
+        id: row.journaler_id,
+        name: row.name,
+        email: row.email,
+        averageMood,
+        trend: buildMoodTrend(entries, 14),
+        recentEntries,
+        alerts: {
+          lowMood: lowMoodFlags.map((entry) => ({
+            id: entry.id,
+            entryDate: entry.entry_date,
+            mood: entry.mood,
+          })),
+          crisis: crisisFlags.map((entry) => ({
+            id: entry.id,
+            entryDate: entry.entry_date,
+            summary: entry.summary,
+          })),
+        },
+      };
+    });
+
+    const { rows: pendingRequests } = await pool.query(
+      `SELECT COUNT(*) FROM mentor_requests WHERE mentor_id = $1 AND status = 'pending'`,
+      [req.user.id]
+    );
+
+    const recentEntries = entryRows.slice(0, 8).map((entry) => ({
+      id: entry.id,
+      journalerId: entry.journaler_id,
+      journalerName: entry.journaler_name,
+      entryDate: entry.entry_date,
+      mood: entry.mood,
+      summary: entry.summary,
+      sharedLevel: entry.shared_level,
+    }));
+
+    return res.json({
+      overview: {
+        menteeCount: mentees.length,
+        pendingRequests: Number(pendingRequests[0]?.count || 0),
+      },
+      mentees,
+      recentEntries,
+    });
+  } catch (error) {
+    return next(error);
   }
-);
+});
 
 module.exports = router;

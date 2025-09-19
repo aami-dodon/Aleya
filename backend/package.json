@@ -1,16 +1,20 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Aleya API server",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "mentor-digest": "node jobs/sendMentorDigest.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "mentor-digest": "node src/jobs/sendMentorDigest.js",
+    "lint": "eslint \"src/**/*.js\" \"tests/**/*.js\"",
+    "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.js\"",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -18,12 +22,18 @@
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
-    "nodemailer": "^6.9.14",
     "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.14",
     "pg": "^8.16.3",
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@eslint/js": "^9.13.0",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.11.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.3.3"
   }
 }

@@ -1,3 +1,9 @@
+# 2025-10-14
+
+- Reorganized the backend into `src/` and `tests/`, moved the SQL schema into `backend/docs/`, and added Jest + Prettier + ESLint tooling with CI coverage for format, lint, and unit tests.
+- Added repository hygiene files (`.gitignore`, `LICENSE`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`) and refreshed the README with setup, quality gate, and documentation guidance.
+- Created a backend utility test suite (`tests/utils/mood.test.js`) and documented the new workflow in `backend/AGENTS.md`.
+
 # 2025-10-13
 
 - Documented the frontend and backend package suites plus the platform's custom functionality highlights in `README.md` so new contributors can quickly see the tooling stack and advanced flows beyond static pages.

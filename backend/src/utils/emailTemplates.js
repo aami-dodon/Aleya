@@ -27,16 +27,9 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
-function renderEmailLayout({
-  title,
-  previewText,
-  contentHtml,
-  footerHtml,
-}) {
+function renderEmailLayout({ title, previewText, contentHtml, footerHtml }) {
   const safeTitle = escapeHtml(title || "Aleya");
-  const safePreviewText = escapeHtml(
-    previewText || "Rooted in care with Aleya."
-  );
+  const safePreviewText = escapeHtml(previewText || "Rooted in care with Aleya.");
   const resolvedFooter =
     footerHtml !== undefined
       ? String(footerHtml)
@@ -245,17 +238,13 @@ function buildEntryDetails({ sharedLevel, mood, summary, responses }) {
 
   if (sharedLevel !== "private" && mood) {
     const safeMood = escapeHtml(String(mood));
-    htmlParts.push(
-      `<p class="paragraph"><strong>Mood:</strong> ${safeMood}</p>`
-    );
+    htmlParts.push(`<p class="paragraph"><strong>Mood:</strong> ${safeMood}</p>`);
     textLines.push(`Mood: ${mood}`);
   }
 
   if ((sharedLevel === "summary" || sharedLevel === "full") && summary) {
     const safeSummary = escapeHtml(String(summary));
-    htmlParts.push(
-      `<p class="paragraph"><strong>Summary:</strong> ${safeSummary}</p>`
-    );
+    htmlParts.push(`<p class="paragraph"><strong>Summary:</strong> ${safeSummary}</p>`);
     textLines.push(`Summary: ${summary}`);
   }
 
@@ -268,9 +257,7 @@ function buildEntryDetails({ sharedLevel, mood, summary, responses }) {
       }));
 
     if (responseItems.length) {
-      htmlParts.push(
-        '<p class="paragraph"><strong>Reflection details</strong></p>'
-      );
+      htmlParts.push('<p class="paragraph"><strong>Reflection details</strong></p>');
       const listItems = responseItems
         .map(
           (item) =>
@@ -319,7 +306,7 @@ function createMentorEntryNotificationEmail({
   const whenHtml = whenLabel ? ` on ${escapeHtml(whenLabel)}` : "";
 
   const details = buildEntryDetails({
-    sharedLevel,
+    sharedLevel: shareLevel,
     mood,
     summary,
     responses,
@@ -375,12 +362,7 @@ function createMentorEntryNotificationEmail({
   };
 }
 
-function createMentorDigestEmail({
-  mentorName,
-  periodLabel,
-  entryCount,
-  mentees,
-}) {
+function createMentorDigestEmail({ mentorName, periodLabel, entryCount, mentees }) {
   const recipientName = normalizeName(mentorName, "there");
   const safeRecipient = escapeHtml(recipientName);
   const safePeriod = escapeHtml(periodLabel || "the recent period");
@@ -395,12 +377,9 @@ function createMentorDigestEmail({
 
       const entryBlocks = mentee.entries
         .map((entry) => {
-          const levelLabel =
-            SHARE_LEVEL_LABELS[entry.sharedLevel] || "Mood";
+          const levelLabel = SHARE_LEVEL_LABELS[entry.sharedLevel] || "Mood";
           const whenLabel = formatDateLabel(entry.entryDate || entry.createdAt);
-          const safeFormTitle = entry.formTitle
-            ? escapeHtml(entry.formTitle)
-            : null;
+          const safeFormTitle = entry.formTitle ? escapeHtml(entry.formTitle) : null;
 
           const details = buildEntryDetails(entry);
 
@@ -446,11 +425,9 @@ function createMentorDigestEmail({
 
   const sectionsHtml = menteeSections
     .map((section) => section.html)
-    .join("<hr style=\"border:none;border-top:1px solid #e2e8f0;margin:24px 0\"/>");
+    .join('<hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0"/>');
 
-  const sectionsText = menteeSections
-    .map((section) => section.text)
-    .join("\n\n---\n\n");
+  const sectionsText = menteeSections.map((section) => section.text).join("\n\n---\n\n");
 
   const contentHtml = `
     <p class="paragraph">Hi ${safeRecipient},</p>
@@ -500,11 +477,7 @@ function createMentorDigestEmail({
   };
 }
 
-function createVerificationEmail({
-  recipientName,
-  verificationUrl,
-  expiresText,
-}) {
+function createVerificationEmail({ recipientName, verificationUrl, expiresText }) {
   const normalizedName =
     typeof recipientName === "string" && recipientName.trim().length
       ? recipientName.trim()
@@ -535,12 +508,12 @@ function createVerificationEmail({
 
   const html = renderEmailLayout({
     title: "Verify your email address",
-    previewText:
-      "Confirm your email address to complete your Aleya registration.",
+    previewText: "Confirm your email address to complete your Aleya registration.",
     contentHtml,
   });
 
-  const text = `Hi ${normalizedName},\n\n` +
+  const text =
+    `Hi ${normalizedName},\n\n` +
     "Thanks for joining Aleya. Please confirm your email address by visiting the link below:\n" +
     `${verificationUrl}\n\n` +
     `This link expires in ${expiresText}. If you didn't create an account, you can safely ignore this email.\n\n` +

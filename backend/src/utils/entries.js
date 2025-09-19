@@ -62,9 +62,7 @@ function shapeEntryForMentor(entry, options = {}) {
 
   if (sharedLevel === "full") {
     shaped.summary = entry.summary || null;
-    shaped.responses = Array.isArray(entry.responses)
-      ? entry.responses
-      : [];
+    shaped.responses = Array.isArray(entry.responses) ? entry.responses : [];
     return shaped;
   }
 
