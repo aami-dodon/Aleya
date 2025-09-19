@@ -125,9 +125,9 @@ function Layout({ children }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-emerald-50 via-white to-emerald-100 text-emerald-950">
-      <header className="sticky top-0 z-30 border-b border-emerald-100 bg-white/80 backdrop-blur">
-        <div className="mx-auto w-full max-w-6xl px-6 py-4">
-          <div className="flex items-center gap-4">
+      <header className="sticky top-0 z-30 border-b border-emerald-100 bg-white/85 backdrop-blur">
+        <div className="relative mx-auto w-full max-w-6xl px-6 py-3">
+          <div className="flex w-full items-center gap-3">
             <button
               type="button"
               className={`rounded-full border border-transparent bg-transparent leading-none tracking-tight text-emerald-700 transition hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 ${largeHeadingClasses}`}
@@ -136,7 +136,7 @@ function Layout({ children }) {
               Aleya
             </button>
             <nav
-              className={`hidden flex-1 items-center justify-center gap-2 md:flex ${bodySmallStrongTextClasses} text-emerald-900/70`}
+              className={`hidden flex-1 items-center justify-center gap-1 md:flex ${bodySmallStrongTextClasses} text-emerald-900/70`}
             >
               {links.map((link) => (
                 <NavLink
@@ -201,30 +201,34 @@ function Layout({ children }) {
             </div>
           </div>
           {isMobileMenuOpen && (
-            <div className="mt-4 flex flex-col gap-4 md:hidden" id="mobile-navigation">
-              {links.length > 0 && (
-                <nav
-                  className={`flex flex-col gap-2 ${bodySmallStrongTextClasses} text-emerald-900/80`}
-                >
-                  {links.map((link) => (
-                    <NavLink
-                      key={link.to}
-                      to={link.to}
-                      className={({ isActive }) =>
-                        `rounded-full px-4 py-2 transition ${
-                          isActive
-                            ? "bg-emerald-100 text-emerald-800 shadow-inner shadow-emerald-900/10"
-                            : "text-emerald-900/70 hover:bg-emerald-50 hover:text-emerald-700"
-                        }`
-                      }
-                      onClick={closeMobileMenu}
-                    >
-                      {link.label}
-                    </NavLink>
-                  ))}
-                </nav>
-              )}
-              <AuthControls orientation="vertical" onNavigate={closeMobileMenu} />
+            <div className="absolute left-0 right-0 top-full mt-3 md:hidden" id="mobile-navigation">
+              <div className="rounded-3xl border border-emerald-100 bg-white/95 p-4 shadow-xl shadow-emerald-900/10 backdrop-blur">
+                {links.length > 0 && (
+                  <nav
+                    className={`flex flex-col gap-2 ${bodySmallStrongTextClasses} text-emerald-900/80`}
+                  >
+                    {links.map((link) => (
+                      <NavLink
+                        key={link.to}
+                        to={link.to}
+                        className={({ isActive }) =>
+                          `rounded-full px-4 py-2 transition ${
+                            isActive
+                              ? "bg-emerald-100 text-emerald-800 shadow-inner shadow-emerald-900/10"
+                              : "text-emerald-900/70 hover:bg-emerald-50 hover:text-emerald-700"
+                          }`
+                        }
+                        onClick={closeMobileMenu}
+                      >
+                        {link.label}
+                      </NavLink>
+                    ))}
+                  </nav>
+                )}
+                <div className="mt-4 border-t border-emerald-100/70 pt-4">
+                  <AuthControls orientation="vertical" onNavigate={closeMobileMenu} />
+                </div>
+              </div>
             </div>
           )}
         </div>

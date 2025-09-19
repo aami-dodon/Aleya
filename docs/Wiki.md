@@ -1,3 +1,9 @@
+# 2025-10-14
+
+- Reimagined the authenticated mobile header so the sticky bar keeps a slender profile while the navigation opens as a floating
+  tray beneath it, keeping the main content visible. Captured the overlay guidance in `frontend/AGENTS.md` for future frontend
+  updates.
+
 # 2025-10-13
 
 - Documented the frontend and backend package suites plus the platform's custom functionality highlights in `README.md` so new contributors can quickly see the tooling stack and advanced flows beyond static pages.
