@@ -20,6 +20,9 @@ tays balanced across breakpoints.
   a clear escape hatch.
 - Keep modal headers in a single flex container that houses both the title block and the close button so the markup stays
   balanced and easier to maintain.
+- The authenticated mobile header now keeps its height trim; the navigation tray floats beneath the sticky bar as an overlay.
+  When adjusting mobile navigation, preserve the compact header padding and reuse the floating tray pattern (`absolute top-full`
+  container with rounded borders, blur, and `shadow-xl`) so the main content retains vertical space.
 - Settings now focus on profile essentials: the email reminder fields and in-app notification preferences have been retired for
   every role, so keep the layout lean and avoid reintroducing NotificationContext or bell-style components.
 - Admin mentor management lives on `/mentorship`: show mentor cards with linked mentees, allow linking by email, and surface a
