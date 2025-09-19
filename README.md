@@ -5,13 +5,22 @@ mentor support. The repository hosts an Express + PostgreSQL API (`backend/`) an
 React client (`frontend/`). This refresh tidies the repository layout, adds automated
 quality checks, and documents how to grow the grove together.
 
+## Demo
+
+A live demo is available here: [Demo App](https://aleya.dodon.in)
+
+**Important notes**
+- The demo server may be offline at times (it is rebuilt daily).
+- **All data is reset once per day** — do not use it for important storage.
+- The demo is provided for evaluation and testing purposes only.
+
 ### Landing Page
 
 ![Landing Page](docs/Web-Aleya.png)
 
 
 
-## Mobile Layout Screenshots
+### Mobile Layout Screenshots
 <p align="center">
   <img src="docs/Mobile-1.png" alt="Mobile 1" width="400"/>
   <img src="docs/Mobile-2.png" alt="Mobile 2" width="400"/>
