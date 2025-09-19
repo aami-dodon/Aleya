@@ -6,7 +6,8 @@ React client (`frontend/`). This refresh tidies the repository layout, adds auto
 quality checks, and documents how to grow the grove together.
 
 ### Landing Page
-![Landing Page](docs/Web-Aleya.png)
+<p align="center">![Landing Page](docs/Web-Aleya.png)</p>
+
 
 
 ## Mobile Layout Screenshots
