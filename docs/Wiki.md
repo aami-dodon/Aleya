@@ -1,5 +1,11 @@
 # 2025-10-15
 
+- Introduced a secure password reset flow with `/api/auth/forgot-password` and `/api/auth/reset-password`,
+  hashing single-use tokens on the backend, expiring them after a short window, and wiring the new Reset Password
+  page so people can choose a fresh secret from the emailed link.
+- Added a password reset email template that reuses the Aleya theme, reusing the shared expiry formatter,
+  and taught the bootstrapper to track `reset_token_hash` columns for existing accounts.
+
 - Added a root `backend/index.js` shim so Docker and nodemon resolve the backend entrypoint consistently now that the actual
   server lives in `src/index.js`, and documented the expectation in `backend/AGENTS.md` for future updates.
 

@@ -94,6 +94,8 @@ const createTableStatements = [
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_hash TEXT`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires_at TIMESTAMPTZ`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_hash TEXT`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires_at TIMESTAMPTZ`,
   `UPDATE users SET is_verified = TRUE WHERE is_verified IS NULL`,
 ];
 
