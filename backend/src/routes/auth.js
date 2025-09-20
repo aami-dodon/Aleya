@@ -8,11 +8,7 @@ const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 const { logger } = require("../utils/logger");
 const { sendEmail } = require("../utils/mailer");
-const {
-  createVerificationEmail,
-  createPasswordResetEmail,
-  formatExpiresText,
-} = require("../utils/emailTemplates");
+const { createVerificationEmail } = require("../utils/emailTemplates");
 
 const router = express.Router();
 
@@ -20,82 +16,53 @@ const JWT_SECRET = process.env.JWT_SECRET || "development-secret";
 const REGISTER_ROLES = ["journaler", "mentor"];
 
 const DEFAULT_VERIFICATION_TOKEN_TTL_HOURS = 48;
-const DEFAULT_RESET_TOKEN_TTL_HOURS = 2;
 
-function resolveHoursFromEnv(rawValue, defaultValue) {
-  if (!rawValue) {
-    return defaultValue;
+function resolveVerificationTtlHours() {
+  const raw = process.env.EMAIL_VERIFICATION_TTL_HOURS;
+  if (!raw) {
+    return DEFAULT_VERIFICATION_TOKEN_TTL_HOURS;
   }
 
-  const parsed = Number.parseInt(rawValue, 10);
+  const parsed = Number.parseInt(raw, 10);
   if (Number.isNaN(parsed) || parsed <= 0) {
-    return defaultValue;
+    return DEFAULT_VERIFICATION_TOKEN_TTL_HOURS;
   }
 
   return parsed;
 }
 
-function resolveVerificationTtlHours() {
-  const raw = process.env.EMAIL_VERIFICATION_TTL_HOURS;
-  return resolveHoursFromEnv(raw, DEFAULT_VERIFICATION_TOKEN_TTL_HOURS);
-}
-
 const VERIFICATION_TOKEN_TTL_HOURS = resolveVerificationTtlHours();
 
-function resolvePasswordResetTtlHours() {
-  const raw = process.env.PASSWORD_RESET_TTL_HOURS;
-  return resolveHoursFromEnv(raw, DEFAULT_RESET_TOKEN_TTL_HOURS);
-}
+function buildVerificationLink(token) {
+  const explicit = process.env.EMAIL_VERIFICATION_URL;
 
-const RESET_TOKEN_TTL_HOURS = resolvePasswordResetTtlHours();
-
-function resolveAppBaseUrl() {
-  return (
-    process.env.APP_BASE_URL ||
-    process.env.FRONTEND_URL ||
-    (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",")[0].trim() : null) ||
-    "http://localhost:3000"
-  );
-}
-
-function buildLinkWithToken(token, { explicitUrl, defaultPath }) {
-  if (explicitUrl) {
+  if (explicit) {
     try {
-      const url = new URL(explicitUrl);
+      const url = new URL(explicit);
       url.searchParams.set("token", token);
       return url.toString();
     } catch (error) {
-      logger.warn("Invalid explicit URL configured: %s", explicitUrl, {
+      logger.warn("Invalid EMAIL_VERIFICATION_URL configured: %s", explicit, {
         error: error.message,
       });
     }
   }
 
-  const fallbackBase = resolveAppBaseUrl();
+  const fallbackBase =
+    process.env.APP_BASE_URL ||
+    process.env.FRONTEND_URL ||
+    (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",")[0].trim() : null) ||
+    "http://localhost:3000";
 
   try {
     const baseUrl = new URL(fallbackBase);
     const trimmedPath = baseUrl.pathname.replace(/\/$/, "");
-    baseUrl.pathname = `${trimmedPath}${defaultPath}`;
+    baseUrl.pathname = `${trimmedPath}/verify-email`;
     baseUrl.searchParams.set("token", token);
     return baseUrl.toString();
   } catch (error) {
-    return `http://localhost:3000${defaultPath}?token=${encodeURIComponent(token)}`;
+    return `http://localhost:3000/verify-email?token=${encodeURIComponent(token)}`;
   }
-}
-
-function buildVerificationLink(token) {
-  return buildLinkWithToken(token, {
-    explicitUrl: process.env.EMAIL_VERIFICATION_URL,
-    defaultPath: "/verify-email",
-  });
-}
-
-function buildPasswordResetLink(token) {
-  return buildLinkWithToken(token, {
-    explicitUrl: process.env.PASSWORD_RESET_URL,
-    defaultPath: "/reset-password",
-  });
 }
 
 function splitExpertiseTags(value) {
@@ -152,7 +119,10 @@ function choosePreferredLabel(current, candidate) {
 async function sendVerificationEmail(app, { email, name }, token) {
   const verificationUrl = buildVerificationLink(token);
 
-  const expiresText = formatExpiresText(VERIFICATION_TOKEN_TTL_HOURS);
+  const expiresText =
+    VERIFICATION_TOKEN_TTL_HOURS === 1
+      ? "1 hour"
+      : `${VERIFICATION_TOKEN_TTL_HOURS} hours`;
 
   const { subject, text, html } = createVerificationEmail({
     recipientName: name,
@@ -172,30 +142,6 @@ async function sendVerificationEmail(app, { email, name }, token) {
   );
 
   logger.info("Sent verification email to %s", email);
-}
-
-async function sendPasswordResetEmail(app, { email, name }, token) {
-  const resetUrl = buildPasswordResetLink(token);
-  const expiresText = formatExpiresText(RESET_TOKEN_TTL_HOURS);
-
-  const { subject, text, html } = createPasswordResetEmail({
-    recipientName: name,
-    resetUrl,
-    expiresText,
-  });
-
-  await sendEmail(
-    app,
-    {
-      to: email,
-      subject,
-      text,
-      html,
-    },
-    { type: "passwordReset", email }
-  );
-
-  logger.info("Sent password reset email to %s", email);
 }
 
 async function fetchUserById(id) {
@@ -371,138 +317,6 @@ router.post(
       return next(error);
     } finally {
       client.release();
-    }
-  }
-);
-
-router.post(
-  "/forgot-password",
-  [body("email").isEmail().withMessage("A valid email is required")],
-  async (req, res) => {
-    if (!handleValidation(req, res)) {
-      return;
-    }
-
-    const { email } = req.body;
-    const normalizedEmail = email.toLowerCase();
-    const genericMessage = {
-      message: "If an account exists with that email, a reset link is on its way.",
-    };
-
-    try {
-      const { rows } = await pool.query(
-        `SELECT id, email, name FROM users WHERE email = $1 LIMIT 1`,
-        [normalizedEmail]
-      );
-
-      if (!rows.length) {
-        return res.json(genericMessage);
-      }
-
-      const user = rows[0];
-      const resetToken = crypto.randomBytes(32).toString("hex");
-      const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
-      const resetExpiresAt = new Date(
-        Date.now() + RESET_TOKEN_TTL_HOURS * 60 * 60 * 1000
-      );
-
-      await pool.query(
-        `UPDATE users
-           SET reset_token_hash = $1,
-               reset_token_expires_at = $2,
-               updated_at = NOW()
-         WHERE id = $3`,
-        [resetTokenHash, resetExpiresAt, user.id]
-      );
-
-      try {
-        await sendPasswordResetEmail(req.app, user, resetToken);
-      } catch (error) {
-        logger.error("Failed to send password reset email to %s", user.email, {
-          error: error.message,
-        });
-      }
-
-      return res.json(genericMessage);
-    } catch (error) {
-      logger.error("Failed to process password reset request for %s", normalizedEmail, {
-        error: error.message,
-      });
-      return res.status(500).json({
-        error: "We couldn't process the reset request. Please try again later.",
-      });
-    }
-  }
-);
-
-router.post(
-  "/reset-password",
-  [
-    body("token").isString().notEmpty().withMessage("A reset token is required"),
-    body("password")
-      .isLength({ min: 8 })
-      .withMessage("Password must be at least 8 characters"),
-  ],
-  async (req, res) => {
-    if (!handleValidation(req, res)) {
-      return;
-    }
-
-    const { token, password } = req.body;
-
-    try {
-      const resetTokenHash = crypto.createHash("sha256").update(token).digest("hex");
-
-      const { rows } = await pool.query(
-        `SELECT id, reset_token_expires_at FROM users WHERE reset_token_hash = $1`,
-        [resetTokenHash]
-      );
-
-      if (!rows.length) {
-        return res.status(400).json({ error: "Invalid or expired reset link." });
-      }
-
-      const user = rows[0];
-      const expiresAt = user.reset_token_expires_at
-        ? new Date(user.reset_token_expires_at)
-        : null;
-
-      if (!expiresAt || expiresAt.getTime() < Date.now()) {
-        await pool.query(
-          `UPDATE users
-             SET reset_token_hash = NULL,
-                 reset_token_expires_at = NULL,
-                 updated_at = NOW()
-           WHERE id = $1`,
-          [user.id]
-        );
-
-        return res.status(400).json({ error: "Invalid or expired reset link." });
-      }
-
-      const passwordHash = await bcrypt.hash(password, 10);
-
-      await pool.query(
-        `UPDATE users
-           SET password_hash = $1,
-               reset_token_hash = NULL,
-               reset_token_expires_at = NULL,
-               updated_at = NOW()
-         WHERE id = $2`,
-        [passwordHash, user.id]
-      );
-
-      return res.json({
-        message:
-          "Your password has been reset. You can now sign in with your new password.",
-      });
-    } catch (error) {
-      logger.error("Failed to reset password with provided token", {
-        error: error.message,
-      });
-      return res
-        .status(500)
-        .json({ error: "We couldn't reset the password. Please try again." });
     }
   }
 );
