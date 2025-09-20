@@ -6,6 +6,7 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import JournalerDashboard from "./pages/JournalerDashboard";
 import MentorDashboard from "./pages/MentorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -69,6 +70,12 @@ function AppRoutes() {
             path="/forgot-password"
             element={
               user ? <Navigate to="/dashboard" replace /> : <ForgotPasswordPage />
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              user ? <Navigate to="/dashboard" replace /> : <ResetPasswordPage />
             }
           />
           <Route
