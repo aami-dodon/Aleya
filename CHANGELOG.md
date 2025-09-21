@@ -1,5 +1,16 @@
 # Changelog
 
+## 2025-10-29
+
+- Added the `/reset-password` public route so emailed tokens land on a dedicated
+  reset form that validates inputs, surfaces gentle status copy, and guides
+  people back to sign-in after success.
+- Implemented `POST /api/auth/reset-password` to verify hashed reset tokens,
+  rotate the matching account's password, clear the stored token, and return a
+  friendly confirmation message for the new flow.
+- Documented the reset experience across the backend and frontend knowledge
+  bases so contributors can find the route wiring, TTL knobs, and UI guidance.
+
 ## 2025-10-16
 
 - Added `/api/auth/forgot-password` so visitors can request hashed, expiring reset links, wired the Aleya-branded email template, and documented the new env knobs for base URLs + TTL overrides across the backend knowledge base and AGENT notes.

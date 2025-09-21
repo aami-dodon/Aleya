@@ -536,6 +536,83 @@ router.post(
 );
 
 router.post(
+  "/reset-password",
+  [
+    body("token").trim().notEmpty().withMessage("Reset token is required"),
+    body("password")
+      .isLength({ min: 8 })
+      .withMessage("Password must be at least 8 characters"),
+    body("confirmPassword")
+      .notEmpty()
+      .withMessage("Please retype your password")
+      .bail()
+      .custom((value, { req }) => value === req.body.password)
+      .withMessage("Passwords must match"),
+  ],
+  async (req, res, next) => {
+    if (!handleValidation(req, res)) return;
+
+    const { token, password } = req.body;
+    const tokenHash = hashToken(token);
+
+    try {
+      const { rows } = await pool.query(
+        `SELECT prt.user_id, prt.expires_at, u.email
+         FROM password_reset_tokens prt
+         JOIN users u ON u.id = prt.user_id
+         WHERE prt.token_hash = $1
+         LIMIT 1`,
+        [tokenHash]
+      );
+
+      if (!rows.length) {
+        return res.status(400).json({
+          error: "Invalid or expired reset link.",
+        });
+      }
+
+      const record = rows[0];
+      const expiresAt = record.expires_at ? new Date(record.expires_at) : null;
+      const isExpired =
+        !expiresAt ||
+        Number.isNaN(expiresAt.getTime()) ||
+        expiresAt.getTime() < Date.now();
+
+      if (isExpired) {
+        await pool.query("DELETE FROM password_reset_tokens WHERE user_id = $1", [
+          record.user_id,
+        ]);
+        return res.status(400).json({
+          error: "Invalid or expired reset link.",
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      await pool.query(
+        `UPDATE users
+           SET password_hash = $1,
+               updated_at = NOW()
+         WHERE id = $2`,
+        [passwordHash, record.user_id]
+      );
+
+      await pool.query("DELETE FROM password_reset_tokens WHERE user_id = $1", [
+        record.user_id,
+      ]);
+
+      logger.info("Reset password for %s", record.email);
+
+      return res.json({
+        message: "Your password has been refreshed. You can sign in with it now.",
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+router.post(
   "/verify-email",
   [body("token").trim().notEmpty().withMessage("Verification token is required")],
   async (req, res, next) => {
