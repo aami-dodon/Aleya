@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Aleya Mobile</string>
+    <string name="slogan">Guided growth among luminous groves</string>
+    <string name="daily_focus">Daily focus</string>
+    <string name="log_reflection">Log reflection</string>
+    <string name="refresh_prompt">Next prompt</string>
+    <string name="affirmation_title">Grounding affirmation</string>
+    <string name="affirmation_refresh">New affirmation</string>
+    <string name="history_title">Recent reflections</string>
+    <string name="history_empty">Your reflection log will appear here once you record a session.</string>
+    <string name="session_count">Sessions logged: %1$d</string>
+    <string name="session_subtitle">Keep showing up for the grove.</string>
+</resources>
