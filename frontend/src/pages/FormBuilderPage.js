@@ -22,6 +22,8 @@ import {
   tableRowClasses,
 } from "../styles/ui";
 
+let nextFieldId = 0;
+
 const FIELD_TYPES = [
   { value: "textarea", label: "Paragraph" },
   { value: "select", label: "Select" },
@@ -42,6 +44,7 @@ function FormBuilderPage() {
     description: "",
     fields: [createField()],
   });
+  const [optionDrafts, setOptionDrafts] = useState({});
   const [assignment, setAssignment] = useState({ menteeId: "", formId: "" });
   const [searchTerm, setSearchTerm] = useState(() => searchParams.get("q") || "");
   const [visibilityFilter, setVisibilityFilter] = useState(() => {
@@ -279,12 +282,73 @@ function FormBuilderPage() {
     [load, token]
   );
 
+  useEffect(() => {
+    setOptionDrafts((prev) => {
+      const next = {};
+      let changed = false;
+
+      formDraft.fields.forEach((field) => {
+        if (!(field.uiId in prev)) {
+          changed = true;
+        }
+        next[field.uiId] = prev[field.uiId] || "";
+      });
+
+      if (Object.keys(prev).length !== Object.keys(next).length) {
+        changed = true;
+      }
+
+      return changed ? next : prev;
+    });
+  }, [formDraft.fields]);
+
   const handleFieldChange = (index, key, value) => {
     setFormDraft((prev) => {
       const updated = [...prev.fields];
       updated[index] = { ...updated[index], [key]: value };
       return { ...prev, fields: updated };
     });
+  };
+
+  const setOptionDraftValue = (fieldId, value) => {
+    setOptionDrafts((prev) => ({ ...prev, [fieldId]: value }));
+  };
+
+  const addSelectOption = (index) => {
+    const field = formDraft.fields[index];
+    const pendingValue = (optionDrafts[field.uiId] || "").trim();
+
+    if (!pendingValue) {
+      return;
+    }
+
+    const nextOptions = normalizeOptionList([...field.options, pendingValue]);
+    handleFieldChange(index, "options", nextOptions);
+    setOptionDraftValue(field.uiId, "");
+  };
+
+  const updateSelectOption = (fieldIndex, optionIndex, value) => {
+    const field = formDraft.fields[fieldIndex];
+    const nextOptions = [...field.options];
+    nextOptions[optionIndex] = value;
+    handleFieldChange(fieldIndex, "options", nextOptions);
+  };
+
+  const commitSelectOption = (fieldIndex, optionIndex) => {
+    const field = formDraft.fields[fieldIndex];
+    const nextOptions = normalizeOptionList(field.options);
+
+    if (nextOptions.length !== field.options.length) {
+      handleFieldChange(fieldIndex, "options", nextOptions);
+    } else if (nextOptions[optionIndex] !== field.options[optionIndex]) {
+      handleFieldChange(fieldIndex, "options", nextOptions);
+    }
+  };
+
+  const removeSelectOption = (fieldIndex, optionIndex) => {
+    const field = formDraft.fields[fieldIndex];
+    const nextOptions = field.options.filter((_, idx) => idx !== optionIndex);
+    handleFieldChange(fieldIndex, "options", nextOptions);
   };
 
   const addField = () => {
@@ -301,8 +365,23 @@ function FormBuilderPage() {
   const handleCreateForm = async (event) => {
     event.preventDefault();
     try {
-      await apiClient.post("/forms", formDraft, token);
+      const payload = {
+        ...formDraft,
+        fields: formDraft.fields.map((field) => ({
+          label: field.label,
+          fieldType: field.fieldType,
+          required: field.required,
+          helperText: field.helperText,
+          options:
+            field.fieldType === "select"
+              ? normalizeOptionList(field.options)
+              : [],
+        })),
+      };
+
+      await apiClient.post("/forms", payload, token);
       setFormDraft({ title: "", description: "", fields: [createField()] });
+      setOptionDrafts({});
       await load();
       setMessage("Form created successfully.");
     } catch (err) {
@@ -429,24 +508,71 @@ function FormBuilderPage() {
                   />
                 </label>
                 {field.fieldType === "select" && (
-                  <label className="block text-sm font-semibold text-emerald-900/80">
-                    Options (comma separated)
-                    <input
-                      type="text"
-                      className={inputCompactClasses}
-                      value={field.options.join(", ")}
-                      onChange={(event) =>
-                        handleFieldChange(
-                          index,
-                          "options",
-                          event.target
-                            .value.split(",")
-                            .map((opt) => opt.trim())
-                            .filter(Boolean)
-                        )
-                      }
-                    />
-                  </label>
+                  <div className="space-y-2">
+                    <span className="block text-sm font-semibold text-emerald-900/80">
+                      Options
+                    </span>
+                    {field.options.length > 0 && (
+                      <ul className="space-y-2">
+                        {field.options.map((option, optionIndex) => (
+                          <li
+                            key={`${field.uiId}-option-${optionIndex}`}
+                            className="flex items-center gap-2"
+                          >
+                            <input
+                              type="text"
+                              className={`${inputCompactClasses} flex-1`}
+                              value={option}
+                              onChange={(event) =>
+                                updateSelectOption(
+                                  index,
+                                  optionIndex,
+                                  event.target.value
+                                )
+                              }
+                              onBlur={() =>
+                                commitSelectOption(index, optionIndex)
+                              }
+                            />
+                            <button
+                              type="button"
+                              className={`${subtleButtonClasses} px-3 py-1 text-xs`}
+                              onClick={() =>
+                                removeSelectOption(index, optionIndex)
+                              }
+                            >
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <input
+                        type="text"
+                        className={`${inputCompactClasses} flex-1`}
+                        value={optionDrafts[field.uiId] || ""}
+                        onChange={(event) =>
+                          setOptionDraftValue(field.uiId, event.target.value)
+                        }
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            addSelectOption(index);
+                          }
+                        }}
+                        placeholder="Add a choice"
+                      />
+                      <button
+                        type="button"
+                        className={`${secondaryButtonClasses} px-4 py-2 text-sm`}
+                        onClick={() => addSelectOption(index)}
+                        disabled={!(optionDrafts[field.uiId] || "").trim()}
+                      >
+                        Add option
+                      </button>
+                    </div>
+                  </div>
                 )}
                 {formDraft.fields.length > 1 && (
                   <button
@@ -676,8 +802,13 @@ function FormBuilderPage() {
   );
 }
 
+function normalizeOptionList(options) {
+  return options.map((option) => option.trim()).filter(Boolean);
+}
+
 function createField() {
   return {
+    uiId: `field-${nextFieldId++}`,
     label: "",
     fieldType: "textarea",
     required: false,
