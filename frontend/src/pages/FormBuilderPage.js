@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import SectionCard from "../components/SectionCard";
+import SelectOptionsEditor from "../components/SelectOptionsEditor";
 import { useAuth } from "../context/AuthContext";
 import {
   checkboxClasses,
@@ -22,6 +23,8 @@ import {
   tableRowClasses,
 } from "../styles/ui";
 
+let nextFieldId = 0;
+
 const FIELD_TYPES = [
   { value: "textarea", label: "Paragraph" },
   { value: "select", label: "Select" },
@@ -37,11 +40,8 @@ function FormBuilderPage() {
   const [mentees, setMentees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
-  const [formDraft, setFormDraft] = useState({
-    title: "",
-    description: "",
-    fields: [createField()],
-  });
+  const [formDraft, setFormDraft] = useState(() => createEmptyDraft());
+  const [optionDrafts, setOptionDrafts] = useState({});
   const [assignment, setAssignment] = useState({ menteeId: "", formId: "" });
   const [searchTerm, setSearchTerm] = useState(() => searchParams.get("q") || "");
   const [visibilityFilter, setVisibilityFilter] = useState(() => {
@@ -57,8 +57,10 @@ function FormBuilderPage() {
   );
   const isAdmin = user.role === "admin";
   const isMentor = user.role === "mentor";
+  const [editingFormId, setEditingFormId] = useState(null);
   const adminTableGridTemplate =
     "minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.5fr) auto";
+  const isEditing = editingFormId !== null;
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -81,6 +83,54 @@ function FormBuilderPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const editingForm = useMemo(() => {
+    if (!editingFormId) {
+      return null;
+    }
+
+    return forms.find((form) => form.id === editingFormId) || null;
+  }, [editingFormId, forms]);
+
+  const resetFormDraft = useCallback(() => {
+    setFormDraft(createEmptyDraft());
+    setOptionDrafts({});
+    setEditingFormId(null);
+  }, [setFormDraft, setOptionDrafts, setEditingFormId]);
+
+  const beginEditingForm = useCallback(
+    (form) => {
+      const nextFields = Array.isArray(form.fields) && form.fields.length
+        ? form.fields.map((field) => {
+            const options = parseFieldOptions(field.options);
+
+            return {
+              uiId: `field-${nextFieldId++}`,
+              label: field.label || "",
+              fieldType: field.fieldType || "textarea",
+              required: Boolean(field.required),
+              helperText: field.helperText || "",
+              options,
+            };
+          })
+        : [createField()];
+
+      setFormDraft({
+        title: form.title || "",
+        description: form.description || "",
+        fields: nextFields,
+      });
+      setOptionDrafts({});
+      setEditingFormId(form.id);
+      setMessage(`Editing "${form.title}".`);
+    },
+    [setFormDraft, setOptionDrafts, setEditingFormId, setMessage]
+  );
+
+  const handleCancelEdit = useCallback(() => {
+    resetFormDraft();
+    setMessage(null);
+  }, [resetFormDraft, setMessage]);
 
   useEffect(() => {
     const nextSearch = searchParams.get("q") || "";
@@ -250,18 +300,24 @@ function FormBuilderPage() {
   }, []);
 
   const handleDeleteForm = useCallback(
-    async (formId) => {
+    async (form) => {
       if (!token) return;
 
+      const endpoint =
+        user.role === "admin" ? `/admin/forms/${form.id}` : `/forms/${form.id}`;
+
       try {
-        await apiClient.del(`/admin/forms/${formId}`, token);
+        await apiClient.del(endpoint, token);
+        if (editingFormId === form.id) {
+          resetFormDraft();
+        }
         await load();
         setMessage("Form deleted successfully.");
       } catch (err) {
         setMessage(err.message);
       }
     },
-    [load, token]
+    [editingFormId, load, resetFormDraft, token, user.role]
   );
 
   const handleRemoveAssignment = useCallback(
@@ -279,12 +335,73 @@ function FormBuilderPage() {
     [load, token]
   );
 
+  useEffect(() => {
+    setOptionDrafts((prev) => {
+      const next = {};
+      let changed = false;
+
+      formDraft.fields.forEach((field) => {
+        if (!(field.uiId in prev)) {
+          changed = true;
+        }
+        next[field.uiId] = prev[field.uiId] || "";
+      });
+
+      if (Object.keys(prev).length !== Object.keys(next).length) {
+        changed = true;
+      }
+
+      return changed ? next : prev;
+    });
+  }, [formDraft.fields]);
+
   const handleFieldChange = (index, key, value) => {
     setFormDraft((prev) => {
       const updated = [...prev.fields];
       updated[index] = { ...updated[index], [key]: value };
       return { ...prev, fields: updated };
     });
+  };
+
+  const setOptionDraftValue = (fieldId, value) => {
+    setOptionDrafts((prev) => ({ ...prev, [fieldId]: value }));
+  };
+
+  const addSelectOption = (index) => {
+    const field = formDraft.fields[index];
+    const pendingValue = (optionDrafts[field.uiId] || "").trim();
+
+    if (!pendingValue) {
+      return;
+    }
+
+    const nextOptions = normalizeOptionList([...field.options, pendingValue]);
+    handleFieldChange(index, "options", nextOptions);
+    setOptionDraftValue(field.uiId, "");
+  };
+
+  const updateSelectOption = (fieldIndex, optionIndex, value) => {
+    const field = formDraft.fields[fieldIndex];
+    const nextOptions = [...field.options];
+    nextOptions[optionIndex] = value;
+    handleFieldChange(fieldIndex, "options", nextOptions);
+  };
+
+  const commitSelectOption = (fieldIndex, optionIndex) => {
+    const field = formDraft.fields[fieldIndex];
+    const nextOptions = normalizeOptionList(field.options);
+
+    if (nextOptions.length !== field.options.length) {
+      handleFieldChange(fieldIndex, "options", nextOptions);
+    } else if (nextOptions[optionIndex] !== field.options[optionIndex]) {
+      handleFieldChange(fieldIndex, "options", nextOptions);
+    }
+  };
+
+  const removeSelectOption = (fieldIndex, optionIndex) => {
+    const field = formDraft.fields[fieldIndex];
+    const nextOptions = field.options.filter((_, idx) => idx !== optionIndex);
+    handleFieldChange(fieldIndex, "options", nextOptions);
   };
 
   const addField = () => {
@@ -298,13 +415,39 @@ function FormBuilderPage() {
     }));
   };
 
-  const handleCreateForm = async (event) => {
+  const handleSubmitForm = async (event) => {
     event.preventDefault();
+    if (!token) return;
+
+    const payload = {
+      title: formDraft.title,
+      description: formDraft.description,
+      fields: formDraft.fields.map((field) => ({
+        label: field.label,
+        fieldType: field.fieldType,
+        required: field.required,
+        helperText: field.helperText,
+        options:
+          field.fieldType === "select"
+            ? normalizeOptionList(field.options)
+            : [],
+      })),
+    };
+
+    const successMessage = isEditing
+      ? "Form updated successfully."
+      : "Form created successfully.";
+
     try {
-      await apiClient.post("/forms", formDraft, token);
-      setFormDraft({ title: "", description: "", fields: [createField()] });
+      if (isEditing && editingFormId) {
+        await apiClient.put(`/forms/${editingFormId}`, payload, token);
+      } else {
+        await apiClient.post("/forms", payload, token);
+      }
+
+      resetFormDraft();
       await load();
-      setMessage("Form created successfully.");
+      setMessage(successMessage);
     } catch (err) {
       setMessage(err.message);
     }
@@ -327,6 +470,14 @@ function FormBuilderPage() {
     }
   };
 
+  const builderTitle = isEditing
+    ? "Update a reflective form"
+    : "Create a reflective form";
+  const builderSubtitle = isEditing
+    ? `Refresh the prompts${
+        editingForm ? ` for "${editingForm.title}"` : ""
+      } so your mentees continue to bloom.`
+    : "Craft prompts that resonate with the people you support";
   const sectionCardTitle = isAdmin ? "Form Management" : "Available forms";
   const sectionCardSubtitle = isAdmin
     ? "Steward templates, visibilities, and journaler links"
@@ -340,11 +491,19 @@ function FormBuilderPage() {
     <div className="flex w-full flex-1 flex-col gap-8">
       {message && <p className={infoTextClasses}>{message}</p>}
       {!isAdmin && (
-        <SectionCard
-          title="Create a reflective form"
-          subtitle="Craft prompts that resonate with the people you support"
-        >
-          <form className="space-y-6" onSubmit={handleCreateForm}>
+        <SectionCard title={builderTitle} subtitle={builderSubtitle}>
+          <form className="space-y-6" onSubmit={handleSubmitForm}>
+            {isEditing && (
+              <div className="space-y-2 rounded-2xl border border-dashed border-emerald-200 bg-white/60 p-5">
+                <p className="text-sm font-semibold text-emerald-900">
+                  Updating "{editingForm?.title || "your form"}"
+                </p>
+                <p className={`${mutedTextClasses} text-sm`}>
+                  Changes bloom immediately for every journaler linked to this
+                  form.
+                </p>
+              </div>
+            )}
             <label className="block text-sm font-semibold text-emerald-900/80">
               Title
               <input
@@ -429,24 +588,23 @@ function FormBuilderPage() {
                   />
                 </label>
                 {field.fieldType === "select" && (
-                  <label className="block text-sm font-semibold text-emerald-900/80">
-                    Options (comma separated)
-                    <input
-                      type="text"
-                      className={inputCompactClasses}
-                      value={field.options.join(", ")}
-                      onChange={(event) =>
-                        handleFieldChange(
-                          index,
-                          "options",
-                          event.target
-                            .value.split(",")
-                            .map((opt) => opt.trim())
-                            .filter(Boolean)
-                        )
-                      }
-                    />
-                  </label>
+                  <SelectOptionsEditor
+                    field={field}
+                    draftValue={optionDrafts[field.uiId] || ""}
+                    onDraftChange={(value) =>
+                      setOptionDraftValue(field.uiId, value)
+                    }
+                    onAddOption={() => addSelectOption(index)}
+                    onOptionChange={(optionIndex, value) =>
+                      updateSelectOption(index, optionIndex, value)
+                    }
+                    onOptionCommit={(optionIndex) =>
+                      commitSelectOption(index, optionIndex)
+                    }
+                    onOptionRemove={(optionIndex) =>
+                      removeSelectOption(index, optionIndex)
+                    }
+                  />
                 )}
                 {formDraft.fields.length > 1 && (
                   <button
@@ -467,9 +625,23 @@ function FormBuilderPage() {
               >
                 Add another field
               </button>
-              <button type="submit" className={`${primaryButtonClasses} w-full md:w-auto`}>
-                Save form
-              </button>
+              <div className="flex w-full flex-col gap-3 md:ml-auto md:w-auto md:flex-row">
+                {isEditing && (
+                  <button
+                    type="button"
+                    className={`${subtleButtonClasses} w-full px-5 py-2.5 text-sm md:w-auto`}
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel editing
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className={`${primaryButtonClasses} w-full md:w-auto`}
+                >
+                  {isEditing ? "Update form" : "Save form"}
+                </button>
+              </div>
             </div>
           </form>
         </SectionCard>
@@ -597,6 +769,9 @@ function FormBuilderPage() {
               const mentees = Array.isArray(form.mentees)
                 ? form.mentees.filter((mentee) => mentee && mentee.id)
                 : [];
+              const canMentorManage =
+                isMentor && Number(form.created_by) === Number(user.id);
+              const canManageOwnForm = canMentorManage && !form.is_default;
 
               return (
                 <div
@@ -652,11 +827,36 @@ function FormBuilderPage() {
                           type="button"
                           className={`${dangerButtonClasses} w-full px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60 md:w-auto`}
                           disabled={form.is_default}
-                          onClick={() => handleDeleteForm(form.id)}
+                          onClick={() => handleDeleteForm(form)}
                         >
                           Delete form
                         </button>
                         {form.is_default && (
+                          <p className={`${mutedTextClasses} text-xs md:text-right`}>
+                            Default forms cannot be removed.
+                          </p>
+                        )}
+                      </>
+                    )}
+                    {canMentorManage && (
+                      <>
+                        <button
+                          type="button"
+                          className={`${secondaryButtonClasses} w-full px-4 py-2 text-sm md:w-auto`}
+                          onClick={() => beginEditingForm(form)}
+                          disabled={!canManageOwnForm}
+                        >
+                          Edit form
+                        </button>
+                        <button
+                          type="button"
+                          className={`${dangerButtonClasses} w-full px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60 md:w-auto`}
+                          onClick={() => handleDeleteForm(form)}
+                          disabled={!canManageOwnForm}
+                        >
+                          Delete form
+                        </button>
+                        {!canManageOwnForm && (
                           <p className={`${mutedTextClasses} text-xs md:text-right`}>
                             Default forms cannot be removed.
                           </p>
@@ -676,13 +876,62 @@ function FormBuilderPage() {
   );
 }
 
+function normalizeOptionList(options) {
+  return options
+    .map((option) => {
+      if (typeof option === "string") {
+        return option.trim();
+      }
+
+      if (option && typeof option === "object") {
+        const value = option.value ?? option.label ?? "";
+        if (typeof value === "string") {
+          return value.trim();
+        }
+        return String(value ?? "").trim();
+      }
+
+      return String(option ?? "").trim();
+    })
+    .filter(Boolean);
+}
+
+function parseFieldOptions(value) {
+  if (Array.isArray(value)) {
+    return normalizeOptionList(value);
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return normalizeOptionList(parsed);
+      }
+    } catch (error) {
+      const segments = value.split(/[\n,]/);
+      return normalizeOptionList(segments);
+    }
+  }
+
+  return [];
+}
+
 function createField() {
   return {
+    uiId: `field-${nextFieldId++}`,
     label: "",
     fieldType: "textarea",
     required: false,
     helperText: "",
     options: [],
+  };
+}
+
+function createEmptyDraft() {
+  return {
+    title: "",
+    description: "",
+    fields: [createField()],
   };
 }
 

@@ -16,28 +16,34 @@ A live demo is available here: [Demo App](https://aleya.dodon.in)
 
 ### Landing Page
 
-![Landing Page](docs/Web-Aleya.png)
+![Landing Page](docs/screenshots/Web-Aleya.pngWeb-Aleya.png)
 
 
 
 ### Mobile Layout Screenshots
 <p align="center">
-  <img src="docs/Mobile-1.png" alt="Mobile 1" width="400"/>
-  <img src="docs/Mobile-2.png" alt="Mobile 2" width="400"/>
+  <img src="docs/screenshots/Mobile-1.png" alt="Mobile 1" width="400"/>
+  <img src="docs/screenshots/Mobile-2.png" alt="Mobile 2" width="400"/>
 </p>
 
 ## Table of contents
 
-1. [Architecture](#architecture)
-2. [Getting started](#getting-started)
-3. [Running the backend](#running-the-backend)
-4. [Running the frontend](#running-the-frontend)
-5. [Quality gates](#quality-gates)
-6. [Testing](#testing)
-7. [Environment & configuration](#environment--configuration)
-8. [Project documentation](#project-documentation)
-9. [Contributing](#contributing)
-10. [License](#license)
+- [Aleya](#aleya)
+  - [Demo](#demo)
+    - [Landing Page](#landing-page)
+    - [Mobile Layout Screenshots](#mobile-layout-screenshots)
+  - [Table of contents](#table-of-contents)
+  - [Architecture](#architecture)
+  - [Getting started](#getting-started)
+  - [Running the backend](#running-the-backend)
+    - [Mentor digest job](#mentor-digest-job)
+  - [Running the frontend](#running-the-frontend)
+  - [Quality gates](#quality-gates)
+  - [Testing](#testing)
+  - [Environment \& configuration](#environment--configuration)
+  - [Project documentation](#project-documentation)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Architecture
 

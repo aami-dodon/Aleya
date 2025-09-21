@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const { randomUUID } = require("crypto");
 require("dotenv").config();
 
 const { logger, resolvedLogFile, serializeError } = require("./utils/logger");
@@ -31,14 +32,24 @@ try {
 
 const app = express();
 app.locals.mailSettings = mailSettings;
+app.locals.bootId = randomUUID();
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
   : undefined;
 
 const corsOptions = allowedOrigins
-  ? { origin: allowedOrigins, credentials: true }
-  : { origin: true, credentials: true };
+  ? {
+      origin: allowedOrigins,
+      credentials: true,
+      exposedHeaders: ["X-Aleya-Boot-Id"],
+    }
+  : { origin: true, credentials: true, exposedHeaders: ["X-Aleya-Boot-Id"] };
+
+app.use((req, res, next) => {
+  res.setHeader("X-Aleya-Boot-Id", app.locals.bootId);
+  next();
+});
 
 app.use(cors(corsOptions));
 app.use(express.json());

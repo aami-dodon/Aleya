@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  bodySmallMutedTextClasses,
-  bodySmallStrongTextClasses,
   emptyStateClasses,
   formLabelClasses,
   infoTextClasses,
@@ -11,6 +9,17 @@ import {
   subtleButtonClasses,
   selectClasses,
   textareaClasses,
+  formStackClasses,
+  formSectionClasses,
+  formHelperClasses,
+  formRequiredClasses,
+  formStatusClasses,
+  formStatusErrorClasses,
+  formStatusInfoClasses,
+  formStatusSuccessClasses,
+  formActionsClasses,
+  buttonResponsiveClasses,
+  stackSmClasses,
 } from "../styles/ui";
 
 const DEFAULT_SHARING = "private";
@@ -99,8 +108,8 @@ function JournalEntryForm({
   };
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
-      <div>
+    <form className={formStackClasses} onSubmit={handleSubmit}>
+      <div className={stackSmClasses}>
         <h3 className={`${mediumHeadingClasses} text-emerald-900`}>
           {form.title}
         </h3>
@@ -109,24 +118,24 @@ function JournalEntryForm({
         )}
       </div>
       {form.fields.map((field) => (
-        <div className="space-y-2" key={field.id ?? field.label}>
-          <label className={`block ${formLabelClasses}`}>
+        <div className={formSectionClasses} key={field.id ?? field.label}>
+          <label className={formLabelClasses}>
             <span>
               {field.label}
-              {field.required && <span className="ml-1 text-rose-500">*</span>}
+              {field.required && <span className={formRequiredClasses}>*</span>}
             </span>
             {renderField(field, values[field.id ?? field.label] || "", (value) =>
               handleChange(field, value)
             )}
           </label>
           {field.helperText && (
-            <p className={`${bodySmallMutedTextClasses} text-emerald-900/60`}>
+            <p className={formHelperClasses}>
               {field.helperText}
             </p>
           )}
         </div>
       ))}
-      <div className="space-y-2">
+      <div className={formSectionClasses}>
         <label htmlFor="sharing" className={`block ${formLabelClasses}`}>
           Sharing preference
         </label>
@@ -142,32 +151,32 @@ function JournalEntryForm({
             </option>
           ))}
         </select>
-        <p className={`${bodySmallMutedTextClasses} text-emerald-900/60`}>
+        <p className={formHelperClasses}>
           Decide how much of this entry your mentors can see.
         </p>
       </div>
       {error && (
         <p
-          className={`rounded-2xl border border-rose-100 bg-rose-50/80 px-4 py-3 ${bodySmallStrongTextClasses} text-rose-600`}
+          className={`${formStatusClasses} ${formStatusErrorClasses}`}
         >
           {error}
         </p>
       )}
       {statusMessage && (
         <p
-          className={`rounded-2xl px-4 py-3 ${bodySmallStrongTextClasses} ${
+          className={`${formStatusClasses} ${
             statusVariant === "success"
-              ? "border border-emerald-100 bg-emerald-50/80 text-emerald-700"
-              : "border border-emerald-100 bg-white/80 text-emerald-900/70"
+              ? formStatusSuccessClasses
+              : formStatusInfoClasses
           }`}
         >
           {statusMessage}
         </p>
       )}
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className={formActionsClasses}>
         <button
           type="submit"
-          className={`${primaryButtonClasses} w-full sm:w-auto`}
+          className={`${primaryButtonClasses} ${buttonResponsiveClasses}`}
           disabled={!canSubmit || submitting}
         >
           {submitting ? "Saving..." : submitLabel}
@@ -175,7 +184,7 @@ function JournalEntryForm({
         {onCancel && (
           <button
             type="button"
-            className={`${subtleButtonClasses} w-full sm:w-auto`}
+            className={`${subtleButtonClasses} ${buttonResponsiveClasses}`}
             onClick={onCancel}
             disabled={submitting}
           >

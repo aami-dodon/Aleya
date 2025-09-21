@@ -1,10 +1,22 @@
 import {
-  bodyTextClasses,
   bodySmallMutedTextClasses,
+  bodyTextClasses,
   chipBaseClasses,
-  mediumHeadingClasses,
+  dialogActionsClasses,
+  dialogBackdropClasses,
+  dialogBodyClasses,
+  dialogCloseClasses,
+  dialogHeaderClasses,
+  dialogHeadingGroupClasses,
+  dialogPanelClasses,
+  dialogSectionClasses,
+  dialogSectionTitleClasses,
+  dialogTitleClasses,
+  mentorDialogChipsClasses,
   primaryButtonClasses,
   secondaryButtonClasses,
+  buttonPadSmClasses,
+  textPreLineClasses,
 } from "../styles/ui";
 import { parseExpertise } from "../utils/expertise";
 
@@ -21,26 +33,23 @@ function MentorProfileDialog({ mentor, onClose, onRequest, canRequest }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-emerald-950/40 px-4 py-10"
+      className={dialogBackdropClasses}
       role="dialog"
       aria-modal="true"
       aria-labelledby="mentor-profile-heading"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8"
+        className={dialogPanelClasses}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2">
-            <h2
-              id="mentor-profile-heading"
-              className={`${mediumHeadingClasses} text-emerald-900`}
-            >
+        <div className={dialogHeaderClasses}>
+          <div className={dialogHeadingGroupClasses}>
+            <h2 id="mentor-profile-heading" className={dialogTitleClasses}>
               {mentor.name}
             </h2>
             {expertiseTags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className={mentorDialogChipsClasses}>
                 {expertiseTags.map((tag) => (
                   <span key={tag} className={chipBaseClasses}>
                     {tag}
@@ -55,16 +64,16 @@ function MentorProfileDialog({ mentor, onClose, onRequest, canRequest }) {
           <button
             type="button"
             onClick={onClose}
-            className={`${secondaryButtonClasses} px-4 py-2 text-sm`}
+            className={`${secondaryButtonClasses} ${dialogCloseClasses}`}
           >
             Close
           </button>
         </div>
 
-        <div className="mt-6 space-y-4">
+        <div className={dialogBodyClasses}>
           {mentor.availability && (
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-emerald-800/70">
+            <div className={dialogSectionClasses}>
+              <h3 className={dialogSectionTitleClasses}>
                 Availability
               </h3>
               <p className={bodyTextClasses}>{mentor.availability}</p>
@@ -72,11 +81,11 @@ function MentorProfileDialog({ mentor, onClose, onRequest, canRequest }) {
           )}
 
           {mentor.bio && (
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-emerald-800/70">
+            <div className={dialogSectionClasses}>
+              <h3 className={dialogSectionTitleClasses}>
                 About
               </h3>
-              <p className={`${bodyTextClasses} whitespace-pre-line`}>{mentor.bio}</p>
+              <p className={`${bodyTextClasses} ${textPreLineClasses}`}>{mentor.bio}</p>
             </div>
           )}
 
@@ -88,10 +97,10 @@ function MentorProfileDialog({ mentor, onClose, onRequest, canRequest }) {
         </div>
 
         {canRequest && (
-          <div className="mt-8 flex flex-wrap justify-end gap-3">
+          <div className={dialogActionsClasses}>
             <button
               type="button"
-              className={`${primaryButtonClasses} px-5 py-2.5 text-sm`}
+              className={`${primaryButtonClasses} ${buttonPadSmClasses}`}
               onClick={handleRequest}
             >
               Request mentorship

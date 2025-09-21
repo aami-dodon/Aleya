@@ -1,8 +1,15 @@
 import {
   emptyStateClasses,
   getStatusToneClasses,
-  primaryButtonClasses,
-  secondaryButtonClasses,
+  primaryButtonCompactClasses,
+  requestCardActionsClasses,
+  requestCardBodyClasses,
+  requestCardClasses,
+  requestCardMessageClasses,
+  requestCardStatusClasses,
+  requestCardTitleClasses,
+  requestListClasses,
+  secondaryButtonCompactClasses,
 } from "../styles/ui";
 
 function MentorRequestList({
@@ -20,38 +27,44 @@ function MentorRequestList({
   }
 
   return (
-    <ul className="grid gap-4">
+    <ul className={requestListClasses}>
       {requests.map((request) => (
         <li
           key={request.id}
-          className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-emerald-100 bg-white/70 p-5"
+          className={requestCardClasses}
         >
-          <div className="space-y-1 text-emerald-900">
-            <h4 className="text-base font-semibold">
+          <div className={requestCardBodyClasses}>
+            <h4 className={requestCardTitleClasses}>
               {role === "mentor"
                 ? request.journaler.name
                 : request.mentor.name}
             </h4>
-            <p className={`${getStatusToneClasses(request.status)} text-sm`}>
+            <p
+              className={`${getStatusToneClasses(
+                request.status
+              )} ${requestCardStatusClasses}`}
+            >
               {formatStatus(request.status)}
             </p>
             {request.message && (
-              <p className="text-sm text-emerald-900/70">“{request.message}”</p>
+              <p className={requestCardMessageClasses}>
+                “{request.message}”
+              </p>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className={requestCardActionsClasses}>
             {role === "mentor" && request.status === "pending" && (
               <>
                 <button
                   type="button"
-                  className={`${primaryButtonClasses} px-5 py-2.5 text-sm`}
+                  className={primaryButtonCompactClasses}
                   onClick={() => onAccept(request)}
                 >
                   Accept
                 </button>
                 <button
                   type="button"
-                  className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+                  className={secondaryButtonCompactClasses}
                   onClick={() => onDecline(request)}
                 >
                   Decline
@@ -62,14 +75,14 @@ function MentorRequestList({
               <>
                 <button
                   type="button"
-                  className={`${primaryButtonClasses} px-5 py-2.5 text-sm`}
+                  className={primaryButtonCompactClasses}
                   onClick={() => onConfirm(request)}
                 >
                   Confirm link
                 </button>
                 <button
                   type="button"
-                  className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+                  className={secondaryButtonCompactClasses}
                   onClick={() => onDecline(request)}
                 >
                   Decline
@@ -81,7 +94,7 @@ function MentorRequestList({
               typeof onEnd === "function" && (
                 <button
                   type="button"
-                  className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+                  className={secondaryButtonCompactClasses}
                   onClick={() => onEnd(request)}
                 >
                   End mentorship
