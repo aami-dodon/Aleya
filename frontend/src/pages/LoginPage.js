@@ -111,11 +111,10 @@ function LoginPage() {
             </label>
             <div className="text-right">
               <Link
-                to="/reset-password"
-                className={`${bodySmallStrongTextClasses} inline-flex items-center justify-end gap-1 text-emerald-700 underline decoration-emerald-300 decoration-2 underline-offset-4 transition hover:text-emerald-600`}
+                to="/forgot-password"
+                className={`${bodySmallStrongTextClasses} text-emerald-700 underline decoration-emerald-300 decoration-2 underline-offset-4 transition hover:text-emerald-600`}
               >
-                <span aria-hidden="true">Forgot your password?</span>
-                <span className="sr-only">Forgot your password? Reset it.</span>
+                Forgot password?
               </Link>
             </div>
             {error && (
