@@ -1,8 +1,15 @@
 import { Component } from "react";
 import {
-  bodySmallMutedTextClasses,
-  bodyTextClasses,
-  largeHeadingClasses,
+  buttonPadMdClasses,
+  errorActionsClasses,
+  errorCopyClasses,
+  errorDetailsClasses,
+  errorDetailsPanelClasses,
+  errorDetailsToggleClasses,
+  errorFooterClasses,
+  errorHeadingClasses,
+  errorPanelClasses,
+  errorShellClasses,
   primaryButtonClasses,
   secondaryButtonClasses,
 } from "../styles/ui";
@@ -162,48 +169,48 @@ class GlobalErrorBoundary extends Component {
     const detailContent = error?.stack || errorInfo || "";
 
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100 px-6 py-16">
-        <div className="w-full max-w-xl rounded-3xl border border-emerald-200/70 bg-white/80 p-10 text-center shadow-lg shadow-emerald-200/50 backdrop-blur">
-          <h1 className={`${largeHeadingClasses} text-emerald-900`}>We wandered into a thicket.</h1>
-          <p className={`${bodyTextClasses} mt-4 text-emerald-900/80`}>
+      <div className={errorShellClasses}>
+        <div className={errorPanelClasses}>
+          <h1 className={errorHeadingClasses}>We wandered into a thicket.</h1>
+          <p className={errorCopyClasses}>
             Something unexpected rustled the canopy. We have safely paused the experience
             so you can choose how to continue.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className={errorActionsClasses}>
             <button
               type="button"
-              className={`${primaryButtonClasses} px-6 py-2.5`}
+              className={`${primaryButtonClasses} ${buttonPadMdClasses}`}
               onClick={this.handleReset}
             >
               Try again
             </button>
             <button
               type="button"
-              className={`${secondaryButtonClasses} px-6 py-2.5`}
+              className={`${secondaryButtonClasses} ${buttonPadMdClasses}`}
               onClick={this.handleReload}
             >
               Return to the clearing
             </button>
           </div>
           {detailContent ? (
-            <div className="mt-8 text-left">
+            <div className={errorDetailsClasses}>
               <button
                 type="button"
-                className={`${bodyTextClasses} underline-offset-4 transition hover:underline`}
+                className={errorDetailsToggleClasses}
                 onClick={this.toggleDetails}
               >
                 {showDetails ? "Hide technical whispers" : "Show technical whispers"}
               </button>
               {showDetails ? (
                 <pre
-                  className={`${bodySmallMutedTextClasses} mt-4 max-h-48 overflow-auto rounded-2xl bg-emerald-50/80 p-4 text-sm leading-relaxed`}
+                  className={errorDetailsPanelClasses}
                 >
                   {detailContent}
                 </pre>
               ) : null}
             </div>
           ) : null}
-          <p className={`${bodySmallMutedTextClasses} mt-8`}>
+          <p className={errorFooterClasses}>
             If the path keeps closing, please share these details with the Aleya team so we can guide the light back home.
           </p>
         </div>

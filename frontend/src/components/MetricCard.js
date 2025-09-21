@@ -1,14 +1,20 @@
+import {
+  metricCardClasses,
+  metricCardDescriptionClasses,
+  metricCardDetailsClasses,
+  metricCardLabelClasses,
+  metricCardValueClasses,
+} from "../styles/ui";
+
 function MetricCard({ title, value, description, children }) {
   return (
-    <div className="rounded-2xl border border-emerald-100 bg-white/70 p-5 shadow-inner shadow-emerald-900/5">
-      <span className="text-xs font-semibold uppercase tracking-wide text-emerald-900/60">
-        {title}
-      </span>
-      <div className="mt-3 text-3xl font-bold text-emerald-900">{value}</div>
+    <div className={metricCardClasses}>
+      <span className={metricCardLabelClasses}>{title}</span>
+      <div className={metricCardValueClasses}>{value}</div>
       {description && (
-        <p className="mt-2 text-sm text-emerald-900/70">{description}</p>
+        <p className={metricCardDescriptionClasses}>{description}</p>
       )}
-      {children && <div className="mt-4 text-sm text-emerald-900/70">{children}</div>}
+      {children && <div className={metricCardDetailsClasses}>{children}</div>}
     </div>
   );
 }

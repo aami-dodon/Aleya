@@ -1,5 +1,16 @@
 import { useMemo, useState } from "react";
-import { chipBaseClasses, inputClasses } from "../styles/ui";
+import {
+  chipBaseClasses,
+  tagInputChipClasses,
+  tagInputContainerClasses,
+  tagInputEntryClasses,
+  tagInputFieldClasses,
+  tagInputGroupClasses,
+  tagInputLabelClasses,
+  tagInputRemoveButtonClasses,
+  tagInputSuggestionClasses,
+  tagInputSuggestionsContainerClasses,
+} from "../styles/ui";
 import { parseExpertise } from "../utils/expertise";
 
 function normaliseSuggestion(item) {
@@ -121,15 +132,15 @@ function TagInput({
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-emerald-200 bg-white/70 p-2 focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-100">
+    <div className={tagInputContainerClasses}>
+      <div className={tagInputFieldClasses}>
         {tags.map((tag) => (
-          <span key={tag} className={`${chipBaseClasses} flex items-center gap-2`}> 
+          <span key={tag} className={`${chipBaseClasses} ${tagInputChipClasses}`}>
             <span>{tag}</span>
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              className="rounded-full bg-emerald-100 px-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-200"
+              className={tagInputRemoveButtonClasses}
               aria-label={`Remove ${tag}`}
             >
               ✕
@@ -141,22 +152,22 @@ function TagInput({
           value={inputValue}
           onChange={(event) => setInputValue(event.target.value)}
           onKeyDown={handleKeyDown}
-          className={`${inputClasses} h-9 min-w-[140px] flex-1 border-none bg-transparent px-2 py-1 text-sm shadow-none focus:ring-0 mt-0`}
+          className={tagInputEntryClasses}
           placeholder={placeholder}
         />
       </div>
       {(matchingSuggestions.length > 0 || topSuggestions.length > 0) && (
-        <div className="space-y-2">
+        <div className={tagInputSuggestionsContainerClasses}>
           {matchingSuggestions.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-emerald-800/70">
+            <div className={tagInputGroupClasses}>
+              <span className={tagInputLabelClasses}>
                 Matching expertise:
               </span>
               {matchingSuggestions.map((suggestion) => (
                 <button
                   key={`match-${suggestion}`}
                   type="button"
-                  className={`${chipBaseClasses} transition hover:bg-emerald-100`}
+                  className={`${chipBaseClasses} ${tagInputSuggestionClasses}`}
                   onClick={() => addTag(suggestion)}
                 >
                   {suggestion}
@@ -165,15 +176,15 @@ function TagInput({
             </div>
           )}
           {topSuggestions.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-emerald-800/70">
+            <div className={tagInputGroupClasses}>
+              <span className={tagInputLabelClasses}>
                 Popular expertise:
               </span>
               {topSuggestions.map((suggestion) => (
                 <button
                   key={`top-${suggestion}`}
                   type="button"
-                  className={`${chipBaseClasses} transition hover:bg-emerald-100`}
+                  className={`${chipBaseClasses} ${tagInputSuggestionClasses}`}
                   onClick={() => addTag(suggestion)}
                 >
                   {suggestion}

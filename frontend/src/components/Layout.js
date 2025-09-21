@@ -3,14 +3,43 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import PanicButton from "./PanicButton";
 import {
-  bodySmallMutedTextClasses,
-  bodySmallStrongTextClasses,
-  captionTextClasses,
-  largeHeadingClasses,
-  primaryButtonClasses,
-  secondaryButtonClasses,
-  subtleButtonClasses,
+  appBrandClasses,
+  appFooterClasses,
+  appFooterContentClasses,
+  appHeaderClasses,
+  appHeaderInnerClasses,
+  appHeaderRowClasses,
+  appMainClasses,
+  appShellClasses,
+  authControlsClasses,
+  authControlsNameClasses,
+  authControlsRoleClasses,
+  authControlsTextClasses,
+  authControlsTextVerticalClasses,
+  authControlsVerticalClasses,
+  buttonBlockClasses,
+  buttonPadSmClasses,
+  buttonPadXsClasses,
+  headerActionsClasses,
   iconButtonClasses,
+  iconSmallClasses,
+  mobileActionsClasses,
+  mobileActionsToggleActiveClasses,
+  mobileMenuClasses,
+  mobileMenuDividerClasses,
+  mobileMenuPanelClasses,
+  mobileNavClasses,
+  mobileNavLinkActiveClasses,
+  mobileNavLinkClasses,
+  mobileNavLinkInactiveClasses,
+  primaryButtonClasses,
+  primaryNavClasses,
+  primaryNavLinkActiveClasses,
+  primaryNavLinkClasses,
+  primaryNavLinkInactiveClasses,
+  secondaryButtonClasses,
+  srOnlyClasses,
+  subtleButtonClasses,
 } from "../styles/ui";
 
 const roleNavigation = {
@@ -60,13 +89,16 @@ function Layout({ children }) {
     if (user) {
       const containerClasses =
         orientation === "vertical"
-          ? "flex flex-col gap-3"
-          : "flex items-center gap-4";
-      const textAlignment = orientation === "vertical" ? "text-left" : "text-right";
+          ? authControlsVerticalClasses
+          : authControlsClasses;
+      const textClasses =
+        orientation === "vertical"
+          ? authControlsTextVerticalClasses
+          : authControlsTextClasses;
       const buttonClasses =
         orientation === "vertical"
-          ? `${secondaryButtonClasses} w-full px-5 py-2.5 text-sm`
-          : `${secondaryButtonClasses} px-5 py-2.5 text-sm`;
+          ? `${secondaryButtonClasses} ${buttonPadSmClasses} ${buttonBlockClasses}`
+          : `${secondaryButtonClasses} ${buttonPadSmClasses}`;
 
       const handleLogoutClick = () => {
         handleLogout();
@@ -77,11 +109,9 @@ function Layout({ children }) {
 
       return (
         <div className={containerClasses}>
-          <div className={textAlignment}>
-            <span className={`block ${bodySmallStrongTextClasses} text-emerald-900`}>
-              {user.name}
-            </span>
-            <span className={`${captionTextClasses} text-emerald-900/60`}>{user.role}</span>
+          <div className={textClasses}>
+            <span className={authControlsNameClasses}>{user.name}</span>
+            <span className={authControlsRoleClasses}>{user.role}</span>
           </div>
           <button type="button" className={buttonClasses} onClick={handleLogoutClick}>
             Log out
@@ -92,18 +122,18 @@ function Layout({ children }) {
 
     const containerClasses =
       orientation === "vertical"
-        ? "flex flex-col gap-3"
-        : "flex flex-wrap items-center gap-3";
+        ? authControlsVerticalClasses
+        : authControlsClasses;
 
     const signInClasses =
       orientation === "vertical"
-        ? `${subtleButtonClasses} w-full justify-center px-4 py-2`
-        : `${subtleButtonClasses} px-4 py-2`;
+        ? `${subtleButtonClasses} ${buttonPadXsClasses} ${buttonBlockClasses}`
+        : `${subtleButtonClasses} ${buttonPadXsClasses}`;
 
     const joinClasses =
       orientation === "vertical"
-        ? `${primaryButtonClasses} w-full justify-center px-5 py-2.5 text-sm`
-        : `${primaryButtonClasses} px-5 py-2.5 text-sm`;
+        ? `${primaryButtonClasses} ${buttonPadSmClasses} ${buttonBlockClasses}`
+        : `${primaryButtonClasses} ${buttonPadSmClasses}`;
 
     const handleNavigate = () => {
       if (orientation === "vertical") {
@@ -124,29 +154,29 @@ function Layout({ children }) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-emerald-50 via-white to-emerald-100 text-emerald-950">
-      <header className="sticky top-0 z-30 border-b border-emerald-100 bg-white/85 backdrop-blur">
-        <div className="relative mx-auto w-full max-w-6xl px-6 py-3">
-          <div className="flex w-full items-center gap-3">
+    <div className={appShellClasses}>
+      <header className={appHeaderClasses}>
+        <div className={appHeaderInnerClasses}>
+          <div className={appHeaderRowClasses}>
             <button
               type="button"
-              className={`rounded-full border border-transparent bg-transparent leading-none tracking-tight text-emerald-700 transition hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 ${largeHeadingClasses}`}
+              className={appBrandClasses}
               onClick={() => navigate(user ? "/dashboard" : "/")}
             >
               Aleya
             </button>
             <nav
-              className={`hidden flex-1 items-center justify-center gap-1 md:flex ${bodySmallStrongTextClasses} text-emerald-900/70`}
+              className={primaryNavClasses}
             >
               {links.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
                   className={({ isActive }) =>
-                    `rounded-full px-4 py-2 transition ${
+                    `${primaryNavLinkClasses} ${
                       isActive
-                        ? "bg-emerald-100 text-emerald-800 shadow-inner shadow-emerald-900/10"
-                        : "text-emerald-900/70 hover:bg-emerald-50 hover:text-emerald-700"
+                        ? primaryNavLinkActiveClasses
+                        : primaryNavLinkInactiveClasses
                     }`
                   }
                 >
@@ -154,22 +184,22 @@ function Layout({ children }) {
                 </NavLink>
               ))}
             </nav>
-            <div className="hidden items-center gap-3 md:flex">
+            <div className={headerActionsClasses}>
               <PanicButton />
               <AuthControls />
             </div>
-            <div className="ml-auto flex items-center gap-3 md:hidden">
+            <div className={mobileActionsClasses}>
               <PanicButton />
               <button
                 type="button"
                 className={`${iconButtonClasses} ${
-                  isMobileMenuOpen ? "bg-emerald-600 text-white hover:text-white" : ""
-                }`}
+                  isMobileMenuOpen ? mobileActionsToggleActiveClasses : ""
+                }`.trim()}
                 onClick={toggleMobileMenu}
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-navigation"
               >
-                <span className="sr-only">
+                <span className={srOnlyClasses}>
                   {isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
                 </span>
                 {isMobileMenuOpen ? (
@@ -179,7 +209,7 @@ function Layout({ children }) {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.5"
-                    className="h-5 w-5"
+                    className={iconSmallClasses}
                     aria-hidden="true"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -191,7 +221,7 @@ function Layout({ children }) {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.5"
-                    className="h-5 w-5"
+                    className={iconSmallClasses}
                     aria-hidden="true"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -201,21 +231,21 @@ function Layout({ children }) {
             </div>
           </div>
           {isMobileMenuOpen && (
-            <div className="absolute left-0 right-0 top-full mt-3 md:hidden" id="mobile-navigation">
-              <div className="rounded-3xl border border-emerald-100 bg-white/95 p-4 shadow-xl shadow-emerald-900/10 backdrop-blur">
+            <div className={mobileMenuClasses} id="mobile-navigation">
+              <div className={mobileMenuPanelClasses}>
                 {links.length > 0 && (
                   <nav
-                    className={`flex flex-col gap-2 ${bodySmallStrongTextClasses} text-emerald-900/80`}
+                    className={mobileNavClasses}
                   >
                     {links.map((link) => (
                       <NavLink
                         key={link.to}
                         to={link.to}
                         className={({ isActive }) =>
-                          `rounded-full px-4 py-2 transition ${
+                          `${mobileNavLinkClasses} ${
                             isActive
-                              ? "bg-emerald-100 text-emerald-800 shadow-inner shadow-emerald-900/10"
-                              : "text-emerald-900/70 hover:bg-emerald-50 hover:text-emerald-700"
+                              ? mobileNavLinkActiveClasses
+                              : mobileNavLinkInactiveClasses
                           }`
                         }
                         onClick={closeMobileMenu}
@@ -225,7 +255,7 @@ function Layout({ children }) {
                     ))}
                   </nav>
                 )}
-                <div className="mt-4 border-t border-emerald-100/70 pt-4">
+                <div className={mobileMenuDividerClasses}>
                   <AuthControls orientation="vertical" onNavigate={closeMobileMenu} />
                 </div>
               </div>
@@ -233,13 +263,11 @@ function Layout({ children }) {
           )}
         </div>
       </header>
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-12">
+      <main className={appMainClasses}>
         {children}
       </main>
-      <footer className="border-t border-emerald-100 bg-white/70">
-        <div
-          className={`mx-auto w-full max-w-6xl px-6 py-6 text-center ${bodySmallMutedTextClasses} text-emerald-900/70`}
-        >
+      <footer className={appFooterClasses}>
+        <div className={appFooterContentClasses}>
           Tend your breath, follow the light, and share the harvest of your days.
         </div>
       </footer>

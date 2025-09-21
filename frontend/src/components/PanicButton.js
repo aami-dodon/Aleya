@@ -7,7 +7,23 @@ import {
   selectCompactClasses,
   textareaClasses,
   bodySmallMutedTextClasses,
-  bodySmallStrongTextClasses,
+  buttonPadSmClasses,
+  buttonPadXsClasses,
+  dialogActionsInlineClasses,
+  dialogBackdropClasses,
+  dialogBodyClasses,
+  dialogFieldClasses,
+  dialogFieldLabelClasses,
+  dialogFormClasses,
+  dialogHeaderClasses,
+  dialogHeadingGroupClasses,
+  dialogMessagesErrorClasses,
+  dialogMessagesSuccessClasses,
+  dialogPanelScrollClasses,
+  dialogPanelWideClasses,
+  dialogSubtitleClasses,
+  dialogTitleCompactClasses,
+  dialogCloseClasses,
 } from "../styles/ui";
 
 function PanicButton() {
@@ -113,7 +129,7 @@ function PanicButton() {
     <>
       <button
         type="button"
-        className={`${dangerButtonClasses} px-4 py-2 text-sm`}
+        className={`${dangerButtonClasses} ${buttonPadXsClasses}`}
         onClick={openDialog}
       >
         SOS
@@ -121,39 +137,36 @@ function PanicButton() {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-emerald-950/40 px-4 py-6 sm:px-6 sm:py-10"
+          className={dialogBackdropClasses}
           role="dialog"
           aria-modal="true"
           aria-labelledby="sos-dialog-heading"
           onClick={closeDialog}
         >
           <div
-            className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl"
+            className={dialogPanelWideClasses}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="max-h-[min(85vh,40rem)] overflow-y-auto p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <h2
-                    id="sos-dialog-heading"
-                    className="text-xl font-semibold text-emerald-900"
-                  >
+            <div className={dialogPanelScrollClasses}>
+              <div className={dialogHeaderClasses}>
+                <div className={dialogHeadingGroupClasses}>
+                  <h2 id="sos-dialog-heading" className={dialogTitleCompactClasses}>
                     Send a flare for support
                   </h2>
-                  <p className={bodySmallMutedTextClasses}>
+                  <p className={dialogSubtitleClasses}>
                     Choose a linked mentor and share why you need immediate care so they can arrive prepared.
                   </p>
                 </div>
                 <button
                   type="button"
-                  className={`${secondaryButtonClasses} px-4 py-2 text-sm`}
+                  className={`${secondaryButtonClasses} ${dialogCloseClasses}`}
                   onClick={closeDialog}
                 >
                   Close
                 </button>
               </div>
 
-              <div className="mt-6 space-y-4">
+              <div className={dialogBodyClasses}>
                 {loading && (
                   <p className={bodySmallMutedTextClasses}>Calling your mentors…</p>
                 )}
@@ -165,9 +178,9 @@ function PanicButton() {
                 )}
 
                 {hasContacts && (
-                  <form className="space-y-5" onSubmit={handleSubmit}>
-                    <div className="space-y-2">
-                      <label className={bodySmallStrongTextClasses} htmlFor="sos-mentor">
+                  <form className={dialogFormClasses} onSubmit={handleSubmit}>
+                    <div className={dialogFieldClasses}>
+                      <label className={dialogFieldLabelClasses} htmlFor="sos-mentor">
                         Reach out to
                       </label>
                       <select
@@ -186,8 +199,8 @@ function PanicButton() {
                       </select>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className={bodySmallStrongTextClasses} htmlFor="sos-message">
+                    <div className={dialogFieldClasses}>
+                      <label className={dialogFieldLabelClasses} htmlFor="sos-message">
                         What do they need to know?
                       </label>
                       <textarea
@@ -202,17 +215,17 @@ function PanicButton() {
                     </div>
 
                     {error && (
-                      <p className="text-sm text-rose-600">{error}</p>
+                      <p className={dialogMessagesErrorClasses}>{error}</p>
                     )}
 
                     {success && (
-                      <p className="text-sm text-emerald-600">{success}</p>
+                      <p className={dialogMessagesSuccessClasses}>{success}</p>
                     )}
 
-                    <div className="flex justify-end gap-3">
+                    <div className={dialogActionsInlineClasses}>
                       <button
                         type="button"
-                        className={`${secondaryButtonClasses} px-5 py-2.5 text-sm`}
+                        className={`${secondaryButtonClasses} ${buttonPadSmClasses}`}
                         onClick={closeDialog}
                         disabled={sending}
                       >
@@ -220,7 +233,7 @@ function PanicButton() {
                       </button>
                       <button
                         type="submit"
-                        className={`${dangerButtonClasses} px-5 py-2.5 text-sm`}
+                        className={`${dangerButtonClasses} ${buttonPadSmClasses}`}
                         disabled={sending}
                       >
                         {sending ? "Sending…" : "Send SOS lantern"}
@@ -230,7 +243,7 @@ function PanicButton() {
                 )}
 
                 {error && !hasContacts && (
-                  <p className="text-sm text-rose-600">{error}</p>
+                  <p className={dialogMessagesErrorClasses}>{error}</p>
                 )}
               </div>
             </div>

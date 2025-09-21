@@ -1,5 +1,15 @@
 import { format, parseISO } from "date-fns";
-import { emptyStateClasses } from "../styles/ui";
+import {
+  emptyStateClasses,
+  moodChartContainerClasses,
+  moodChartLegendClasses,
+  moodChartLegendCopyClasses,
+  moodChartLegendDateClasses,
+  moodChartLegendDotClasses,
+  moodChartLegendItemClasses,
+  moodChartLegendLabelClasses,
+  moodChartVisualClasses,
+} from "../styles/ui";
 
 const MOOD_COLORS = {
   happy: "#2f855a",
@@ -51,10 +61,10 @@ function MoodTrendChart({ data = [] }) {
     .join(" ");
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={moodChartContainerClasses}>
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="h-40 w-full"
+        className={moodChartVisualClasses}
         role="img"
       >
         <path d={path} fill="none" stroke="#047857" strokeWidth="2" />
@@ -68,18 +78,18 @@ function MoodTrendChart({ data = [] }) {
           />
         ))}
       </svg>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className={moodChartLegendClasses}>
         {points.slice(-4).map((point) => (
-          <div key={point.date} className="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-white/70 px-3 py-2">
+          <div key={point.date} className={moodChartLegendItemClasses}>
             <span
-              className="h-2.5 w-2.5 rounded-full"
+              className={moodChartLegendDotClasses}
               style={{ background: point.color }}
             />
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-emerald-900">
+            <div className={moodChartLegendCopyClasses}>
+              <p className={moodChartLegendLabelClasses}>
                 {point.label || "—"}
               </p>
-              <p className="text-xs text-emerald-900/60">
+              <p className={moodChartLegendDateClasses}>
                 {format(parseISO(point.date), "MMM d")}
               </p>
             </div>
