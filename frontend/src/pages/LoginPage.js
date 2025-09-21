@@ -109,6 +109,14 @@ function LoginPage() {
                 placeholder="Enter your password"
               />
             </label>
+            <div className="flex justify-end">
+              <Link
+                to="/forgot-password"
+                className={`${bodySmallStrongTextClasses} text-emerald-700 transition hover:text-emerald-600`}
+              >
+                Forgot your password?
+              </Link>
+            </div>
             {error && (
               <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
                 {error}
