@@ -112,9 +112,10 @@ function LoginPage() {
             <div className="text-right">
               <Link
                 to="/reset-password"
-                className={`${bodySmallStrongTextClasses} text-emerald-700 transition hover:text-emerald-600`}
+                className={`${bodySmallStrongTextClasses} inline-flex items-center justify-end gap-1 text-emerald-700 underline decoration-emerald-300 decoration-2 underline-offset-4 transition hover:text-emerald-600`}
               >
-                Forgot your password?
+                <span aria-hidden="true">Forgot your password?</span>
+                <span className="sr-only">Forgot your password? Reset it.</span>
               </Link>
             </div>
             {error && (
