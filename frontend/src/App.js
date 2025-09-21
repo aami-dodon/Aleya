@@ -5,7 +5,7 @@ import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import JournalerDashboard from "./pages/JournalerDashboard";
 import MentorDashboard from "./pages/MentorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -50,6 +50,20 @@ function ProtectedRoute({ roles, children }) {
   return children;
 }
 
+function PublicOnlyRoute({ children, redirectTo = "/dashboard" }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingState label="Lighting the Aleya path" />;
+  }
+
+  if (user) {
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  return children;
+}
+
 function AppRoutes() {
   const { user } = useAuth();
 
@@ -63,23 +77,27 @@ function AppRoutes() {
           />
           <Route
             path="/login"
-            element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+            element={
+              <PublicOnlyRoute>
+                <LoginPage />
+              </PublicOnlyRoute>
+            }
           />
           <Route
             path="/forgot-password"
             element={
-              user ? <Navigate to="/dashboard" replace /> : <ResetPasswordPage />
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              user ? <Navigate to="/dashboard" replace /> : <ResetPasswordPage />
+              <PublicOnlyRoute>
+                <ForgotPasswordPage />
+              </PublicOnlyRoute>
             }
           />
           <Route
             path="/register"
-            element={user ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
+            element={
+              <PublicOnlyRoute>
+                <RegisterPage />
+              </PublicOnlyRoute>
+            }
           />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route

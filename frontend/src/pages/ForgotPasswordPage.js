@@ -14,7 +14,7 @@ import {
   secondaryButtonClasses,
 } from "../styles/ui";
 
-function ResetPasswordPage() {
+function ForgotPasswordPage() {
   const [searchParams] = useSearchParams();
   const rawToken = searchParams.get("token");
   const token = rawToken ? rawToken.trim() : "";
@@ -273,7 +273,7 @@ function ResetPasswordPage() {
               <p className={`mt-4 text-center ${bodySmallMutedTextClasses} text-emerald-900/70`}>
                 Need a fresh link?{" "}
                 <Link
-                  to="/reset-password"
+                  to="/forgot-password"
                   className="font-semibold text-emerald-700 transition hover:text-emerald-600"
                 >
                   Request another reset email
@@ -311,4 +311,4 @@ function ResetPasswordPage() {
   );
 }
 
-export default ResetPasswordPage;
+export default ForgotPasswordPage;
