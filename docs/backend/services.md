@@ -9,7 +9,7 @@
 
 ## utils/emailTemplates
 - **Location:** `backend/src/utils/emailTemplates.js`
-- **Role:** Centralises HTML/text templates for verification, mentor entry alerts, and digest emails to keep Aleya branding consistent.
+- **Role:** Centralises HTML/text templates for verification, password reset, mentor entry alerts, and digest emails to keep Aleya branding consistent.
 
 ## utils/mailer
 - **Location:** `backend/src/utils/mailer.js`

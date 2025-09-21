@@ -2,6 +2,7 @@
 
 - `/` → `LandingPage` (public)
 - `/login` → `LoginPage` (public)
+- `/forgot-password` → `ForgotPasswordPage` (public)
 - `/register` → `RegisterPage` (public)
 - `/verify-email` → `VerifyEmailPage` (public token processing)
 - `/dashboard` → role router (`JournalerDashboard`, `MentorDashboard`, `AdminDashboard`) (protected)

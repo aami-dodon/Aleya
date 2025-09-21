@@ -8,7 +8,10 @@ const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 const { logger } = require("../utils/logger");
 const { sendEmail } = require("../utils/mailer");
-const { createVerificationEmail } = require("../utils/emailTemplates");
+const {
+  createVerificationEmail,
+  createPasswordResetEmail,
+} = require("../utils/emailTemplates");
 
 const router = express.Router();
 
@@ -36,6 +39,24 @@ function resolveVerificationTtlHours() {
 }
 
 const VERIFICATION_TOKEN_TTL_HOURS = resolveVerificationTtlHours();
+
+const DEFAULT_PASSWORD_RESET_TOKEN_TTL_HOURS = 2;
+
+function resolvePasswordResetTtlHours() {
+  const raw = process.env.PASSWORD_RESET_TTL_HOURS;
+  if (!raw) {
+    return DEFAULT_PASSWORD_RESET_TOKEN_TTL_HOURS;
+  }
+
+  const parsed = Number.parseInt(raw, 10);
+  if (Number.isNaN(parsed) || parsed <= 0) {
+    return DEFAULT_PASSWORD_RESET_TOKEN_TTL_HOURS;
+  }
+
+  return parsed;
+}
+
+const PASSWORD_RESET_TOKEN_TTL_HOURS = resolvePasswordResetTtlHours();
 
 function buildVerificationLink(token) {
   const explicit = process.env.EMAIL_VERIFICATION_URL;
@@ -67,6 +88,42 @@ function buildVerificationLink(token) {
   } catch (error) {
     return `http://localhost:3000/verify-email?token=${encodeURIComponent(token)}`;
   }
+}
+
+function buildPasswordResetLink(token) {
+  const explicit = process.env.PASSWORD_RESET_URL;
+
+  if (explicit) {
+    try {
+      const url = new URL(explicit);
+      url.searchParams.set("token", token);
+      return url.toString();
+    } catch (error) {
+      logger.warn("Invalid PASSWORD_RESET_URL configured: %s", explicit, {
+        error: error.message,
+      });
+    }
+  }
+
+  const fallbackBase =
+    process.env.APP_BASE_URL ||
+    process.env.FRONTEND_URL ||
+    (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",")[0].trim() : null) ||
+    "http://localhost:3000";
+
+  try {
+    const baseUrl = new URL(fallbackBase);
+    const trimmedPath = baseUrl.pathname.replace(/\/$/, "");
+    baseUrl.pathname = `${trimmedPath}/reset-password`;
+    baseUrl.searchParams.set("token", token);
+    return baseUrl.toString();
+  } catch (error) {
+    return `http://localhost:3000/reset-password?token=${encodeURIComponent(token)}`;
+  }
+}
+
+function hashToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
 }
 
 function splitExpertiseTags(value) {
@@ -393,6 +450,87 @@ router.post(
       return res.json({ token, user });
     } catch (error) {
       return next(error);
+    }
+  }
+);
+
+router.post(
+  "/forgot-password",
+  [body("email").isEmail().withMessage("A valid email is required")],
+  async (req, res) => {
+    if (!handleValidation(req, res)) return;
+
+    const email = String(req.body.email).trim().toLowerCase();
+
+    try {
+      const { rows } = await pool.query(
+        `SELECT id, name
+         FROM users
+         WHERE LOWER(email) = LOWER($1)
+         LIMIT 1`,
+        [email]
+      );
+
+      if (!rows.length) {
+        return res.json({
+          message: "If that email is registered, a reset link has been sent.",
+        });
+      }
+
+      const user = rows[0];
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      const tokenHash = hashToken(rawToken);
+      const expiresAt = new Date(
+        Date.now() + PASSWORD_RESET_TOKEN_TTL_HOURS * 60 * 60 * 1000
+      );
+
+      await pool.query(
+        `INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (user_id)
+         DO UPDATE SET
+           token_hash = EXCLUDED.token_hash,
+           expires_at = EXCLUDED.expires_at,
+           created_at = NOW()`,
+        [user.id, tokenHash, expiresAt]
+      );
+
+      const resetUrl = buildPasswordResetLink(rawToken);
+      const expiresText =
+        PASSWORD_RESET_TOKEN_TTL_HOURS === 1
+          ? "1 hour"
+          : `${PASSWORD_RESET_TOKEN_TTL_HOURS} hours`;
+
+      const { subject, text, html } = createPasswordResetEmail({
+        recipientName: user.name,
+        resetUrl,
+        expiresText,
+      });
+
+      await sendEmail(
+        req.app,
+        {
+          to: email,
+          subject,
+          text,
+          html,
+        },
+        { type: "password-reset", email }
+      );
+
+      logger.info("Sent password reset email", { userId: user.id, email });
+
+      return res.json({
+        message: "If that email is registered, a reset link has been sent.",
+      });
+    } catch (error) {
+      logger.error("Failed to send password reset email", {
+        error: error.message,
+        email,
+      });
+      return res.status(500).json({
+        error: "We couldn't process that request right now. Please try again later.",
+      });
     }
   }
 );

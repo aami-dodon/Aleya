@@ -10,6 +10,11 @@
 - **Request:** `{ email, password }`
 - **Response:** `200` with `{ token, user }` once verified. If unverified, resends verification token and returns `403`.
 
+### POST /api/auth/forgot-password
+- **Request:** `{ email }`
+- **Response:** `200` with success copy even when the account is missing; stores a hashed reset token with a rolling expiry and emails the Aleya-branded reset link when the user exists.
+- **Notes:** Token lifetime defaults to 2 hours but honours `PASSWORD_RESET_TTL_HOURS`; reset links use `PASSWORD_RESET_URL` or the configured app base URL fallbacks.
+
 ### POST /api/auth/verify-email
 - **Request:** `{ token }`
 - **Response:** `200` with success message; clears verification hash on success.

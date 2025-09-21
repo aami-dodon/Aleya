@@ -1,5 +1,11 @@
 # Backend Change Log
 
+## Password reset invitations (2025-09-30)
+- Added `POST /api/auth/forgot-password` to generate time-bound reset tokens, persist them in
+  `password_reset_tokens`, and email mentors or journalers a themed reset link via the mailer.
+- Bootstrapping now provisions the `password_reset_tokens` table and supporting indexes so
+  container starts automatically enforce expiry and lookup integrity.
+
 ## Container session resets (2025-09-24)
 - Each API process now issues a unique `X-Aleya-Boot-Id` header generated at startup. Clients use this identifier to detect
   container restarts and invalidate cached authentication state.

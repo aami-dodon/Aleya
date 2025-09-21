@@ -7,7 +7,7 @@
 
 ## Schema
 - Canonical reference lives in `backend/docs/schema.sql` (see [Models](./models.md)).
-- Tables cover users, mentor profiles/requests/links, journal forms + fields, assignments, entries, and entry comments.
+- Tables cover users, password reset tokens, mentor profiles/requests/links, journal forms + fields, assignments, entries, and entry comments.
 
 ## Migrations & Seeding
 - No migration framework bundled; apply `schema.sql` manually or via external tools.

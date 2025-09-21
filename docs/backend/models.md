@@ -6,6 +6,13 @@
 - `is_verified`, `verification_token_hash`, `verification_token_expires_at`
 - Timestamps: `created_at`, `updated_at`
 
+## password_reset_tokens
+- `user_id` (PK, FK → users, cascades on delete)
+- `token_hash`
+- `expires_at`
+- `created_at`
+- Indexes: unique hash (`idx_password_reset_tokens_hash`), expiry lookup (`idx_password_reset_tokens_expires_at`)
+
 ## mentor_profiles
 - `user_id` (PK, FK → users)
 - `expertise`, `availability`, `bio`
