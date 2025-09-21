@@ -15,6 +15,11 @@
 - **Response:** `200` with success copy even when the account is missing; stores a hashed reset token with a rolling expiry and emails the Aleya-branded reset link when the user exists.
 - **Notes:** Token lifetime defaults to 2 hours but honours `PASSWORD_RESET_TTL_HOURS`; reset links use `PASSWORD_RESET_URL` or the configured app base URL fallbacks.
 
+### POST /api/auth/reset-password
+- **Request:** `{ token, password, confirmPassword }`
+- **Response:** `200` with a confirmation message when the hashed token matches an unexpired record; clears the stored token once the password updates.
+- **Notes:** Rejects missing or expired tokens with `400`; password hashing mirrors registration and honours the reset TTL cleanup.
+
 ### POST /api/auth/verify-email
 - **Request:** `{ token }`
 - **Response:** `200` with success message; clears verification hash on success.

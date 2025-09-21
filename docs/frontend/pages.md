@@ -15,6 +15,12 @@
 - **Components:** Single-field request form with Aleya copy, status banners, and CTA redirect back to login.
 - **APIs:** `apiClient.post("/auth/forgot-password")` submits the email directly without AuthContext involvement.
 
+## ResetPasswordPage
+- **Route:** `/reset-password`
+- **Components:** Token-aware form that validates password length and confirmation, surfaces status banners, and offers a sign-in
+  link after success.
+- **APIs:** `apiClient.post("/auth/reset-password")` exchanges the emailed token for a refreshed password.
+
 ## RegisterPage
 - **Route:** `/register`
 - **Components:** Multi-step role selector, mentor expertise fields with `TagInput`, timezone select.
