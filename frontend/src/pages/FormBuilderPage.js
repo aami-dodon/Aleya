@@ -300,23 +300,8 @@ function FormBuilderPage() {
 
   const handleCreateForm = async (event) => {
     event.preventDefault();
-    const payload = {
-      ...formDraft,
-      fields: formDraft.fields.map((field) => {
-        if (field.fieldType !== "select") {
-          return field;
-        }
-
-        const cleanedOptions = field.options
-          .map((option) => option.trim())
-          .filter(Boolean);
-
-        return { ...field, options: cleanedOptions };
-      }),
-    };
-
     try {
-      await apiClient.post("/forms", payload, token);
+      await apiClient.post("/forms", formDraft, token);
       setFormDraft({ title: "", description: "", fields: [createField()] });
       await load();
       setMessage("Form created successfully.");
@@ -450,23 +435,16 @@ function FormBuilderPage() {
                       type="text"
                       className={inputCompactClasses}
                       value={field.options.join(", ")}
-                      onChange={(event) => {
-                        const rawSegments = event.target.value.split(",");
-                        const normalizedSegments = rawSegments.map((segment) =>
-                          segment.trim()
-                        );
-                        const keepTrailingEmpty =
-                          rawSegments.length > 1 &&
-                          rawSegments[rawSegments.length - 1].trim() === "";
-                        const nextOptions = normalizedSegments.filter(
-                          (segment, segmentIndex) =>
-                            segment ||
-                            (keepTrailingEmpty &&
-                              segmentIndex === normalizedSegments.length - 1)
-                        );
-
-                        handleFieldChange(index, "options", nextOptions);
-                      }}
+                      onChange={(event) =>
+                        handleFieldChange(
+                          index,
+                          "options",
+                          event.target
+                            .value.split(",")
+                            .map((opt) => opt.trim())
+                            .filter(Boolean)
+                        )
+                      }
                     />
                   </label>
                 )}
