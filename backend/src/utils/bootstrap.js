@@ -17,6 +17,12 @@ const createTableStatements = [
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )`,
+  `CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      token_hash TEXT NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
   `CREATE TABLE IF NOT EXISTS mentor_profiles (
       user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
       expertise TEXT,
@@ -89,6 +95,8 @@ const createTableStatements = [
   `CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date ON journal_entries (journaler_id, entry_date DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_mentor_assignments_journaler ON mentor_form_assignments (journaler_id)`,
   `CREATE INDEX IF NOT EXISTS idx_mentor_links_journaler ON mentor_links (journaler_id)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_password_reset_tokens_hash ON password_reset_tokens (token_hash)`,
+  `CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires_at ON password_reset_tokens (expires_at)`,
   `ALTER TABLE mentor_requests DROP CONSTRAINT IF EXISTS mentor_requests_status_check`,
   `ALTER TABLE mentor_requests ADD CONSTRAINT mentor_requests_status_check CHECK (status IN ('pending','mentor_accepted','confirmed','declined','ended'))`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE`,

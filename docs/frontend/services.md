@@ -4,7 +4,7 @@
 - **Location:** `frontend/src/api/client.js`
 - **Exports:** `get`, `post`, `patch`, `del`, `request`.
 - **Behavior:** Prefixes requests with `process.env.REACT_APP_API_URL` (defaults to `http://localhost:5000/api`), attaches JSON headers, propagates bearer tokens, and normalises error payloads.
-- **Consumers:** `AuthContext`, dashboards, mentorship flows, forms builder, panic alerts.
+- **Consumers:** `AuthContext`, Forgot/Reset Password flows, dashboards, mentorship flows, forms builder, panic alerts.
 
 ## expertise utils
 - **Location:** `frontend/src/utils/expertise.js`

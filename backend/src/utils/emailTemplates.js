@@ -526,11 +526,61 @@ function createVerificationEmail({ recipientName, verificationUrl, expiresText }
   };
 }
 
+function createPasswordResetEmail({ recipientName, resetUrl, expiresText }) {
+  const normalizedName =
+    typeof recipientName === "string" && recipientName.trim().length
+      ? recipientName.trim()
+      : "there";
+  const safeName = escapeHtml(normalizedName);
+  const safeExpires = escapeHtml(expiresText);
+  const safeUrl = escapeHtml(resetUrl);
+
+  const contentHtml = `
+    <p class="paragraph">Hi ${safeName},</p>
+    <p class="paragraph">
+      We received a request to reset your Aleya password. Follow the path below
+      to set a fresh password and return to your grove.
+    </p>
+    <div class="cta">
+      <a class="button" href="${resetUrl}">Reset password</a>
+    </div>
+    <p class="paragraph muted">
+      If the button above doesn't open, copy and paste this link into your
+      browser:
+      <span class="link-alt">${safeUrl}</span>
+    </p>
+    <p class="paragraph">
+      This link expires in ${safeExpires}. If you didn't request a reset, you
+      can safely ignore this email and your password will remain the same.
+    </p>
+  `;
+
+  const html = renderEmailLayout({
+    title: "Reset your Aleya password",
+    previewText: "Follow this link to refresh your Aleya password.",
+    contentHtml,
+  });
+
+  const text =
+    `Hi ${normalizedName},\n\n` +
+    "We received a request to reset your Aleya password. Use the link below to choose a new password:\n" +
+    `${resetUrl}\n\n` +
+    `This link expires in ${expiresText}. If you didn't request a reset, you can ignore this email and your password will remain the same.\n\n` +
+    "Rooted in care,\nThe Aleya team";
+
+  return {
+    subject: `${SUBJECT_PREFIX} Reset your Aleya password`,
+    text,
+    html,
+  };
+}
+
 module.exports = {
   SUBJECT_PREFIX,
   escapeHtml,
   renderEmailLayout,
   createVerificationEmail,
+  createPasswordResetEmail,
   createMentorEntryNotificationEmail,
   createMentorDigestEmail,
 };
