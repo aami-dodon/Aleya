@@ -1,5 +1,6 @@
 import {
   inputCompactClasses,
+  mutedTextClasses,
   secondaryButtonClasses,
   subtleButtonClasses,
 } from "../styles/ui";
@@ -13,13 +14,27 @@ function SelectOptionsEditor({
   onOptionCommit,
   onOptionRemove,
 }) {
+
+  const labelId = `${field.uiId}-options-label`;
+  const hintId = `${field.uiId}-options-hint`;
+  const draftInputId = `${field.uiId}-option-draft`;
+
   return (
-    <div className="space-y-2">
-      <span className="block text-sm font-semibold text-emerald-900/80">
-        Options
-      </span>
+    <div className="space-y-3">
+      <label
+        id={labelId}
+        htmlFor={draftInputId}
+        className="block text-sm font-semibold text-emerald-900/80"
+      >
+        Choices
+      </label>
+      <p id={hintId} className={`${mutedTextClasses} text-xs`}>
+        Add each choice individually below and use the button to place it in
+        the list.
+      </p>
       {field.options.length > 0 && (
-        <ul className="space-y-2">
+        <ul className="space-y-2" aria-labelledby={labelId}>
+
           {field.options.map((option, optionIndex) => (
             <li
               key={`${field.uiId}-option-${optionIndex}`}
@@ -29,6 +44,7 @@ function SelectOptionsEditor({
                 type="text"
                 className={`${inputCompactClasses} flex-1`}
                 value={option}
+                aria-label={`Choice ${optionIndex + 1}`}
                 onChange={(event) =>
                   onOptionChange(optionIndex, event.target.value)
                 }
@@ -48,6 +64,7 @@ function SelectOptionsEditor({
       <div className="flex flex-col gap-2 sm:flex-row">
         <input
           type="text"
+          id={draftInputId}
           className={`${inputCompactClasses} flex-1`}
           value={draftValue}
           onChange={(event) => onDraftChange(event.target.value)}
@@ -58,6 +75,7 @@ function SelectOptionsEditor({
             }
           }}
           placeholder="Add a choice"
+          aria-describedby={hintId}
         />
         <button
           type="button"
