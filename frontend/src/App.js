@@ -5,6 +5,7 @@ import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import JournalerDashboard from "./pages/JournalerDashboard";
 import MentorDashboard from "./pages/MentorDashboard";
@@ -64,6 +65,12 @@ function AppRoutes() {
           <Route
             path="/login"
             element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+          />
+          <Route
+            path="/reset-password"
+            element={
+              user ? <Navigate to="/dashboard" replace /> : <ResetPasswordPage />
+            }
           />
           <Route
             path="/reset-password"
