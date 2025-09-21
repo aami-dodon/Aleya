@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import apiClient from "../api/client";
 import LoadingState from "../components/LoadingState";
 import SectionCard from "../components/SectionCard";
+import SelectOptionsEditor from "../components/SelectOptionsEditor";
 import { useAuth } from "../context/AuthContext";
 import {
   checkboxClasses,
@@ -508,71 +509,23 @@ function FormBuilderPage() {
                   />
                 </label>
                 {field.fieldType === "select" && (
-                  <div className="space-y-2">
-                    <span className="block text-sm font-semibold text-emerald-900/80">
-                      Options
-                    </span>
-                    {field.options.length > 0 && (
-                      <ul className="space-y-2">
-                        {field.options.map((option, optionIndex) => (
-                          <li
-                            key={`${field.uiId}-option-${optionIndex}`}
-                            className="flex items-center gap-2"
-                          >
-                            <input
-                              type="text"
-                              className={`${inputCompactClasses} flex-1`}
-                              value={option}
-                              onChange={(event) =>
-                                updateSelectOption(
-                                  index,
-                                  optionIndex,
-                                  event.target.value
-                                )
-                              }
-                              onBlur={() =>
-                                commitSelectOption(index, optionIndex)
-                              }
-                            />
-                            <button
-                              type="button"
-                              className={`${subtleButtonClasses} px-3 py-1 text-xs`}
-                              onClick={() =>
-                                removeSelectOption(index, optionIndex)
-                              }
-                            >
-                              Remove
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      <input
-                        type="text"
-                        className={`${inputCompactClasses} flex-1`}
-                        value={optionDrafts[field.uiId] || ""}
-                        onChange={(event) =>
-                          setOptionDraftValue(field.uiId, event.target.value)
-                        }
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") {
-                            event.preventDefault();
-                            addSelectOption(index);
-                          }
-                        }}
-                        placeholder="Add a choice"
-                      />
-                      <button
-                        type="button"
-                        className={`${secondaryButtonClasses} px-4 py-2 text-sm`}
-                        onClick={() => addSelectOption(index)}
-                        disabled={!(optionDrafts[field.uiId] || "").trim()}
-                      >
-                        Add option
-                      </button>
-                    </div>
-                  </div>
+                  <SelectOptionsEditor
+                    field={field}
+                    draftValue={optionDrafts[field.uiId] || ""}
+                    onDraftChange={(value) =>
+                      setOptionDraftValue(field.uiId, value)
+                    }
+                    onAddOption={() => addSelectOption(index)}
+                    onOptionChange={(optionIndex, value) =>
+                      updateSelectOption(index, optionIndex, value)
+                    }
+                    onOptionCommit={(optionIndex) =>
+                      commitSelectOption(index, optionIndex)
+                    }
+                    onOptionRemove={(optionIndex) =>
+                      removeSelectOption(index, optionIndex)
+                    }
+                  />
                 )}
                 {formDraft.fields.length > 1 && (
                   <button
