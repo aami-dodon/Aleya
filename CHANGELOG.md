@@ -1,5 +1,10 @@
 # Changelog
 
+## 2025-10-16
+
+- Added `/api/auth/forgot-password` so visitors can request hashed, expiring reset links, wired the Aleya-branded email template, and documented the new env knobs for base URLs + TTL overrides across the backend knowledge base and AGENT notes.
+- Refreshed the frontend guides to cover the Forgot Password page and route so contributors know how the UI requests reset links without AuthContext wiring.
+
 ## 2025-10-15
 
 - Added a root `backend/index.js` shim so Docker and nodemon resolve the backend entrypoint consistently now that the actual server lives in `src/index.js`, and documented the expectation in `backend/AGENTS.md` for future updates.

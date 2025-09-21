@@ -10,6 +10,11 @@
 - **Components:** Styled form using Tailwind tokens; navigation copy plus CTA grid.
 - **APIs:** `authContext.login()` → `POST /api/auth/login`.
 
+## ForgotPasswordPage
+- **Route:** `/forgot-password`
+- **Components:** Single-field request form with Aleya copy, status banners, and CTA redirect back to login.
+- **APIs:** `apiClient.post("/auth/forgot-password")` submits the email directly without AuthContext involvement.
+
 ## RegisterPage
 - **Route:** `/register`
 - **Components:** Multi-step role selector, mentor expertise fields with `TagInput`, timezone select.

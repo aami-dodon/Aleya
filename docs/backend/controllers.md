@@ -3,7 +3,7 @@
 Aleya routes co-locate controller logic with Express routers. Key handlers include:
 
 ## AuthController (`backend/src/routes/auth.js`)
-- Validates registration/login payloads, hashes passwords, manages email verification tokens, and hydrates mentor profiles.
+- Validates registration/login payloads, hashes passwords, manages verification + password reset tokens, and hydrates mentor profiles.
 - Provides profile CRUD for authenticated users and admin mentor profile listings.
 
 ## FormsController (`backend/src/routes/forms.js`)

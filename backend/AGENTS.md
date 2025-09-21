@@ -4,6 +4,7 @@
 - When changing backend routes or utilities, run `node --check <file>` on the touched modules to catch syntax issues early.
 - Keep mentor panic alert flows consistent with mentor escalation requirements and ensure new middleware is added as individual arguments instead of wrapped arrays when Express parsing causes issues.
 - Document all backend changes in `docs/Wiki.md` so future contributors understand the context behind updates.
+- Password reset requests now mint hashed tokens into `password_reset_tokens` and send Aleya-branded emails via `createPasswordResetEmail`; update the backend/frontend docs and env notes when adjusting this flow.
 - Mentor registrations no longer pass through a `mentor_approvals` table or admin review routes—please avoid reintroducing that flow. New mentors should remain immediately active after verification.
 - Transactional emails must be composed through `utils/emailTemplates.js` so the Aleya theme, preheader copy, and `[Aleya]` subject
   prefix stay consistent across messages. Extend that helper when introducing new mail types instead of crafting ad-hoc HTML.
