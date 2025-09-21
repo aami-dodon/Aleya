@@ -2,6 +2,14 @@ import {
   cardContainerClasses,
   sectionSubtitleClasses,
   sectionTitleClasses,
+  sectionCardActionsClasses,
+  sectionCardContentClasses,
+  sectionCardContentOffsetClasses,
+  sectionCardHeaderBetweenClasses,
+  sectionCardHeaderClasses,
+  sectionCardHeaderEndClasses,
+  sectionCardHeadingGroupClasses,
+  sectionCardIconClasses,
 } from "../styles/ui";
 
 function SectionCard({
@@ -20,30 +28,36 @@ function SectionCard({
   const headingClassName = [sectionTitleClasses, titleClassName]
     .filter(Boolean)
     .join(" ");
+  const headerAlignmentClass = showHeaderText
+    ? sectionCardHeaderBetweenClasses
+    : sectionCardHeaderEndClasses;
+  const headerClasses = `${sectionCardHeaderClasses} ${headerAlignmentClass}`.trim();
+  const contentClasses = [
+    sectionCardContentClasses,
+    showHeader ? sectionCardContentOffsetClasses : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <section ref={sectionRef} className={`${cardContainerClasses} w-full`}>
       {showHeader && (
-        <div
-          className={`flex flex-wrap items-center gap-4 ${
-            showHeaderText ? "justify-between" : "justify-end"
-          }`}
-        >
+        <div className={headerClasses}>
           {showHeaderText && (
-            <div className="space-y-1">
+            <div className={sectionCardHeadingGroupClasses}>
               <h2 ref={titleRef} className={headingClassName} {...restTitleProps}>
                 {icon && (
-                  <span className="mr-2 inline-flex items-center">{icon}</span>
+                  <span className={sectionCardIconClasses}>{icon}</span>
                 )}
                 {title}
               </h2>
               {subtitle && <p className={sectionSubtitleClasses}>{subtitle}</p>}
             </div>
           )}
-          {action && <div className="flex items-center gap-3">{action}</div>}
+          {action && <div className={sectionCardActionsClasses}>{action}</div>}
         </div>
       )}
-      <div className={`${showHeader ? "mt-6" : ""} space-y-4`}>{children}</div>
+      <div className={contentClasses}>{children}</div>
     </section>
   );
 }

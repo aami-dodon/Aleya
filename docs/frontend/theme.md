@@ -14,10 +14,13 @@
 - `form-label` keeps input guidance in Emerald 900/80 for accessibility.
 
 ## Component Tokens
-- Buttons: `btn-primary`, `btn-secondary`, `btn-subtle`, `btn-danger`, and circular `icon-button` share rounded 2xl shapes and motion hover states.
-- Forms: `form-input`, `form-input-compact`, `form-select`, `form-select-compact`, `form-textarea`, `form-checkbox` apply frosted backgrounds and emerald focus rings.
-- Feedback + layout: `empty-state`, `card-container`, `table-header`, `table-row`, `chip-base`, `badge-base`, `section-title`, `section-subtitle` keep admin tables, cards, and chips consistent.
-- Status helpers: `getMoodBadgeClasses`, `getShareChipClasses`, and `getStatusToneClasses` map moods, share levels, and mentor request states to Tailwind utility blends.
+- Buttons: `btn-primary`, `btn-secondary`, `btn-subtle`, `btn-danger`, and circular `icon-button` share rounded 2xl shapes and motion hover states; compact variants (`btn-primary-compact`, `btn-secondary-compact`) plus padding helpers (`button-pad-*`), layout utilities (`button-block`, `button-responsive`), and `icon-sm` keep actions balanced across contexts.
+- Layout & navigation: `app-shell`, `app-header*`, `primary-nav*`, `mobile-menu*`, `auth-controls*`, and spacing helpers (`stack-*`, `cluster-*`) orchestrate the shell, navigation, and responsive spacing.
+- Forms: `form-input`, `form-input-compact`, `form-select`, `form-select-compact`, `form-textarea`, `form-checkbox`, and support classes (`form-*` helpers, status banners, `form-actions`) apply frosted backgrounds, emerald focus rings, and consistent feedback styling.
+- Feedback + layout: `empty-state`, `card-container`, `table-header`, `table-row`, `chip-base`, `badge-base`, `section-title`, `section-subtitle`, `section-card__*`, `error-*`, and `dialog-*` keep admin tables, cards, dialogs, and fallbacks consistent.
+- Dashboard metrics and charts: `metric-card*`, `mood-chart*` (including `mood-chart__legend-copy`), and `loading-state*` unify stats, sparklines, and loading affordances across dashboards.
+- Interactive lists & inputs: `request-list`, `request-card*`, `request-status--*`, and `tag-input*` align mentorship requests and chip-style inputs with the shared emerald styling.
+- Status helpers: `getMoodBadgeClasses`, `getShareChipClasses`, and `getStatusToneClasses` now return CSS token blends (`badge-mood-*`, `chip-share-*`, `request-status--*`) so components never reach for raw Tailwind utilities.
 
 ## Motion & Depth
 - Buttons ease upward with subtle translate-y hover states and focus outlines.
