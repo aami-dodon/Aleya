@@ -1,5 +1,7 @@
 # Config
 
+An example environment file lives at `backend/.env.example`; copy it to `.env` and update the values that differ for your setup.
+
 ## Core
 - `PORT` – Express port (defaults to `5000`).
 - `DATABASE_URL` – PostgreSQL connection string (required).
