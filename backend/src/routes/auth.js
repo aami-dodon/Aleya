@@ -15,6 +15,10 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "development-secret";
 const REGISTER_ROLES = ["journaler", "mentor"];
 
+router.get("/session", (req, res) => {
+  res.json({ bootId: req.app.locals.bootId || null });
+});
+
 const DEFAULT_VERIFICATION_TOKEN_TTL_HOURS = 48;
 
 function resolveVerificationTtlHours() {

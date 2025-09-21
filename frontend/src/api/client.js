@@ -1,3 +1,5 @@
+import { trackBootId } from "../utils/sessionVersion";
+
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 async function request(path, { method = "GET", data, token, headers = {} } = {}) {
@@ -18,6 +20,10 @@ async function request(path, { method = "GET", data, token, headers = {} } = {})
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, config);
+  const bootId = response.headers.get("x-aleya-boot-id");
+  if (bootId) {
+    trackBootId(bootId);
+  }
   const text = await response.text();
   let payload;
 
