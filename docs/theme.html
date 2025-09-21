@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aleya Theme Showcase</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer base {
+        body {
+          @apply m-0 min-h-screen bg-emerald-50 font-sans text-emerald-950 antialiased;
+        }
+
+        a {
+          @apply text-emerald-700 no-underline;
+        }
+
+        a:hover {
+          @apply text-emerald-600 underline;
+        }
+
+        * {
+          @apply box-border;
+        }
+      }
+
+      @layer components {
+        .btn-primary {
+          @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:translate-y-0 disabled:opacity-60;
+        }
+
+        .btn-danger {
+          @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-rose-500/20 transition hover:-translate-y-0.5 hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 disabled:translate-y-0 disabled:opacity-60;
+        }
+
+        .btn-secondary {
+          @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-white/70 px-6 py-3.5 text-base font-semibold text-emerald-700 shadow-sm shadow-emerald-900/10 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:translate-y-0 disabled:opacity-60;
+        }
+
+        .btn-subtle {
+          @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-transparent px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:-translate-y-0.5 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:translate-y-0 disabled:opacity-60;
+        }
+
+        .icon-button {
+          @apply inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-white/80 text-emerald-700 shadow-sm shadow-emerald-900/10 transition hover:border-emerald-300 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600;
+        }
+
+        .form-input {
+          @apply mt-2 w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-3 text-base text-emerald-900 shadow-sm transition placeholder:text-emerald-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
+        }
+
+        .form-input-compact {
+          @apply w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-2.5 text-sm text-emerald-900 shadow-sm transition placeholder:text-emerald-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
+        }
+
+        .form-textarea {
+          @apply mt-2 w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-3 text-base text-emerald-900 shadow-sm transition placeholder:text-emerald-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
+        }
+
+        .form-select {
+          @apply mt-2 w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-3 text-base text-emerald-900 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
+        }
+
+        .form-select-compact {
+          @apply w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-2.5 text-sm text-emerald-900 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
+        }
+
+        .form-checkbox {
+          @apply h-5 w-5 rounded-md border-emerald-200 text-emerald-600 focus:ring-emerald-500;
+        }
+
+        .text-info {
+          @apply text-sm text-emerald-900/70;
+        }
+
+        .text-muted {
+          @apply text-sm text-emerald-900/60;
+        }
+
+        .empty-state {
+          @apply rounded-2xl border border-emerald-100 bg-white/60 p-6 text-center text-sm font-medium text-emerald-900/70;
+        }
+
+        .chip-base {
+          @apply inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700;
+        }
+
+        .badge-base {
+          @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize tracking-wide;
+        }
+
+        .table-header {
+          @apply hidden items-center gap-4 text-sm font-semibold text-emerald-900/70 md:grid;
+          grid-template-columns: var(
+              --table-grid,
+              minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)
+            );
+        }
+
+        .table-row {
+          @apply flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-white/70 px-4 py-4 text-sm text-emerald-900 md:grid md:items-center md:gap-4 md:py-3;
+          grid-template-columns: var(
+              --table-grid,
+              minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)
+            );
+        }
+
+        .card-container {
+          @apply rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-lg shadow-emerald-900/10 backdrop-blur;
+        }
+
+        .section-title {
+          @apply text-2xl font-semibold text-emerald-950;
+        }
+
+        .section-subtitle {
+          @apply mt-1 text-sm text-emerald-900/70;
+        }
+
+        .text-display {
+          @apply text-4xl font-bold tracking-tight sm:text-5xl;
+        }
+
+        .text-heading-lg {
+          @apply text-3xl font-semibold;
+        }
+
+        .text-heading-md {
+          @apply text-2xl font-semibold;
+        }
+
+        .text-heading-sm {
+          @apply text-xl font-semibold;
+        }
+
+        .text-heading-xs {
+          @apply text-lg font-semibold;
+        }
+
+        .text-body-lg {
+          @apply text-lg leading-relaxed;
+        }
+
+        .text-body {
+          @apply text-base leading-relaxed;
+        }
+
+        .text-body-sm {
+          @apply text-sm;
+        }
+
+        .text-body-sm-strong {
+          @apply text-sm font-semibold;
+        }
+
+        .text-eyebrow {
+          @apply text-sm font-semibold uppercase tracking-[0.2em];
+        }
+
+        .text-caption {
+          @apply text-xs font-semibold uppercase tracking-wide;
+        }
+
+        .form-label {
+          @apply text-sm font-semibold text-emerald-900/80;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-emerald-100/60 pb-24">
+      <header class="bg-white/70 shadow-sm shadow-emerald-900/10">
+        <div class="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-12 sm:flex-row sm:items-end sm:justify-between">
+          <div class="space-y-3">
+            <p class="text-eyebrow text-emerald-600">Aleya Theme</p>
+            <h1 class="text-display">Visual token garden</h1>
+            <p class="max-w-2xl text-body text-emerald-900/80">
+              This living guide mirrors the Tailwind component layer in
+              <code class="rounded-md bg-emerald-100/80 px-1.5 py-0.5 text-xs">src/index.css</code>,
+              making it easy to audit typography, colors, and shared UI patterns.
+              Pair it with the written docs under
+              <code class="rounded-md bg-emerald-100/80 px-1.5 py-0.5 text-xs">docs/frontend/theme.md</code>
+              when evolving the design system.
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="btn-secondary">Download tokens</button>
+            <button class="btn-primary">Open Figma source</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="mx-auto mt-16 flex max-w-6xl flex-col gap-16 px-6">
+        <section class="space-y-6">
+          <div>
+            <p class="text-eyebrow text-emerald-600">Palette</p>
+            <h2 class="text-heading-lg">Luminous canopy</h2>
+            <p class="text-body text-emerald-900/80">
+              Gradients, accent washes, and elevated surfaces anchor the product in calm emerald light.
+              Use this grid to sample foreground/background contrasts and hover moments.
+            </p>
+          </div>
+          <div class="grid gap-6 md:grid-cols-3">
+            <article class="card-container space-y-4 bg-gradient-to-br from-emerald-50 to-emerald-100">
+              <span class="chip-base bg-emerald-100 text-emerald-700">Background wash</span>
+              <div class="space-y-1">
+                <h3 class="text-heading-sm">Forest mist</h3>
+                <p class="text-body-sm text-emerald-900/70">
+                  Base layout surfaces breathing room with subtle gradient layers.
+                </p>
+              </div>
+              <div class="flex gap-3">
+                <div class="h-12 flex-1 rounded-2xl bg-emerald-50"></div>
+                <div class="h-12 flex-1 rounded-2xl bg-emerald-100"></div>
+              </div>
+            </article>
+            <article class="card-container space-y-4 bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-400 text-white">
+              <span class="chip-base bg-white/20 text-white">Primary</span>
+              <div class="space-y-1">
+                <h3 class="text-heading-sm text-white">Emerald action</h3>
+                <p class="text-body-sm text-white/80">
+                  Use for primary buttons, key CTAs, and active navigation states.
+                </p>
+              </div>
+              <div class="flex gap-3">
+                <div class="h-12 flex-1 rounded-2xl bg-emerald-600"></div>
+                <div class="h-12 flex-1 rounded-2xl bg-emerald-500"></div>
+              </div>
+            </article>
+            <article class="card-container space-y-4 bg-gradient-to-br from-rose-500 via-rose-600 to-rose-700 text-white">
+              <span class="chip-base bg-white/20 text-white">Danger</span>
+              <div class="space-y-1">
+                <h3 class="text-heading-sm text-white">SOS accents</h3>
+                <p class="text-body-sm text-white/80">
+                  Reserve for destructive choices and urgent confirmation prompts.
+                </p>
+              </div>
+              <div class="flex gap-3">
+                <div class="h-12 flex-1 rounded-2xl bg-rose-500"></div>
+                <div class="h-12 flex-1 rounded-2xl bg-rose-600"></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="grid gap-8 lg:grid-cols-2">
+          <div class="space-y-6">
+            <div>
+              <p class="text-eyebrow text-emerald-600">Typography scale</p>
+              <h2 class="text-heading-lg">Story-first rhythm</h2>
+              <p class="text-body text-emerald-900/80">
+                Each token pairs Poppins weight with relaxed leading to keep copy lyrical yet clear.
+              </p>
+            </div>
+            <div class="space-y-6 rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-sm">
+              <div class="space-y-2">
+                <p class="text-eyebrow">Display</p>
+                <p class="text-display">Under the emerald canopy</p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-caption">Headings</p>
+                <p class="text-heading-lg">Heading large wakes the senses</p>
+                <p class="text-heading-md">Heading medium guides reflection</p>
+                <p class="text-heading-sm">Heading small anchors card titles</p>
+                <p class="text-heading-xs">Heading xs supports inline callouts</p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-caption">Body</p>
+                <p class="text-body-lg">
+                  Body large carries longer narratives with gentle pacing and open tracking.
+                </p>
+                <p class="text-body">
+                  Body is the daily companion for product copy, balancing warmth with clarity.
+                </p>
+                <p class="text-body-sm">
+                  Body small slips into secondary meta details like helper notes or captions.
+                </p>
+                <p class="text-body-sm-strong">
+                  Body small strong keeps emphasis approachable without shouting.
+                </p>
+              </div>
+              <div class="flex gap-4">
+                <span class="text-eyebrow">Eyebrow</span>
+                <span class="text-caption">Caption</span>
+                <span class="form-label">Form label</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <div>
+              <p class="text-eyebrow text-emerald-600">Buttons & icons</p>
+              <h2 class="text-heading-lg">Interactive glow</h2>
+              <p class="text-body text-emerald-900/80">
+                Rounded-2xl edges, soft shadows, and hover lift cues reinforce the handcrafted feel.
+              </p>
+            </div>
+            <div class="rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-sm">
+              <div class="flex flex-wrap gap-4">
+                <button class="btn-primary">Primary action</button>
+                <button class="btn-secondary">Secondary action</button>
+                <button class="btn-subtle">Subtle affordance</button>
+                <button class="btn-danger">Destructive</button>
+                <button class="icon-button" aria-label="Add">
+                  <span class="text-xl">+</span>
+                </button>
+              </div>
+              <div class="mt-6 grid gap-4 sm:grid-cols-2">
+                <div class="rounded-2xl border border-emerald-100 bg-white/70 p-4 text-sm text-emerald-900/70">
+                  Buttons use <code>transition</code> and <code>shadow</code> utilities to lift on hover.
+                </div>
+                <div class="rounded-2xl border border-emerald-100 bg-white/70 p-4 text-sm text-emerald-900/70">
+                  Pair primary actions with a secondary escape hatch for accessibility and calm.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid gap-8 lg:grid-cols-2">
+          <div class="space-y-6">
+            <div>
+              <p class="text-eyebrow text-emerald-600">Form tokens</p>
+              <h2 class="text-heading-lg">Guided inputs</h2>
+              <p class="text-body text-emerald-900/80">
+                Frosted backgrounds with emerald focus rings keep interactions grounded.
+              </p>
+            </div>
+            <form class="space-y-6 rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-sm">
+              <div>
+                <label class="form-label" for="full-name">Full name</label>
+                <input class="form-input" id="full-name" placeholder="Rowan Willow" />
+                <p class="text-info mt-2">Helper text and inline validation use <code>text-info</code>.</p>
+              </div>
+              <div class="grid gap-6 sm:grid-cols-2">
+                <div>
+                  <label class="form-label" for="role">Role</label>
+                  <select class="form-select" id="role">
+                    <option>Journaler</option>
+                    <option>Mentor</option>
+                    <option>Admin steward</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label" for="focus-area">Focus area</label>
+                  <select class="form-select-compact" id="focus-area">
+                    <option>Mindful routines</option>
+                    <option>Creative bloom</option>
+                    <option>Grounding breath</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="form-label" for="bio">Guiding story</label>
+                <textarea class="form-textarea" id="bio" rows="4" placeholder="Share how you nurture growth"></textarea>
+              </div>
+              <label class="flex items-center gap-3 text-body-sm" for="updates">
+                <input class="form-checkbox" id="updates" type="checkbox" checked />
+                Receive canopy updates
+              </label>
+            </form>
+          </div>
+
+          <div class="space-y-6">
+            <div>
+              <p class="text-eyebrow text-emerald-600">Cards & tables</p>
+              <h2 class="text-heading-lg">Structured clarity</h2>
+              <p class="text-body text-emerald-900/80">
+                Shared helpers keep admin inventory calm on both mobile and desktop.
+              </p>
+            </div>
+            <div class="space-y-6">
+              <div class="card-container space-y-4">
+                <h3 class="text-heading-sm">Mentor overview</h3>
+                <p class="text-body text-emerald-900/75">
+                  Card containers add blur and subtle shadow depth for key summary surfaces.
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="chip-base">Mindful growth</span>
+                  <span class="chip-base">Creative bloom</span>
+                  <span class="chip-base">Nighttime calm</span>
+                </div>
+                <button class="btn-subtle text-sm">View profile</button>
+              </div>
+
+              <div class="space-y-3 rounded-3xl border border-emerald-100 bg-white/80 p-6 shadow-sm">
+                <div class="table-header" style="--table-grid: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)">
+                  <span>Form</span>
+                  <span>Shared</span>
+                  <span>Status</span>
+                </div>
+                <div class="table-row" style="--table-grid: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)">
+                  <div class="space-y-1">
+                    <p class="text-body-sm-strong">Morning intention</p>
+                    <p class="text-muted">Daily reflection • 5 prompts</p>
+                  </div>
+                  <span class="badge-base bg-emerald-100 text-emerald-700">Mentor</span>
+                  <span class="badge-base bg-amber-100 text-amber-700">Awaiting review</span>
+                </div>
+                <div class="table-row" style="--table-grid: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)">
+                  <div class="space-y-1">
+                    <p class="text-body-sm-strong">Harvest gratitude</p>
+                    <p class="text-muted">Weekly • 7 prompts</p>
+                  </div>
+                  <span class="badge-base bg-teal-100 text-teal-700">Mentor &amp; mentee</span>
+                  <span class="badge-base bg-sky-100 text-sky-700">Shared</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="space-y-6">
+          <div>
+            <p class="text-eyebrow text-emerald-600">Empty states & feedback</p>
+            <h2 class="text-heading-lg">Gentle guidance</h2>
+            <p class="text-body text-emerald-900/80">
+              Empty states and helper text keep the product supportive when content is light.
+            </p>
+          </div>
+          <div class="grid gap-6 md:grid-cols-2">
+            <div class="empty-state">
+              <p class="text-heading-sm text-emerald-800">No journals yet</p>
+              <p class="mt-3 text-body text-emerald-900/70">
+                When a mentee hasn’t shared reflections, offer a poetic prompt to nudge first steps.
+              </p>
+              <button class="btn-primary mt-4">Invite to begin</button>
+            </div>
+            <div class="rounded-3xl border border-emerald-100 bg-white/80 p-6 shadow-sm">
+              <p class="text-heading-sm">Alert badge</p>
+              <p class="text-body text-emerald-900/75">
+                Combine <code>badge-base</code> with mood helpers to surface state changes.
+              </p>
+              <div class="mt-4 flex flex-wrap gap-3">
+                <span class="badge-base bg-emerald-100 text-emerald-700">Calm</span>
+                <span class="badge-base bg-amber-100 text-amber-700">Attention</span>
+                <span class="badge-base bg-rose-100 text-rose-700">Urgent</span>
+                <span class="badge-base bg-sky-100 text-sky-700">Shared</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="mt-24 border-t border-emerald-200/70 bg-white/70">
+        <div class="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-8 text-sm text-emerald-900/70 sm:flex-row sm:items-center sm:justify-between">
+          <p>Keep this showcase updated whenever new tokens or helpers land in <code>src/index.css</code>.</p>
+          <a class="btn-subtle" href="../frontend/theme.md">View written guidelines</a>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
