@@ -53,9 +53,14 @@
 - **Request:** `{ title, description?, fields: [{ label, fieldType, required?, options?, helperText? }], visibility? }`
 - **Response:** `201` with `{ form }` newly created (visibility defaults to `mentor`).
 
+### PUT /api/forms/:id
+- **Auth:** Mentor (owner)
+- **Request:** `{ title, description?, fields: [{ label, fieldType, required?, options?, helperText? }] }`
+- **Response:** `{ form }` with refreshed prompts once ownership is confirmed; default templates remain locked.
+
 ### DELETE /api/forms/:id
 - **Auth:** Mentor (owner)
-- **Response:** `{ success: true }` once the mentor-owned form is removed.
+- **Response:** `{ success: true }` once the mentor-owned, non-default form is removed.
 
 ### POST /api/forms/:formId/assign
 - **Auth:** Mentor (owner)
@@ -67,9 +72,8 @@
 - **Response:** `{ success: true }` removing a specific mentee assignment.
 
 ### DELETE /api/forms/:formId/assignment
-- **Auth:** Mentor (owner)
-- **Query:** `journalerId`
-- **Response:** `{ success: true }` fallback for removing a mentee when the composite id is not known client-side.
+- **Auth:** Journaler (self)
+- **Response:** `{ success: true }` when a journaler unlinks a non-default form from their dashboard.
 
 ## Journal Entries
 ### POST /api/journal-entries
