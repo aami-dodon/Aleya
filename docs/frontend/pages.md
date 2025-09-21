@@ -71,7 +71,7 @@
 - **Route:** `/forms`
 - **Components:** Mentor form composer for creation; admin stewardship table of all forms and mentee assignments.
 - **APIs:**
-  - Mentor: `GET /api/forms`, `POST /api/forms` to create new prompts, `DELETE /api/forms/:id` to archive mentor-authored templates, `POST /api/forms/:formId/assign` to map mentees, `DELETE /api/forms/:formId/assign/:journalerId` or `DELETE /api/forms/:formId/assignment` to unassign.
+  - Mentor: `GET /api/forms`, `POST /api/forms` to create new prompts, `PUT /api/forms/:id` to refresh existing templates, `DELETE /api/forms/:id` to archive mentor-authored templates, `POST /api/forms/:formId/assign` to map mentees, `DELETE /api/forms/:formId/assign/:journalerId` to unlink mentees.
   - Admin: `GET /api/admin/forms`, `PATCH /api/admin/forms/:id` to update visibility/flags, `DELETE /api/admin/forms/:id` to remove non-default forms.
 
 ## SettingsPage

@@ -242,6 +242,130 @@ router.post(
   }
 );
 
+router.put(
+  "/:formId",
+  authenticate,
+  requireRole("mentor"),
+  fieldValidators,
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const formId = Number.parseInt(req.params.formId, 10);
+    if (!Number.isInteger(formId)) {
+      return res.status(400).json({ error: "Invalid form id" });
+    }
+
+    const { title, description, fields } = req.body;
+    const sanitizedFields = Array.isArray(fields)
+      ? fields
+          .map((field) => {
+            if (!field) {
+              return null;
+            }
+
+            const label = typeof field.label === "string" ? field.label.trim() : "";
+            const fieldType = typeof field.fieldType === "string" ? field.fieldType : "";
+
+            if (!label || !fieldType) {
+              return null;
+            }
+
+            const helperText =
+              typeof field.helperText === "string"
+                ? field.helperText.trim() || null
+                : null;
+
+            const options = Array.isArray(field.options)
+              ? field.options
+                  .map((option) =>
+                    typeof option === "string"
+                      ? option.trim()
+                      : String(option ?? "").trim()
+                  )
+                  .filter((option) => option.length)
+              : [];
+
+            return {
+              label,
+              fieldType,
+              required: Boolean(field.required),
+              helperText,
+              options,
+            };
+          })
+          .filter(Boolean)
+      : [];
+
+    if (!sanitizedFields.length) {
+      return res.status(400).json({ error: "At least one valid field is required" });
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const { rows } = await client.query(
+        `SELECT created_by, is_default FROM journal_forms WHERE id = $1`,
+        [formId]
+      );
+
+      if (!rows.length) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "Form not found" });
+      }
+
+      const form = rows[0];
+
+      if (form.created_by !== req.user.id) {
+        await client.query("ROLLBACK");
+        return res.status(403).json({ error: "You can only update your own forms" });
+      }
+
+      if (form.is_default) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({ error: "Default forms cannot be edited" });
+      }
+
+      await client.query(
+        `UPDATE journal_forms SET title = $1, description = $2 WHERE id = $3`,
+        [title, description || null, formId]
+      );
+
+      await client.query(`DELETE FROM journal_form_fields WHERE form_id = $1`, [formId]);
+
+      for (const field of sanitizedFields) {
+        await client.query(
+          `INSERT INTO journal_form_fields (form_id, label, field_type, required, options, helper_text)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [
+            formId,
+            field.label,
+            field.fieldType,
+            field.required,
+            JSON.stringify(field.options || []),
+            field.helperText,
+          ]
+        );
+      }
+
+      await client.query("COMMIT");
+
+      const [updated] = await fetchForms("WHERE f.id = $1", [formId]);
+
+      return res.json({ form: updated });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      return next(error);
+    } finally {
+      client.release();
+    }
+  }
+);
+
 router.post(
   "/:formId/assign",
   authenticate,
@@ -324,6 +448,41 @@ router.delete(
     }
   }
 );
+
+router.delete("/:formId", authenticate, requireRole("mentor"), async (req, res, next) => {
+  const formId = Number.parseInt(req.params.formId, 10);
+
+  if (!Number.isInteger(formId)) {
+    return res.status(400).json({ error: "Invalid form id" });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT created_by, is_default FROM journal_forms WHERE id = $1`,
+      [formId]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ error: "Form not found" });
+    }
+
+    const form = rows[0];
+
+    if (form.created_by !== req.user.id) {
+      return res.status(403).json({ error: "You can only delete your own forms" });
+    }
+
+    if (form.is_default) {
+      return res.status(400).json({ error: "Default forms cannot be deleted" });
+    }
+
+    await pool.query(`DELETE FROM journal_forms WHERE id = $1`, [formId]);
+
+    return res.json({ success: true });
+  } catch (error) {
+    return next(error);
+  }
+});
 
 router.delete(
   "/:formId/assignment",

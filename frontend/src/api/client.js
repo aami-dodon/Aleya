@@ -43,6 +43,8 @@ const apiClient = {
   get: (path, token, config = {}) => request(path, { ...config, method: "GET", token }),
   post: (path, data, token, config = {}) =>
     request(path, { ...config, method: "POST", data, token }),
+  put: (path, data, token, config = {}) =>
+    request(path, { ...config, method: "PUT", data, token }),
   patch: (path, data, token, config = {}) =>
     request(path, { ...config, method: "PATCH", data, token }),
   del: (path, token, config = {}) => {
