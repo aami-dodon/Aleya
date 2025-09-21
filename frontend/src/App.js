@@ -5,7 +5,6 @@ import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import JournalerDashboard from "./pages/JournalerDashboard";
 import MentorDashboard from "./pages/MentorDashboard";
@@ -67,7 +66,7 @@ function AppRoutes() {
             element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />}
           />
           <Route
-            path="/reset-password"
+            path="/forgot-password"
             element={
               user ? <Navigate to="/dashboard" replace /> : <ResetPasswordPage />
             }
@@ -82,66 +81,66 @@ function AppRoutes() {
             path="/register"
             element={user ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
           />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardRouter />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/journal/history"
-              element={
-                <ProtectedRoute roles={["journaler", "mentor"]}>
-                  <JournalHistoryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mentorship"
-              element={
-                <ProtectedRoute roles={["journaler", "mentor", "admin"]}>
-                  <MentorConnectionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/journalers"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <JournalerManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/journals"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <JournalAdminPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/forms"
-              element={
-                <ProtectedRoute roles={["mentor", "admin"]}>
-                  <FormBuilderPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute roles={["journaler", "mentor", "admin"]}>
-                  <SettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Layout>
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardRouter />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/journal/history"
+            element={
+              <ProtectedRoute roles={["journaler", "mentor"]}>
+                <JournalHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mentorship"
+            element={
+              <ProtectedRoute roles={["journaler", "mentor", "admin"]}>
+                <MentorConnectionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/journalers"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <JournalerManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/journals"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <JournalAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms"
+            element={
+              <ProtectedRoute roles={["mentor", "admin"]}>
+                <FormBuilderPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute roles={["journaler", "mentor", "admin"]}>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Layout>
     </GlobalErrorBoundary>
   );
 }
