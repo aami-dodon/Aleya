@@ -14,6 +14,7 @@ function SelectOptionsEditor({
   onOptionCommit,
   onOptionRemove,
 }) {
+
   const labelId = `${field.uiId}-options-label`;
   const hintId = `${field.uiId}-options-hint`;
   const draftInputId = `${field.uiId}-option-draft`;
@@ -33,6 +34,7 @@ function SelectOptionsEditor({
       </p>
       {field.options.length > 0 && (
         <ul className="space-y-2" aria-labelledby={labelId}>
+
           {field.options.map((option, optionIndex) => (
             <li
               key={`${field.uiId}-option-${optionIndex}`}
