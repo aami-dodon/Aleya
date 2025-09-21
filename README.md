@@ -16,7 +16,7 @@ A live demo is available here: [Demo App](https://aleya.dodon.in)
 
 ### Landing Page
 
-![Landing Page](docs/screenshots/Web-Aleya.pngWeb-Aleya.png)
+![Landing Page](docs/screenshots/Web-Aleya.png)
 
 
 
