@@ -27,6 +27,10 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function formatExpiresText(hours) {
+  return hours === 1 ? "1 hour" : `${hours} hours`;
+}
+
 function renderEmailLayout({ title, previewText, contentHtml, footerHtml }) {
   const safeTitle = escapeHtml(title || "Aleya");
   const safePreviewText = escapeHtml(previewText || "Rooted in care with Aleya.");
@@ -526,11 +530,61 @@ function createVerificationEmail({ recipientName, verificationUrl, expiresText }
   };
 }
 
+function createPasswordResetEmail({ recipientName, resetUrl, expiresText }) {
+  const normalizedName =
+    typeof recipientName === "string" && recipientName.trim().length
+      ? recipientName.trim()
+      : "there";
+  const safeName = escapeHtml(normalizedName);
+  const safeExpires = escapeHtml(expiresText);
+  const safeUrl = escapeHtml(resetUrl);
+
+  const contentHtml = `
+    <p class="paragraph">Hi ${safeName},</p>
+    <p class="paragraph">
+      We received a request to reset your Aleya password. Follow the path below
+      to plant a new one and regain access to your reflections.
+    </p>
+    <div class="cta">
+      <a class="button" href="${resetUrl}">Choose a new password</a>
+    </div>
+    <p class="paragraph muted">
+      If the button above doesn't open, copy and paste this link into your
+      browser: <span class="link-alt">${safeUrl}</span>
+    </p>
+    <p class="paragraph">
+      This link expires in ${safeExpires}. If you didn't ask for a reset, you
+      can safely ignore this email and your password will stay the same.
+    </p>
+  `;
+
+  const html = renderEmailLayout({
+    title: "Reset your Aleya password",
+    previewText: "Reset your Aleya password before the link fades.",
+    contentHtml,
+  });
+
+  const text =
+    `Hi ${normalizedName},\n\n` +
+    "We received a request to reset your Aleya password. Choose a new one by visiting the link below:\n" +
+    `${resetUrl}\n\n` +
+    `This link expires in ${expiresText}. If you didn't request a reset, you can ignore this email and your password will remain unchanged.\n\n` +
+    "Rooted in care,\nThe Aleya team";
+
+  return {
+    subject: `${SUBJECT_PREFIX} Reset your password`,
+    text,
+    html,
+  };
+}
+
 module.exports = {
   SUBJECT_PREFIX,
   escapeHtml,
   renderEmailLayout,
+  formatExpiresText,
   createVerificationEmail,
+  createPasswordResetEmail,
   createMentorEntryNotificationEmail,
   createMentorDigestEmail,
 };

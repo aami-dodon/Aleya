@@ -111,7 +111,7 @@ function LoginPage() {
             </label>
             <div className="text-right">
               <Link
-                to="/forgot-password"
+                to="/reset-password"
                 className={`${bodySmallStrongTextClasses} text-emerald-700 transition hover:text-emerald-600`}
               >
                 Forgot your password?
