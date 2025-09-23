@@ -69,7 +69,11 @@ function Layout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const links = user ? roleNavigation[user.role] || [] : [];
+  const commonLinks = [{ to: "/contact", label: "Contact" }];
+  const links = [
+    ...(user ? roleNavigation[user.role] || [] : []),
+    ...commonLinks,
+  ];
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {

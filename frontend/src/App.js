@@ -23,6 +23,7 @@ import FormBuilderPage from "./pages/FormBuilderPage";
 import SettingsPage from "./pages/SettingsPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import LoadingState from "./components/LoadingState";
+import ContactPage from "./pages/ContactPage";
 
 function DashboardRouter() {
   const { user } = useAuth();
@@ -92,6 +93,7 @@ function AppRoutes() {
               user ? <Navigate to="/dashboard" replace /> : <RegisterPage />
             }
           />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route
             path="/dashboard"
