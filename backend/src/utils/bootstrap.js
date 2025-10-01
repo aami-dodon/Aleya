@@ -92,6 +92,19 @@ const createTableStatements = [
       comment TEXT NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`,
+  `CREATE TABLE IF NOT EXISTS social_accounts (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      provider TEXT NOT NULL CHECK (provider IN ('google', 'facebook')),
+      provider_id TEXT NOT NULL,
+      provider_email TEXT,
+      provider_name TEXT,
+      profile_data JSONB DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (provider, provider_id),
+      UNIQUE (user_id, provider)
+    )`,
   `CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date ON journal_entries (journaler_id, entry_date DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_mentor_assignments_journaler ON mentor_form_assignments (journaler_id)`,
   `CREATE INDEX IF NOT EXISTS idx_mentor_links_journaler ON mentor_links (journaler_id)`,
@@ -102,7 +115,11 @@ const createTableStatements = [
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_hash TEXT`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires_at TIMESTAMPTZ`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_method TEXT DEFAULT 'email' CHECK (auth_method IN ('email', 'social', 'hybrid'))`,
+  `ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL`,
   `UPDATE users SET is_verified = TRUE WHERE is_verified IS NULL`,
+  `CREATE INDEX IF NOT EXISTS idx_social_accounts_user_provider ON social_accounts (user_id, provider)`,
+  `CREATE INDEX IF NOT EXISTS idx_social_accounts_provider_id ON social_accounts (provider, provider_id)`,
 ];
 
 const DEFAULT_FORM = {
