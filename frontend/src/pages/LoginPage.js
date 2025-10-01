@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 import {
   bodySmallMutedTextClasses,
   bodySmallStrongTextClasses,
@@ -129,6 +130,17 @@ function LoginPage() {
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
+            
+            <div className="flex items-center gap-4">
+              <div className="h-px flex-1 bg-emerald-200"></div>
+              <span className={`${bodySmallMutedTextClasses} text-emerald-900/50`}>or</span>
+              <div className="h-px flex-1 bg-emerald-200"></div>
+            </div>
+            
+            <GoogleLoginButton 
+              text="Continue with Google"
+              variant="subtle"
+            />
           </form>
           <p className={`mt-6 text-center ${bodySmallMutedTextClasses} text-emerald-900/70`}>
             New to Aleya?{" "}

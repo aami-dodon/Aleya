@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const session = require("express-session");
 const { randomUUID } = require("crypto");
 require("dotenv").config();
 
@@ -13,6 +14,7 @@ const dashboardRoutes = require("./routes/dashboard");
 const adminRoutes = require("./routes/admin");
 const { initializePlatform } = require("./utils/bootstrap");
 const { validateMailSettings } = require("./utils/email");
+const passport = require("./config/passport");
 
 let mailSettings;
 
@@ -53,6 +55,21 @@ app.use((req, res, next) => {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// Session configuration for OAuth
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Only use secure cookies in production
+    maxAge: 10 * 60 * 1000, // 10 minutes (just for OAuth flow)
+  }
+}));
+
+// Initialize Passport for OAuth
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get("/api/health", async (req, res) => {
   try {

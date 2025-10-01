@@ -6,7 +6,7 @@ const { body, validationResult } = require("express-validator");
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
-const { logger } = require("../utils/logger");
+const { logger, serializeError } = require("../utils/logger");
 const { sendEmail } = require("../utils/mailer");
 const {
   createVerificationEmail,
@@ -871,6 +871,118 @@ router.get("/expertise", async (req, res, next) => {
     });
   } catch (error) {
     return next(error);
+  }
+});
+
+// Google OAuth Routes
+const passport = require("../config/passport");
+
+// Initiate Google OAuth
+router.get("/google", passport.authenticate("google", { 
+  scope: ["profile", "email"] 
+}));
+
+// Google OAuth callback
+router.get("/google/callback", 
+  passport.authenticate("google", { failureRedirect: `${process.env.FRONTEND_URL}/login?error=oauth_failed` }),
+  (req, res) => {
+    try {
+      // Generate JWT token for the authenticated user
+      const token = jwt.sign(
+        {
+          id: req.user.id,
+          email: req.user.email,
+          role: req.user.role,
+        },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      logger.info("Google OAuth success, redirecting user", {
+        userId: req.user.id,
+        email: req.user.email,
+      });
+
+      // Redirect to frontend with token as URL parameter
+      // The frontend will extract the token and store it
+      const redirectUrl = `${process.env.FRONTEND_URL}/auth/callback?token=${token}&bootId=${req.app.locals.bootId}`;
+      res.redirect(redirectUrl);
+    } catch (error) {
+      logger.error("Google OAuth callback error", { error: serializeError(error) });
+      res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
+    }
+  }
+);
+
+// Get user's linked social accounts
+router.get("/social-accounts", authenticate, async (req, res, next) => {
+  try {
+    const result = await pool.query(
+      "SELECT provider, provider_email, provider_name, created_at FROM social_accounts WHERE user_id = $1",
+      [req.user.id]
+    );
+
+    res.json({ socialAccounts: result.rows });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Unlink social account
+router.delete("/social-accounts/:provider", authenticate, async (req, res, next) => {
+  try {
+    const { provider } = req.params;
+
+    if (!["google", "facebook"].includes(provider)) {
+      return res.status(400).json({ error: "Invalid provider" });
+    }
+
+    // Check if user has a password (can't unlink if it's their only auth method)
+    const user = await pool.query("SELECT password_hash, auth_method FROM users WHERE id = $1", [req.user.id]);
+    
+    if (user.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const userAuth = user.rows[0];
+    if (userAuth.auth_method === 'social' && !userAuth.password_hash) {
+      return res.status(400).json({ 
+        error: "Cannot unlink your only authentication method. Please set a password first." 
+      });
+    }
+
+    // Remove social account
+    const result = await pool.query(
+      "DELETE FROM social_accounts WHERE user_id = $1 AND provider = $2 RETURNING *",
+      [req.user.id, provider]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Social account not found" });
+    }
+
+    // Update user auth method if needed
+    const remainingSocial = await pool.query(
+      "SELECT COUNT(*) as count FROM social_accounts WHERE user_id = $1",
+      [req.user.id]
+    );
+
+    if (remainingSocial.rows[0].count === 0 && userAuth.password_hash) {
+      await pool.query(
+        "UPDATE users SET auth_method = 'email' WHERE id = $1",
+        [req.user.id]
+      );
+    }
+
+    logger.info("Social account unlinked", { 
+      userId: req.user.id, 
+      provider,
+      email: req.user.email 
+    });
+
+    res.json({ message: "Social account unlinked successfully" });
+  } catch (error) {
+    next(error);
   }
 });
 

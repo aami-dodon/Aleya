@@ -22,6 +22,7 @@ import JournalHistoryPage from "./pages/JournalHistoryPage";
 import FormBuilderPage from "./pages/FormBuilderPage";
 import SettingsPage from "./pages/SettingsPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
+import OAuthCallbackPage from "./pages/OAuthCallbackPage";
 import LoadingState from "./components/LoadingState";
 import ContactPage from "./pages/ContactPage";
 
@@ -95,6 +96,7 @@ function AppRoutes() {
           />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/auth/callback" element={<OAuthCallbackPage />} />
           <Route
             path="/dashboard"
             element={
