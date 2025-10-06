@@ -1,5 +1,11 @@
 # Backend Change Log
 
+## Comprehensive OpenAPI coverage (2025-11-19)
+- Expanded the Swagger specification to cover every backend route exposed under `/api`.
+- Documented request bodies, query parameters, success payloads, and failure modes for auth, forms, mentor management, journal entries, dashboard metrics, and admin tooling.
+- Published shared schema components for users, forms, mentor requests, and journal entries to keep documentation consistent.
+- Split the Swagger configuration into reusable modules so future endpoints can be documented without modifying `src/index.js` directly.
+
 ## Swagger API explorer (2025-10-06)
 - Integrated Swagger UI at `/api/docs` with a machine-readable OpenAPI document
   at `/api/docs.json` to make backend capabilities easier to inspect and test.

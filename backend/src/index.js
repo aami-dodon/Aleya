@@ -17,6 +17,7 @@ const adminRoutes = require("./routes/admin");
 const { initializePlatform } = require("./utils/bootstrap");
 const { validateMailSettings } = require("./utils/email");
 const passport = require("./config/passport");
+const { paths, components, tags } = require("./docs/swagger");
 
 let mailSettings;
 
@@ -49,11 +50,12 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url:
-        process.env.SWAGGER_SERVER_URL ||
-        `http://localhost:${PORT}`,
+      url: process.env.SWAGGER_SERVER_URL || `http://localhost:${PORT}`,
     },
   ],
+  tags,
+  components,
+  paths,
 };
 
 const swaggerSpec = swaggerJsdoc({
@@ -87,15 +89,17 @@ app.get("/api/docs.json", (req, res) => {
 });
 
 // Session configuration for OAuth
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', // Only use secure cookies in production
-    maxAge: 10 * 60 * 1000, // 10 minutes (just for OAuth flow)
-  }
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "fallback-secret-for-development",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+      maxAge: 10 * 60 * 1000, // 10 minutes (just for OAuth flow)
+    },
+  })
+);
 
 // Initialize Passport for OAuth
 app.use(passport.initialize());
