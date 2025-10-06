@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
 const { randomUUID } = require("crypto");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 require("dotenv").config();
 
 const { logger, resolvedLogFile, serializeError } = require("./utils/logger");
@@ -33,8 +35,31 @@ try {
 }
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 app.locals.mailSettings = mailSettings;
 app.locals.bootId = randomUUID();
+
+const swaggerDefinition = {
+  openapi: "3.0.0",
+  info: {
+    title: "Aleya API",
+    description:
+      "API documentation for Aleya backend services. The documented endpoints require valid authentication unless specified otherwise.",
+    version: "1.0.0",
+  },
+  servers: [
+    {
+      url:
+        process.env.SWAGGER_SERVER_URL ||
+        `http://localhost:${PORT}`,
+    },
+  ],
+};
+
+const swaggerSpec = swaggerJsdoc({
+  definition: swaggerDefinition,
+  apis: ["./src/index.js", "./src/routes/**/*.js"],
+});
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
@@ -56,6 +81,11 @@ app.use((req, res, next) => {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
+app.get("/api/docs.json", (req, res) => {
+  res.json(swaggerSpec);
+});
+
 // Session configuration for OAuth
 app.use(session({
   secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
@@ -71,6 +101,30 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+/**
+ * @openapi
+ * /api/health:
+ *   get:
+ *     summary: Returns the API health status.
+ *     tags:
+ *       - Health
+ *     responses:
+ *       '200':
+ *         description: The API is healthy and can access the database.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *                 time:
+ *                   type: string
+ *                   format: date-time
+ *       '500':
+ *         description: Database connection failed.
+ */
 app.get("/api/health", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW() AS time");
@@ -100,8 +154,6 @@ app.use((err, req, res, next) => {
 
   res.status(err.status || 500).json({ error: err.message || "Internal server error" });
 });
-
-const PORT = process.env.PORT || 5000;
 
 initializePlatform()
   .then(() => {

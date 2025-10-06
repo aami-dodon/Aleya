@@ -1,5 +1,14 @@
 # Backend Change Log
 
+## Swagger API explorer (2025-10-06)
+- Integrated Swagger UI at `/api/docs` with a machine-readable OpenAPI document
+  at `/api/docs.json` to make backend capabilities easier to inspect and test.
+- Added request/response documentation for the health check route. Additional
+  routes can opt-in by adding `@openapi` blocks inside the associated router
+  files.
+- Introduced the optional `SWAGGER_SERVER_URL` environment variable so the
+  generated documentation can advertise proxied or tunnelled origins.
+
 ## Password reset confirmations (2025-10-29)
 - Added `POST /api/auth/reset-password` to validate hashed tokens, rotate the
   requesting user's password, and clear the matching `password_reset_tokens`
