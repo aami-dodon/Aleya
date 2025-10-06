@@ -102,6 +102,16 @@ The server boots from `backend/src/index.js`, validates SMTP credentials via
 provided. API routes live under `src/routes/` and reuse shared middleware,
 services, and utilities.
 
+### API documentation (Swagger UI)
+
+With the backend running you can browse the generated Swagger UI at
+`http://localhost:5000/api/docs`. The explorer lists every annotated route and
+lets you issue authenticated requests from the browser. A raw OpenAPI document
+is also available at `http://localhost:5000/api/docs.json` for use with API
+clients such as Insomnia or Postman. Set `SWAGGER_SERVER_URL` in
+`backend/.env` if you need to override the server URL that appears inside the
+document (e.g. when the API is behind a tunnel or reverse proxy).
+
 ### Mentor digest job
 
 ```
@@ -157,6 +167,7 @@ Integration tests can be added with Jest + Supertest; wire them into the
 
 - `backend/.env-sample` documents required credentials for the API, including
   PostgreSQL, JWT, logging, and SMTP settings.
+  - Set `SWAGGER_SERVER_URL` if the Swagger UI should advertise a proxied host.
 - `frontend/.env-sample` lists client configuration such as the API base URL.
 - Docker users can run `docker compose up --build` to orchestrate both services
   (PostgreSQL is expected to be provisioned separately).
