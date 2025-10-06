@@ -878,13 +878,19 @@ router.get("/expertise", async (req, res, next) => {
 const passport = require("../config/passport");
 
 // Initiate Google OAuth
-router.get("/google", passport.authenticate("google", { 
-  scope: ["profile", "email"] 
-}));
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+);
 
 // Google OAuth callback
-router.get("/google/callback", 
-  passport.authenticate("google", { failureRedirect: `${process.env.FRONTEND_URL}/login?error=oauth_failed` }),
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: `${process.env.FRONTEND_URL}/login?error=oauth_failed`,
+  }),
   (req, res) => {
     try {
       // Generate JWT token for the authenticated user
@@ -938,16 +944,20 @@ router.delete("/social-accounts/:provider", authenticate, async (req, res, next)
     }
 
     // Check if user has a password (can't unlink if it's their only auth method)
-    const user = await pool.query("SELECT password_hash, auth_method FROM users WHERE id = $1", [req.user.id]);
-    
+    const user = await pool.query(
+      "SELECT password_hash, auth_method FROM users WHERE id = $1",
+      [req.user.id]
+    );
+
     if (user.rows.length === 0) {
       return res.status(404).json({ error: "User not found" });
     }
 
     const userAuth = user.rows[0];
-    if (userAuth.auth_method === 'social' && !userAuth.password_hash) {
-      return res.status(400).json({ 
-        error: "Cannot unlink your only authentication method. Please set a password first." 
+    if (userAuth.auth_method === "social" && !userAuth.password_hash) {
+      return res.status(400).json({
+        error:
+          "Cannot unlink your only authentication method. Please set a password first.",
       });
     }
 
@@ -968,16 +978,15 @@ router.delete("/social-accounts/:provider", authenticate, async (req, res, next)
     );
 
     if (remainingSocial.rows[0].count === 0 && userAuth.password_hash) {
-      await pool.query(
-        "UPDATE users SET auth_method = 'email' WHERE id = $1",
-        [req.user.id]
-      );
+      await pool.query("UPDATE users SET auth_method = 'email' WHERE id = $1", [
+        req.user.id,
+      ]);
     }
 
-    logger.info("Social account unlinked", { 
-      userId: req.user.id, 
+    logger.info("Social account unlinked", {
+      userId: req.user.id,
       provider,
-      email: req.user.email 
+      email: req.user.email,
     });
 
     res.json({ message: "Social account unlinked successfully" });

@@ -20,7 +20,9 @@ passport.use(
 
         const googleEmail = profile.emails?.[0]?.value;
         const googleId = profile.id;
-        const googleName = profile.displayName || `${profile.name?.givenName || ""} ${profile.name?.familyName || ""}`.trim();
+        const googleName =
+          profile.displayName ||
+          `${profile.name?.givenName || ""} ${profile.name?.familyName || ""}`.trim();
 
         if (!googleEmail) {
           return done(new Error("No email provided by Google"), null);
@@ -35,7 +37,10 @@ passport.use(
         if (existingSocialAccount.rows.length > 0) {
           // User already has Google account linked
           const user = existingSocialAccount.rows[0];
-          logger.info("Existing Google user logged in", { userId: user.id, email: user.email });
+          logger.info("Existing Google user logged in", {
+            userId: user.id,
+            email: user.email,
+          });
           return done(null, {
             id: user.id,
             email: user.email,
@@ -47,17 +52,19 @@ passport.use(
         }
 
         // Check if user exists with this email
-        const existingUser = await pool.query(
-          "SELECT * FROM users WHERE email = $1",
-          [googleEmail]
-        );
+        const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [
+          googleEmail,
+        ]);
 
         let userId;
 
         if (existingUser.rows.length > 0) {
           // Link Google account to existing user
           userId = existingUser.rows[0].id;
-          logger.info("Linking Google account to existing user", { userId, email: googleEmail });
+          logger.info("Linking Google account to existing user", {
+            userId,
+            email: googleEmail,
+          });
 
           // Update user to hybrid auth method
           await pool.query(
@@ -103,10 +110,7 @@ passport.use(
         );
 
         // Get final user data
-        const finalUser = await pool.query(
-          "SELECT * FROM users WHERE id = $1",
-          [userId]
-        );
+        const finalUser = await pool.query("SELECT * FROM users WHERE id = $1", [userId]);
 
         const user = finalUser.rows[0];
         logger.info("Google OAuth successful", { userId: user.id, email: user.email });
@@ -139,7 +143,7 @@ passport.deserializeUser(async (id, done) => {
     if (result.rows.length === 0) {
       return done(null, false);
     }
-    
+
     const user = result.rows[0];
     done(null, {
       id: user.id,
