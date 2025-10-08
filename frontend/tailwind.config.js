@@ -1,16 +1,30 @@
 /** @type {import('tailwindcss').Config} */
-const heavenlyBluePalette = {
-  50: "#f1f7ff",
-  100: "#dcecff",
-  200: "#b7d8ff",
-  300: "#8fc1ff",
-  400: "#65a7ff",
-  500: "#3c8cff",
-  600: "#1f74e6",
-  700: "#1559bc",
-  800: "#124596",
-  900: "#0f3677",
-  950: "#081f4d",
+const forestPalette = {
+  50: "#f3f6f2",
+  100: "#e4ede2",
+  200: "#c8dcc7",
+  300: "#a9c9ab",
+  400: "#82b28a",
+  500: "#5c976a",
+  600: "#477956",
+  700: "#385c42",
+  800: "#274030",
+  900: "#1a2b21",
+  950: "#0f1b14",
+};
+
+const earthPalette = {
+  50: "#f6f1eb",
+  100: "#eadfcd",
+  200: "#d3c1a0",
+  300: "#bb9f74",
+  400: "#a17f51",
+  500: "#85653a",
+  600: "#6b4f2e",
+  700: "#513b24",
+  800: "#38281a",
+  900: "#22180f",
+  950: "#120c07",
 };
 
 module.exports = {
@@ -19,7 +33,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: [
-          "Inter",
+          "Quicksand",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",
@@ -27,8 +41,8 @@ module.exports = {
           "sans-serif",
         ],
         display: [
-          "Poppins",
-          "Inter",
+          "Playfair Display",
+          "Quicksand",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",
@@ -37,7 +51,8 @@ module.exports = {
         ],
       },
       colors: {
-        emerald: heavenlyBluePalette,
+        emerald: forestPalette,
+        earth: earthPalette,
       },
     },
   },

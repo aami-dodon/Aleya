@@ -14,33 +14,55 @@
       crossorigin
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      const heavenlyBluePalette = {
-        50: '#f1f7ff',
-        100: '#dcecff',
-        200: '#b7d8ff',
-        300: '#8fc1ff',
-        400: '#65a7ff',
-        500: '#3c8cff',
-        600: '#1f74e6',
-        700: '#1559bc',
-        800: '#124596',
-        900: '#0f3677',
-        950: '#081f4d',
+      const forestPalette = {
+        50: '#f3f6f2',
+        100: '#e4ede2',
+        200: '#c8dcc7',
+        300: '#a9c9ab',
+        400: '#82b28a',
+        500: '#5c976a',
+        600: '#477956',
+        700: '#385c42',
+        800: '#274030',
+        900: '#1a2b21',
+        950: '#0f1b14',
+      };
+
+      const earthPalette = {
+        50: '#f6f1eb',
+        100: '#eadfcd',
+        200: '#d3c1a0',
+        300: '#bb9f74',
+        400: '#a17f51',
+        500: '#85653a',
+        600: '#6b4f2e',
+        700: '#513b24',
+        800: '#38281a',
+        900: '#22180f',
+        950: '#120c07',
       };
 
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              sans: ['Quicksand', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              display: [
+                'Playfair Display',
+                'Quicksand',
+                'ui-sans-serif',
+                'system-ui',
+                'sans-serif',
+              ],
             },
             colors: {
-              emerald: heavenlyBluePalette,
+              emerald: forestPalette,
+              earth: earthPalette,
             },
           },
         },
@@ -48,179 +70,767 @@
     </script>
     <style type="text/tailwindcss">
       @layer base {
-        body {
-          @apply m-0 min-h-screen bg-emerald-50 font-sans text-emerald-950 antialiased;
-        }
+  body {
+    @apply m-0 min-h-screen bg-gradient-to-br from-emerald-50 via-earth-50 to-emerald-100 font-sans text-earth-950 antialiased;
+  }
 
-        a {
-          @apply text-emerald-700 no-underline;
-        }
+  a {
+    @apply text-emerald-600 no-underline;
+  }
 
-        a:hover {
-          @apply text-emerald-600 underline;
-        }
+  a:hover {
+    @apply text-earth-600 underline;
+  }
 
-        * {
-          @apply box-border;
-        }
-      }
+  * {
+    @apply box-border;
+  }
+}
 
-      @layer components {
-        .btn-primary {
-          @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:translate-y-0 disabled:opacity-60;
-        }
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 text-base font-semibold text-earth-50 shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-earth-500 disabled:translate-y-0 disabled:opacity-60;
+  }
 
-        .btn-danger {
-          @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-rose-500/20 transition hover:-translate-y-0.5 hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 disabled:translate-y-0 disabled:opacity-60;
-        }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-rose-500/20 transition hover:-translate-y-0.5 hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 disabled:translate-y-0 disabled:opacity-60;
+  }
 
-        .btn-secondary {
-          @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-white/70 px-6 py-3.5 text-base font-semibold text-emerald-700 shadow-sm shadow-emerald-900/10 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:translate-y-0 disabled:opacity-60;
-        }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-earth-300 bg-earth-50 px-6 py-3.5 text-base font-semibold text-earth-700 shadow-sm shadow-earth-900/10 transition hover:-translate-y-0.5 hover:border-earth-400 hover:bg-earth-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-earth-500 disabled:translate-y-0 disabled:opacity-60;
+  }
 
-        .btn-subtle {
-          @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-transparent px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:-translate-y-0.5 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:translate-y-0 disabled:opacity-60;
-        }
+  .btn-subtle {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-transparent px-4 py-2.5 text-sm font-semibold text-earth-700 transition hover:-translate-y-0.5 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-earth-500 disabled:translate-y-0 disabled:opacity-60;
+  }
 
-        .icon-button {
-          @apply inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-white/80 text-emerald-700 shadow-sm shadow-emerald-900/10 transition hover:border-emerald-300 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600;
-        }
+  .icon-button {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-full border border-earth-200 bg-earth-50/90 text-earth-700 shadow-sm shadow-earth-900/10 transition hover:border-earth-300 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-earth-500;
+  }
 
-        .form-input {
-          @apply mt-2 w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-3 text-base text-emerald-900 shadow-sm transition placeholder:text-emerald-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
-        }
+  .icon-sm {
+    @apply h-5 w-5;
+  }
 
-        .form-input-compact {
-          @apply w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-2.5 text-sm text-emerald-900 shadow-sm transition placeholder:text-emerald-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
-        }
+  .btn-primary-compact {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-earth-50 shadow-lg shadow-emerald-900/20 transition hover:-translate-y-0.5 hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-earth-500 disabled:translate-y-0 disabled:opacity-60;
+  }
 
-        .form-textarea {
-          @apply mt-2 w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-3 text-base text-emerald-900 shadow-sm transition placeholder:text-emerald-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
-        }
+  .btn-secondary-compact {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-earth-300 bg-earth-50 px-5 py-2.5 text-sm font-semibold text-earth-700 shadow-sm shadow-earth-900/10 transition hover:-translate-y-0.5 hover:border-earth-400 hover:bg-earth-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-earth-500 disabled:translate-y-0 disabled:opacity-60;
+  }
 
-        .form-select {
-          @apply mt-2 w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-3 text-base text-emerald-900 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
-        }
+  .form-input {
+    @apply mt-2 w-full rounded-2xl border border-earth-200 bg-white/90 px-4 py-3 text-base text-earth-900 shadow-sm transition placeholder:text-earth-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
+  }
 
-        .form-select-compact {
-          @apply w-full rounded-2xl border border-emerald-100 bg-white/90 px-4 py-2.5 text-sm text-emerald-900 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
-        }
+  .form-input-compact {
+    @apply w-full rounded-2xl border border-earth-200 bg-white/90 px-4 py-2.5 text-sm text-earth-900 shadow-sm transition placeholder:text-earth-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
+  }
 
-        .form-checkbox {
-          @apply h-5 w-5 rounded-md border-emerald-200 text-emerald-600 focus:ring-emerald-500;
-        }
+  .form-textarea {
+    @apply mt-2 w-full rounded-2xl border border-earth-200 bg-white/90 px-4 py-3 text-base text-earth-900 shadow-sm transition placeholder:text-earth-900/40 focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
+  }
 
-        .text-info {
-          @apply text-sm text-emerald-900/70;
-        }
+  .form-select {
+    @apply mt-2 w-full rounded-2xl border border-earth-200 bg-white/90 px-4 py-3 text-base text-earth-900 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
+  }
 
-        .text-muted {
-          @apply text-sm text-emerald-900/60;
-        }
+  .form-select-compact {
+    @apply w-full rounded-2xl border border-earth-200 bg-white/90 px-4 py-2.5 text-sm text-earth-900 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100;
+  }
 
-        .empty-state {
-          @apply rounded-2xl border border-emerald-100 bg-white/60 p-6 text-center text-sm font-medium text-emerald-900/70;
-        }
+  .form-checkbox {
+    @apply h-5 w-5 rounded-md border-earth-300 text-emerald-600 focus:ring-emerald-500;
+  }
 
-        .chip-base {
-          @apply inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700;
-        }
+  .text-info {
+    @apply text-sm text-earth-700;
+  }
 
-        .badge-base {
-          @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize tracking-wide;
-        }
+  .text-muted {
+    @apply text-sm text-earth-600;
+  }
 
-        .table-header {
-          @apply hidden items-center gap-4 text-sm font-semibold text-emerald-900/70 md:grid;
-          grid-template-columns: var(
-              --table-grid,
-              minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)
-            );
-        }
+  .empty-state {
+    @apply rounded-2xl border border-earth-200 bg-earth-50/80 p-6 text-center text-sm font-medium text-earth-700;
+  }
 
-        .table-row {
-          @apply flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-white/70 px-4 py-4 text-sm text-emerald-900 md:grid md:items-center md:gap-4 md:py-3;
-          grid-template-columns: var(
-              --table-grid,
-              minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)
-            );
-        }
+  .chip-base {
+    @apply inline-flex items-center rounded-full bg-earth-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-earth-700;
+  }
 
-        .card-container {
-          @apply rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-lg shadow-emerald-900/10 backdrop-blur;
-        }
+  .badge-base {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize tracking-wide;
+  }
 
-        .section-title {
-          @apply text-2xl font-semibold text-emerald-950;
-        }
+  .table-header {
+    @apply hidden items-center gap-4 text-sm font-semibold text-earth-700 md:grid;
+    grid-template-columns: var(
+      --table-grid,
+      minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)
+    );
+  }
 
-        .section-subtitle {
-          @apply mt-1 text-sm text-emerald-900/70;
-        }
+  .table-row {
+    @apply flex flex-col gap-3 rounded-2xl border border-earth-200 bg-white/80 px-4 py-4 text-sm text-earth-900 md:grid md:items-center md:gap-4 md:py-3;
+    grid-template-columns: var(
+      --table-grid,
+      minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)
+    );
+  }
 
-        .text-display {
-          @apply text-4xl font-bold tracking-tight sm:text-5xl;
-        }
+  .card-container {
+    @apply rounded-3xl border border-earth-200 bg-white/85 p-8 shadow-lg shadow-earth-900/10 backdrop-blur;
+  }
 
-        .text-heading-lg {
-          @apply text-3xl font-semibold;
-        }
+  .section-title {
+    @apply text-2xl font-semibold text-earth-950;
+  }
 
-        .text-heading-md {
-          @apply text-2xl font-semibold;
-        }
+  .section-subtitle {
+    @apply mt-1 text-sm text-earth-700;
+  }
 
-        .text-heading-sm {
-          @apply text-xl font-semibold;
-        }
+  .text-display {
+    @apply font-display text-4xl font-semibold tracking-tight text-earth-900 sm:text-5xl;
+  }
 
-        .text-heading-xs {
-          @apply text-lg font-semibold;
-        }
+  .text-heading-lg {
+    @apply font-display text-3xl font-semibold tracking-tight;
+  }
 
-        .text-body-lg {
-          @apply text-lg leading-relaxed;
-        }
+  .text-heading-md {
+    @apply font-display text-2xl font-semibold;
+  }
 
-        .text-body {
-          @apply text-base leading-relaxed;
-        }
+  .text-heading-sm {
+    @apply font-display text-xl font-semibold;
+  }
 
-        .text-body-sm {
-          @apply text-sm;
-        }
+  .text-heading-xs {
+    @apply font-display text-lg font-semibold;
+  }
 
-        .text-body-sm-strong {
-          @apply text-sm font-semibold;
-        }
+  .text-body-lg {
+    @apply text-lg leading-relaxed;
+  }
 
-        .text-eyebrow {
-          @apply text-sm font-semibold uppercase tracking-[0.2em];
-        }
+  .text-body {
+    @apply text-base leading-relaxed;
+  }
 
-        .text-caption {
-          @apply text-xs font-semibold uppercase tracking-wide;
-        }
+  .text-body-sm {
+    @apply text-sm;
+  }
 
-        .form-label {
-          @apply text-sm font-semibold text-emerald-900/80;
-        }
-      }
+  .text-body-sm-strong {
+    @apply text-sm font-semibold;
+  }
+
+  .text-eyebrow {
+    @apply text-sm font-semibold uppercase tracking-[0.2em] text-earth-600;
+  }
+
+  .text-caption {
+    @apply text-xs font-semibold uppercase tracking-wide text-earth-600;
+  }
+
+  .text-preline {
+    @apply whitespace-pre-line;
+  }
+
+  .metric-card {
+    @apply rounded-2xl border border-earth-200 bg-earth-50/80 p-5 shadow-inner shadow-earth-900/5;
+  }
+
+  .metric-card__label {
+    @apply text-xs font-semibold uppercase tracking-wide text-earth-600;
+  }
+
+  .metric-card__value {
+    @apply mt-3 text-3xl font-semibold text-earth-900;
+  }
+
+  .metric-card__description {
+    @apply mt-2 text-sm text-earth-700;
+  }
+
+  .metric-card__details {
+    @apply mt-4 text-sm text-earth-700;
+  }
+
+  .request-list {
+    @apply grid gap-4;
+  }
+
+  .request-card {
+    @apply flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-earth-200 bg-white/80 p-5;
+  }
+
+  .request-card__body {
+    @apply space-y-1 text-earth-900;
+  }
+
+  .request-card__title {
+    @apply text-base font-semibold;
+  }
+
+  .request-card__status {
+    @apply text-sm;
+  }
+
+  .request-card__message {
+    @apply text-sm text-earth-700;
+  }
+
+  .request-card__actions {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  .tag-input {
+    @apply space-y-3;
+  }
+
+  .tag-input__field {
+    @apply flex flex-wrap items-center gap-2 rounded-2xl border border-earth-200 bg-white/70 p-2 focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-100;
+  }
+
+  .tag-input__chip {
+    @apply flex items-center gap-2;
+  }
+
+  .tag-input__remove {
+    @apply rounded-full bg-earth-100 px-1 text-xs font-semibold text-earth-700 transition hover:bg-earth-200;
+  }
+
+  .tag-input__entry {
+    @apply h-9 min-w-[140px] flex-1 border-none bg-transparent px-2 py-1 text-sm text-earth-900 placeholder:text-earth-900/40 focus:outline-none focus:ring-0;
+  }
+
+  .tag-input__label {
+    @apply text-xs font-semibold uppercase tracking-wide text-earth-600;
+  }
+
+  .tag-input__suggestion {
+    @apply transition hover:bg-earth-100;
+  }
+
+  .tag-input__suggestions {
+    @apply space-y-2;
+  }
+
+  .tag-input__group {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .loading-state {
+    @apply flex items-center justify-center text-sm font-medium text-earth-700;
+  }
+
+  .loading-state--full {
+    @apply min-h-[40vh];
+  }
+
+  .mood-chart {
+    @apply flex flex-col gap-4;
+  }
+
+  .mood-chart__visual {
+    @apply h-40 w-full;
+  }
+
+  .mood-chart__legend {
+    @apply grid gap-3 sm:grid-cols-2;
+  }
+
+  .mood-chart__legend-item {
+    @apply flex items-center gap-3 rounded-2xl border border-earth-200 bg-white/80 px-3 py-2;
+  }
+
+  .mood-chart__legend-dot {
+    @apply h-2.5 w-2.5 rounded-full;
+  }
+
+  .mood-chart__legend-label {
+    @apply text-sm font-semibold text-earth-900;
+  }
+
+  .mood-chart__legend-date {
+    @apply text-xs text-earth-600;
+  }
+
+  .form-label {
+    @apply block text-sm font-semibold text-earth-800;
+  }
+
+  .stack-xs {
+    @apply space-y-1;
+  }
+
+  .stack-sm {
+    @apply space-y-2;
+  }
+
+  .stack-md {
+    @apply space-y-3;
+  }
+
+  .stack-lg {
+    @apply space-y-4;
+  }
+
+  .stack-xl {
+    @apply space-y-5;
+  }
+
+  .cluster-inline {
+    @apply flex items-center gap-3;
+  }
+
+  .cluster-inline-tight {
+    @apply flex items-center gap-2;
+  }
+
+  .cluster-wrap {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  .cluster-wrap-tight {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .cluster-center {
+    @apply flex flex-wrap justify-center gap-3;
+  }
+
+  .cluster-end {
+    @apply flex flex-wrap justify-end gap-3;
+  }
+
+  .cluster-between {
+    @apply flex flex-wrap items-center justify-between gap-4;
+  }
+
+  .app-shell {
+    @apply flex min-h-screen flex-col bg-gradient-to-br from-emerald-50 via-earth-50 to-emerald-100 text-earth-950;
+  }
+
+  .app-header {
+    @apply sticky top-0 z-30 border-b border-earth-200 bg-white/85 backdrop-blur;
+  }
+
+  .app-header__inner {
+    @apply relative mx-auto w-full max-w-6xl px-6 py-3;
+  }
+
+  .app-header__row {
+    @apply flex w-full items-center gap-3;
+  }
+
+  .app-brand {
+    @apply rounded-full border border-transparent bg-transparent text-heading-lg leading-none tracking-tight text-earth-800 transition hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-earth-500;
+  }
+
+  .primary-nav {
+    @apply hidden flex-1 items-center justify-center gap-1 text-body-sm-strong text-earth-700 md:flex;
+  }
+
+  .primary-nav__link {
+    @apply rounded-full px-4 py-2 transition;
+  }
+
+  .primary-nav__link--active {
+    @apply bg-earth-100 text-earth-800 shadow-inner shadow-earth-900/10;
+  }
+
+  .primary-nav__link--inactive {
+    @apply text-earth-600 hover:bg-earth-100/80 hover:text-emerald-600;
+  }
+
+  .header-actions {
+    @apply hidden items-center gap-3 md:flex;
+  }
+
+  .mobile-actions {
+    @apply ml-auto flex items-center gap-3 md:hidden;
+  }
+
+  .mobile-actions__toggle--active {
+    @apply bg-emerald-600 text-earth-50 hover:text-earth-50;
+  }
+
+  .mobile-menu {
+    @apply absolute left-0 right-0 top-full mt-3 md:hidden;
+  }
+
+  .mobile-menu__panel {
+    @apply rounded-3xl border border-earth-200 bg-white/95 p-4 shadow-xl shadow-earth-900/10 backdrop-blur;
+  }
+
+  .mobile-nav {
+    @apply flex flex-col gap-2 text-body-sm-strong text-earth-800;
+  }
+
+  .mobile-nav__link {
+    @apply rounded-full px-4 py-2 transition;
+  }
+
+  .mobile-nav__link--active {
+    @apply bg-earth-100 text-earth-800 shadow-inner shadow-earth-900/10;
+  }
+
+  .mobile-nav__link--inactive {
+    @apply text-earth-600 hover:bg-earth-100/80 hover:text-emerald-600;
+  }
+
+  .mobile-menu__divider {
+    @apply mt-4 border-t border-earth-200/70 pt-4;
+  }
+
+  .app-main {
+    @apply mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-12;
+  }
+
+  .app-footer {
+    @apply border-t border-earth-200 bg-white/70;
+  }
+
+  .app-footer__content {
+    @apply mx-auto w-full max-w-6xl px-6 py-6 text-center text-body-sm text-earth-700;
+  }
+
+  .auth-controls {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  .auth-controls--vertical {
+    @apply flex flex-col gap-3;
+  }
+
+  .auth-controls__text {
+    @apply text-right;
+  }
+
+  .auth-controls__text--vertical {
+    @apply text-left;
+  }
+
+  .auth-controls__name {
+    @apply block text-body-sm-strong text-earth-900;
+  }
+
+  .auth-controls__role {
+    @apply text-caption text-earth-600;
+  }
+
+  .button-pad-xs {
+    @apply px-4 py-2 text-sm;
+  }
+
+  .button-pad-sm {
+    @apply px-5 py-2.5 text-sm;
+  }
+
+  .button-pad-md {
+    @apply px-6 py-2.5;
+  }
+
+  .button-block {
+    @apply w-full justify-center;
+  }
+
+  .button-fluid {
+    @apply w-full;
+  }
+
+  .button-responsive {
+    @apply w-full sm:w-auto;
+  }
+
+  .error-shell {
+    @apply flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-emerald-50 via-earth-50 to-emerald-100 px-6 py-16;
+  }
+
+  .error-panel {
+    @apply w-full max-w-xl rounded-3xl border border-earth-200/70 bg-white/80 p-10 text-center shadow-lg shadow-earth-900/10 backdrop-blur;
+  }
+
+  .error-heading {
+    @apply text-heading-lg text-earth-900;
+  }
+
+  .error-copy {
+    @apply mt-4 text-body text-earth-700;
+  }
+
+  .error-actions {
+    @apply cluster-center mt-8;
+  }
+
+  .error-details {
+    @apply mt-8 text-left;
+  }
+
+  .error-details__toggle {
+    @apply text-body underline-offset-4 transition hover:underline;
+  }
+
+  .error-details__panel {
+    @apply mt-4 max-h-48 overflow-auto rounded-2xl bg-earth-50/80 p-4 text-body-sm leading-relaxed text-earth-700;
+  }
+
+  .error-footer {
+    @apply mt-8 text-body-sm text-earth-700;
+  }
+
+  .dialog-backdrop {
+    @apply fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-earth-900/40 px-4 py-6 sm:px-6 sm:py-10;
+  }
+
+  .dialog-panel {
+    @apply relative w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8;
+  }
+
+  .dialog-panel--wide {
+    @apply relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl;
+  }
+
+  .dialog-panel__scroll {
+    @apply max-h-[min(85vh,40rem)] overflow-y-auto p-6 sm:p-8;
+  }
+
+  .dialog-header {
+    @apply cluster-between;
+  }
+
+  .dialog-heading-group {
+    @apply stack-xs;
+  }
+
+  .dialog-title {
+    @apply text-heading-md text-earth-900;
+  }
+
+  .dialog-title--compact {
+    @apply text-heading-sm text-earth-900;
+  }
+
+  .dialog-subtitle {
+    @apply text-body-sm text-earth-700;
+  }
+
+  .dialog-close {
+    @apply button-pad-xs text-sm;
+  }
+
+  .dialog-body {
+    @apply mt-6 stack-lg;
+  }
+
+  .dialog-section {
+    @apply stack-sm;
+  }
+
+  .dialog-section__title {
+    @apply text-caption text-earth-600;
+  }
+
+  .dialog-actions {
+    @apply cluster-end mt-8;
+  }
+
+  .mentor-dialog__chips {
+    @apply cluster-wrap-tight;
+  }
+
+  .dialog-form {
+    @apply stack-xl;
+  }
+
+  .dialog-field {
+    @apply stack-sm;
+  }
+
+  .dialog-field__label {
+    @apply text-body-sm-strong text-earth-900;
+  }
+
+  .dialog-messages__error {
+    @apply text-body-sm text-rose-600;
+  }
+
+  .dialog-messages__success {
+    @apply text-body-sm text-emerald-600;
+  }
+
+  .dialog-actions--inline {
+    @apply cluster-end;
+  }
+
+  .section-card__header {
+    @apply flex flex-wrap items-center gap-4;
+  }
+
+  .section-card__header--between {
+    @apply justify-between;
+  }
+
+  .section-card__header--end {
+    @apply justify-end;
+  }
+
+  .section-card__heading-group {
+    @apply stack-xs;
+  }
+
+  .section-card__icon {
+    @apply mr-2 inline-flex items-center;
+  }
+
+  .section-card__actions {
+    @apply flex items-center gap-3;
+  }
+
+  .section-card__content {
+    @apply stack-lg;
+  }
+
+  .section-card__content--offset {
+    @apply mt-6;
+  }
+
+  .form-stack {
+    @apply stack-xl;
+  }
+
+  .form-section {
+    @apply stack-sm;
+  }
+
+  .form-helper {
+    @apply text-body-sm text-earth-600;
+  }
+
+  .form-required {
+    @apply ml-1 text-rose-500;
+  }
+
+  .form-status {
+    @apply rounded-2xl px-4 py-3 text-body-sm-strong;
+  }
+
+  .form-status--error {
+    @apply border border-rose-100 bg-rose-50/80 text-rose-600;
+  }
+
+  .form-status--success {
+    @apply border border-emerald-100 bg-emerald-50/80 text-emerald-700;
+  }
+
+  .form-status--info {
+    @apply border border-earth-200 bg-earth-50/80 text-earth-700;
+  }
+
+  .form-actions {
+    @apply flex flex-col gap-3 sm:flex-row;
+  }
+
+  .request-status--pending {
+    @apply text-earth-700;
+  }
+
+  .request-status--mentor_accepted {
+    @apply text-amber-600;
+  }
+
+  .request-status--confirmed {
+    @apply text-emerald-600;
+  }
+
+  .request-status--declined {
+    @apply text-rose-600;
+  }
+
+  .request-status--ended {
+    @apply text-slate-500;
+  }
+
+  .mood-chart__legend-copy {
+    @apply stack-xs;
+  }
+
+  .badge-mood-happy {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .badge-mood-loved {
+    @apply bg-pink-100 text-pink-700;
+  }
+
+  .badge-mood-proud {
+    @apply bg-amber-100 text-amber-700;
+  }
+
+  .badge-mood-relaxed {
+    @apply bg-teal-100 text-teal-700;
+  }
+
+  .badge-mood-tired {
+    @apply bg-slate-200 text-slate-700;
+  }
+
+  .badge-mood-anxious {
+    @apply bg-rose-100 text-rose-700;
+  }
+
+  .badge-mood-angry {
+    @apply bg-rose-100 text-rose-700;
+  }
+
+  .badge-mood-sad {
+    @apply bg-sky-100 text-sky-700;
+  }
+
+  .badge-mood-neutral {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .chip-share-private {
+    @apply bg-slate-100 text-slate-600;
+  }
+
+  .chip-share-mood {
+    @apply bg-sky-100 text-sky-700;
+  }
+
+  .chip-share-summary {
+    @apply bg-amber-100 text-amber-700;
+  }
+
+  .chip-share-full {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .chip-share-default {
+    @apply bg-emerald-50 text-emerald-700;
+  }
+}
     </style>
   </head>
   <body>
-    <div class="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-emerald-100/60 pb-24">
-      <header class="bg-white/70 shadow-sm shadow-emerald-900/10">
+    <div class="min-h-screen bg-gradient-to-b from-emerald-50 via-earth-50 to-emerald-100/70 pb-24">
+      <header class="bg-white/70 shadow-sm shadow-earth-900/10">
         <div class="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-12 sm:flex-row sm:items-end sm:justify-between">
           <div class="space-y-3">
-            <p class="text-eyebrow text-emerald-600">Aleya Theme</p>
-            <h1 class="text-display">Visual token garden</h1>
-            <p class="max-w-2xl text-body text-emerald-900/80">
+            <p class="text-eyebrow text-earth-600">Aleya Theme</p>
+            <h1 class="text-display">Grove-hued token garden</h1>
+            <p class="max-w-2xl text-body text-earth-700">
               This living guide mirrors the Tailwind component layer in
-              <code class="rounded-md bg-emerald-100/80 px-1.5 py-0.5 text-xs">src/index.css</code>,
+              <code class="rounded-md bg-earth-100/80 px-1.5 py-0.5 text-xs">src/index.css</code>,
               making it easy to audit typography, colors, and shared UI patterns.
               Pair it with the written docs under
-              <code class="rounded-md bg-emerald-100/80 px-1.5 py-0.5 text-xs">docs/frontend/theme.md</code>
+              <code class="rounded-md bg-earth-100/80 px-1.5 py-0.5 text-xs">docs/frontend/theme.md</code>
               when evolving the design system.
             </p>
           </div>
@@ -234,31 +844,31 @@
       <main class="mx-auto mt-16 flex max-w-6xl flex-col gap-16 px-6">
         <section class="space-y-6">
           <div>
-            <p class="text-eyebrow text-emerald-600">Palette</p>
-            <h2 class="text-heading-lg">Luminous canopy</h2>
-            <p class="text-body text-emerald-900/80">
-              Gradients, accent washes, and elevated surfaces anchor the product in calm emerald light.
+            <p class="text-eyebrow text-earth-600">Palette</p>
+            <h2 class="text-heading-lg">Rooted canopy</h2>
+            <p class="text-body text-earth-700">
+              Sage greens mingle with warm bark browns to keep the product grounded in nature.
               Use this grid to sample foreground/background contrasts and hover moments.
             </p>
           </div>
           <div class="grid gap-6 md:grid-cols-3">
-            <article class="card-container space-y-4 bg-gradient-to-br from-emerald-50 to-emerald-100">
-              <span class="chip-base bg-emerald-100 text-emerald-700">Background wash</span>
+            <article class="card-container space-y-4 bg-gradient-to-br from-emerald-50 via-earth-50 to-emerald-100">
+              <span class="chip-base">Background wash</span>
               <div class="space-y-1">
                 <h3 class="text-heading-sm">Forest mist</h3>
-                <p class="text-body-sm text-emerald-900/70">
+                <p class="text-body-sm text-earth-700">
                   Base layout surfaces breathing room with subtle gradient layers.
                 </p>
               </div>
               <div class="flex gap-3">
                 <div class="h-12 flex-1 rounded-2xl bg-emerald-50"></div>
-                <div class="h-12 flex-1 rounded-2xl bg-emerald-100"></div>
+                <div class="h-12 flex-1 rounded-2xl bg-earth-100"></div>
               </div>
             </article>
             <article class="card-container space-y-4 bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-400 text-white">
               <span class="chip-base bg-white/20 text-white">Primary</span>
               <div class="space-y-1">
-                <h3 class="text-heading-sm text-white">Emerald action</h3>
+                <h3 class="text-heading-sm text-white">Verdant action</h3>
                 <p class="text-body-sm text-white/80">
                   Use for primary buttons, key CTAs, and active navigation states.
                 </p>
@@ -268,17 +878,17 @@
                 <div class="h-12 flex-1 rounded-2xl bg-emerald-500"></div>
               </div>
             </article>
-            <article class="card-container space-y-4 bg-gradient-to-br from-rose-500 via-rose-600 to-rose-700 text-white">
-              <span class="chip-base bg-white/20 text-white">Danger</span>
+            <article class="card-container space-y-4 bg-gradient-to-br from-earth-500 via-earth-600 to-earth-700 text-white">
+              <span class="chip-base bg-white/20 text-white">Earth accent</span>
               <div class="space-y-1">
-                <h3 class="text-heading-sm text-white">SOS accents</h3>
+                <h3 class="text-heading-sm text-white">Warm grounding</h3>
                 <p class="text-body-sm text-white/80">
-                  Reserve for destructive choices and urgent confirmation prompts.
+                  Pair with secondary surfaces, table dividers, and supportive icon states.
                 </p>
               </div>
               <div class="flex gap-3">
-                <div class="h-12 flex-1 rounded-2xl bg-rose-500"></div>
-                <div class="h-12 flex-1 rounded-2xl bg-rose-600"></div>
+                <div class="h-12 flex-1 rounded-2xl bg-earth-500"></div>
+                <div class="h-12 flex-1 rounded-2xl bg-earth-600"></div>
               </div>
             </article>
           </div>
@@ -287,16 +897,16 @@
         <section class="grid gap-8 lg:grid-cols-2">
           <div class="space-y-6">
             <div>
-              <p class="text-eyebrow text-emerald-600">Typography scale</p>
+              <p class="text-eyebrow text-earth-600">Typography scale</p>
               <h2 class="text-heading-lg">Story-first rhythm</h2>
-              <p class="text-body text-emerald-900/80">
-                Each token pairs Poppins weight with relaxed leading to keep copy lyrical yet clear.
+              <p class="text-body text-earth-700">
+                Playfair Display crowns headlines with organic curves while Quicksand keeps body copy gentle and legible.
               </p>
             </div>
-            <div class="space-y-6 rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-sm">
+            <div class="space-y-6 rounded-3xl border border-earth-200 bg-white/80 p-8 shadow-sm">
               <div class="space-y-2">
                 <p class="text-eyebrow">Display</p>
-                <p class="text-display">Under the emerald canopy</p>
+                <p class="text-display">Under the whispering canopy</p>
               </div>
               <div class="space-y-1">
                 <p class="text-caption">Headings</p>
@@ -330,13 +940,13 @@
 
           <div class="space-y-6">
             <div>
-              <p class="text-eyebrow text-emerald-600">Buttons & icons</p>
+              <p class="text-eyebrow text-earth-600">Buttons & icons</p>
               <h2 class="text-heading-lg">Interactive glow</h2>
-              <p class="text-body text-emerald-900/80">
+              <p class="text-body text-earth-700">
                 Rounded-2xl edges, soft shadows, and hover lift cues reinforce the handcrafted feel.
               </p>
             </div>
-            <div class="rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-sm">
+            <div class="rounded-3xl border border-earth-200 bg-white/80 p-8 shadow-sm">
               <div class="flex flex-wrap gap-4">
                 <button class="btn-primary">Primary action</button>
                 <button class="btn-secondary">Secondary action</button>
@@ -347,10 +957,10 @@
                 </button>
               </div>
               <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                <div class="rounded-2xl border border-emerald-100 bg-white/70 p-4 text-sm text-emerald-900/70">
+                <div class="rounded-2xl border border-earth-200 bg-white/70 p-4 text-sm text-earth-700">
                   Buttons use <code>transition</code> and <code>shadow</code> utilities to lift on hover.
                 </div>
-                <div class="rounded-2xl border border-emerald-100 bg-white/70 p-4 text-sm text-emerald-900/70">
+                <div class="rounded-2xl border border-earth-200 bg-white/70 p-4 text-sm text-earth-700">
                   Pair primary actions with a secondary escape hatch for accessibility and calm.
                 </div>
               </div>
@@ -361,13 +971,13 @@
         <section class="grid gap-8 lg:grid-cols-2">
           <div class="space-y-6">
             <div>
-              <p class="text-eyebrow text-emerald-600">Form tokens</p>
+              <p class="text-eyebrow text-earth-600">Form tokens</p>
               <h2 class="text-heading-lg">Guided inputs</h2>
-              <p class="text-body text-emerald-900/80">
-                Frosted backgrounds with emerald focus rings keep interactions grounded.
+              <p class="text-body text-earth-700">
+                Frosted backgrounds with sage focus rings keep interactions grounded.
               </p>
             </div>
-            <form class="space-y-6 rounded-3xl border border-emerald-100 bg-white/80 p-8 shadow-sm">
+            <form class="space-y-6 rounded-3xl border border-earth-200 bg-white/80 p-8 shadow-sm">
               <div>
                 <label class="form-label" for="full-name">Full name</label>
                 <input class="form-input" id="full-name" placeholder="Rowan Willow" />
@@ -404,16 +1014,16 @@
 
           <div class="space-y-6">
             <div>
-              <p class="text-eyebrow text-emerald-600">Cards & tables</p>
+              <p class="text-eyebrow text-earth-600">Cards & tables</p>
               <h2 class="text-heading-lg">Structured clarity</h2>
-              <p class="text-body text-emerald-900/80">
+              <p class="text-body text-earth-700">
                 Shared helpers keep admin inventory calm on both mobile and desktop.
               </p>
             </div>
             <div class="space-y-6">
               <div class="card-container space-y-4">
                 <h3 class="text-heading-sm">Mentor overview</h3>
-                <p class="text-body text-emerald-900/75">
+                <p class="text-body text-earth-700">
                   Card containers add blur and subtle shadow depth for key summary surfaces.
                 </p>
                 <div class="flex flex-wrap gap-2">
@@ -424,7 +1034,7 @@
                 <button class="btn-subtle text-sm">View profile</button>
               </div>
 
-              <div class="space-y-3 rounded-3xl border border-emerald-100 bg-white/80 p-6 shadow-sm">
+              <div class="space-y-3 rounded-3xl border border-earth-200 bg-white/80 p-6 shadow-sm">
                 <div class="table-header" style="--table-grid: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)">
                   <span>Form</span>
                   <span>Shared</span>
@@ -435,7 +1045,7 @@
                     <p class="text-body-sm-strong">Morning intention</p>
                     <p class="text-muted">Daily reflection • 5 prompts</p>
                   </div>
-                  <span class="badge-base bg-emerald-100 text-emerald-700">Mentor</span>
+                  <span class="badge-base bg-earth-100 text-earth-700">Mentor</span>
                   <span class="badge-base bg-amber-100 text-amber-700">Awaiting review</span>
                 </div>
                 <div class="table-row" style="--table-grid: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)">
@@ -453,27 +1063,27 @@
 
         <section class="space-y-6">
           <div>
-            <p class="text-eyebrow text-emerald-600">Empty states & feedback</p>
+            <p class="text-eyebrow text-earth-600">Empty states & feedback</p>
             <h2 class="text-heading-lg">Gentle guidance</h2>
-            <p class="text-body text-emerald-900/80">
+            <p class="text-body text-earth-700">
               Empty states and helper text keep the product supportive when content is light.
             </p>
           </div>
           <div class="grid gap-6 md:grid-cols-2">
             <div class="empty-state">
-              <p class="text-heading-sm text-emerald-800">No journals yet</p>
-              <p class="mt-3 text-body text-emerald-900/70">
+              <p class="text-heading-sm text-earth-800">No journals yet</p>
+              <p class="mt-3 text-body text-earth-700">
                 When a mentee hasn’t shared reflections, offer a poetic prompt to nudge first steps.
               </p>
               <button class="btn-primary mt-4">Invite to begin</button>
             </div>
-            <div class="rounded-3xl border border-emerald-100 bg-white/80 p-6 shadow-sm">
+            <div class="rounded-3xl border border-earth-200 bg-white/80 p-6 shadow-sm">
               <p class="text-heading-sm">Alert badge</p>
-              <p class="text-body text-emerald-900/75">
+              <p class="text-body text-earth-700">
                 Combine <code>badge-base</code> with mood helpers to surface state changes.
               </p>
               <div class="mt-4 flex flex-wrap gap-3">
-                <span class="badge-base bg-emerald-100 text-emerald-700">Calm</span>
+                <span class="badge-base bg-earth-100 text-earth-700">Calm</span>
                 <span class="badge-base bg-amber-100 text-amber-700">Attention</span>
                 <span class="badge-base bg-rose-100 text-rose-700">Urgent</span>
                 <span class="badge-base bg-sky-100 text-sky-700">Shared</span>
@@ -483,8 +1093,8 @@
         </section>
       </main>
 
-      <footer class="mt-24 border-t border-emerald-200/70 bg-white/70">
-        <div class="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-8 text-sm text-emerald-900/70 sm:flex-row sm:items-center sm:justify-between">
+      <footer class="mt-24 border-t border-earth-200/70 bg-white/70">
+        <div class="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-8 text-sm text-earth-700 sm:flex-row sm:items-center sm:justify-between">
           <p>Keep this showcase updated whenever new tokens or helpers land in <code>src/index.css</code>.</p>
           <a class="btn-subtle" href="../frontend/theme.md">View written guidelines</a>
         </div>
