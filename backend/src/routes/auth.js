@@ -702,6 +702,16 @@ router.patch("/me", authenticate, async (req, res, next) => {
   const { name, timezone, password, mentorProfile } = req.body;
 
   try {
+    const { rows: existingRows } = await pool.query(
+      "SELECT auth_method, password_hash FROM users WHERE id = $1",
+      [req.user.id]
+    );
+
+    if (!existingRows.length) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const currentUser = existingRows[0];
     const updates = [];
     const values = [];
     let index = 1;
@@ -719,10 +729,26 @@ router.patch("/me", authenticate, async (req, res, next) => {
     }
 
     if (password) {
+      if (typeof password !== "string" || password.length < 8) {
+        return res
+          .status(400)
+          .json({ error: "Password must be at least 8 characters long" });
+      }
+
       const passwordHash = await bcrypt.hash(password, 10);
       updates.push(`password_hash = $${index}`);
       values.push(passwordHash);
       index += 1;
+
+      if (currentUser.auth_method === "social") {
+        updates.push(`auth_method = $${index}`);
+        values.push("hybrid");
+        index += 1;
+      } else if (!currentUser.auth_method) {
+        updates.push(`auth_method = $${index}`);
+        values.push("email");
+        index += 1;
+      }
     }
 
     if (updates.length) {

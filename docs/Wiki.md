@@ -1,5 +1,10 @@
 # Backend Change Log
 
+## Social sign-in password upgrades (2025-12-04)
+- Hardened `PATCH /api/auth/me` so password refreshes enforce the 8 character minimum and upgrade Google-linked accounts to the
+  `hybrid` auth method when they create a password. This lets people continue signing in with OAuth while also unlocking normal
+  email + password logins and future unlink flows.
+
 ## Comprehensive OpenAPI coverage (2025-11-19)
 - Expanded the Swagger specification to cover every backend route exposed under `/api`.
 - Documented request bodies, query parameters, success payloads, and failure modes for auth, forms, mentor management, journal entries, dashboard metrics, and admin tooling.
