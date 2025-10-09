@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 import {
   bodySmallMutedTextClasses,
   bodySmallStrongTextClasses,
@@ -439,6 +440,19 @@ function RegisterPage() {
             >
               {loading ? "Rooting your account..." : "Create luminous account"}
             </button>
+
+            <div className="flex items-center gap-4">
+              <div className="h-px flex-1 bg-emerald-200"></div>
+              <span className={`${bodySmallMutedTextClasses} text-emerald-900/50`}>
+                or
+              </span>
+              <div className="h-px flex-1 bg-emerald-200"></div>
+            </div>
+
+            <GoogleLoginButton
+              text="Sign up with Google"
+              variant="subtle"
+            />
           </form>
           <p className={`mt-6 text-center ${bodySmallMutedTextClasses} text-emerald-900/70`}>
             Already tending a space?{" "}
