@@ -34,13 +34,13 @@ tays balanced across breakpoints.
   the filter controls, and ensure the mentee association list stays actionable with the existing remove affordance.
 - Admins now see the form catalogue under the "Form Management" header; keep the copy aligned and pair the filter controls with
   accessible labels (use `sr-only` utilities) so screen readers announce each option clearly.
-- The shared `table-header` and `table-row` tokens power the responsive admin tables. They collapse into stacked cards on small
+- The shared `table-header` and `resource-table-row` tokens power the responsive admin tables. They collapse into stacked cards on small
   screens and expand to the three-column grid on medium breakpoints—preserve that pattern when listing forms or similar resources.
   Override the column template with the `--table-grid` CSS variable when a layout needs more (or fewer) columns so headers and rows stay aligned.
 - Admin resource tables (journalers, mentors, forms, and journals) now share the same filter mechanics: encode active filters in
   the query string (`q`, `link`, `sharedLevel`, `mentorId`, etc.), normalize search terms to lowercase before requesting data,
   and hydrate initial state from `useSearchParams` so cross-page "view journals" or "view forms" links land on a pre-filtered list.
-  Pair every header filter with an `sr-only` label and reuse the `table-header`/`table-row` token grid for consistent responsive
+  Pair every header filter with an `sr-only` label and reuse the `table-header`/`resource-table-row` token grid for consistent responsive
   behavior.
 - The journaler and mentor admin pages both expose a `mentorId` focus select. Preserve this when updating filters so deep links
   from the Journals dashboard or mentor cards can highlight a specific guide and keep the `link=linked` context intact.

@@ -172,12 +172,18 @@
     );
   }
 
-  .table-row {
-    @apply flex flex-col gap-3 rounded-2xl border border-earth-200 bg-white/80 px-4 py-4 text-sm text-earth-900 md:grid md:items-center md:gap-4 md:py-3;
-    grid-template-columns: var(
-      --table-grid,
-      minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)
-    );
+  .resource-table-row {
+    @apply grid gap-3 rounded-2xl border border-earth-200 bg-white/80 px-4 py-4 text-sm text-earth-900 md:items-center md:gap-4 md:py-3;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 768px) {
+    .resource-table-row {
+      grid-template-columns: var(
+        --table-grid,
+        minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)
+      );
+    }
   }
 
   .card-container {
@@ -1040,7 +1046,7 @@
                   <span>Shared</span>
                   <span>Status</span>
                 </div>
-                <div class="table-row" style="--table-grid: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)">
+                <div class="resource-table-row" style="--table-grid: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)">
                   <div class="space-y-1">
                     <p class="text-body-sm-strong">Morning intention</p>
                     <p class="text-muted">Daily reflection • 5 prompts</p>
@@ -1048,7 +1054,7 @@
                   <span class="badge-base bg-earth-100 text-earth-700">Mentor</span>
                   <span class="badge-base bg-amber-100 text-amber-700">Awaiting review</span>
                 </div>
-                <div class="table-row" style="--table-grid: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)">
+                <div class="resource-table-row" style="--table-grid: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)">
                   <div class="space-y-1">
                     <p class="text-body-sm-strong">Harvest gratitude</p>
                     <p class="text-muted">Weekly • 7 prompts</p>

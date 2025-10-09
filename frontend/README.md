@@ -51,7 +51,7 @@ Typography tokens only control font sizing, weight, and tracking. Apply contextu
 | Token | Description |
 | --- | --- |
 | `card-container` | Frosted glass card container used on dashboards. |
-| `table-header`, `table-row` | Dashboard tables with responsive grids. |
+| `table-header`, `resource-table-row` | Dashboard tables with responsive grids. |
 | `chip-base`, `badge-base` | Base styling for chips and badges (tone comes from context). |
 | `empty-state`, `text-info`, `text-muted` | Empty state containers and helper copy. |
 

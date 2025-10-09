@@ -47,7 +47,7 @@
 
 ## DashboardRouter / AdminDashboard
 - **Route:** `/dashboard` (admin role)
-- **Components:** Aggregated stats cards, recent forms/journals tables using `table-header`/`table-row` tokens.
+- **Components:** Aggregated stats cards, recent forms/journals tables using `table-header`/`resource-table-row` tokens.
 - **APIs:** `GET /api/admin/overview` for counts; `GET /api/admin/forms` for steward cards; `GET /api/admin/journals` for recent shares.
 
 ## JournalHistoryPage

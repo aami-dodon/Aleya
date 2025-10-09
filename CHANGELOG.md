@@ -74,7 +74,7 @@
 
 ## 2025-10-04
 
-- Refined the admin dashboard form library into responsive cards that surface friendly visibility and assignment labels, and documented the `table-header`/`table-row` token pattern in `frontend/AGENTS.md` so future tables keep the stacked mobile layout.
+- Refined the admin dashboard form library into responsive cards that surface friendly visibility and assignment labels, and documented the `table-header`/`resource-table-row` token pattern in `frontend/AGENTS.md` so future tables keep the stacked mobile layout.
 
 ## 2025-10-03
 
