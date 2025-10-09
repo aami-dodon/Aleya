@@ -107,7 +107,7 @@
     );
   }
 
-  .table-row {
+  .resource-table-row {
     @apply flex flex-col gap-3 rounded-2xl border border-earth-200 bg-white/80 px-4 py-4 text-sm text-earth-900 md:grid md:items-center md:gap-4 md:py-3;
     grid-template-columns: var(
       --table-grid,

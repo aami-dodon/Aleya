@@ -22,7 +22,7 @@ export const chipBaseClasses = "chip-base";
 export const badgeBaseClasses = "badge-base";
 
 export const tableHeaderClasses = "table-header";
-export const tableRowClasses = "table-row";
+export const tableRowClasses = "resource-table-row";
 export const cardContainerClasses = "card-container";
 export const sectionTitleClasses = "section-title";
 export const sectionSubtitleClasses = "section-subtitle";
